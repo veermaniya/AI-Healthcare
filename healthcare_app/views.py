@@ -1,11 +1,13 @@
 import json
 import uuid
+import traceback
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 
 from .models import DataSession, AnalysisResult, ChatMessage
 from ml_engine import (
@@ -157,13 +159,12 @@ def run_analysis(request):
         data = json.loads(request.body)
         feature_cols = data.get('feature_columns', [])
         target_col = data.get('target_column', '')
-        task_type = data.get('task_type', 'auto')  # regression, classification, clustering, auto
+        task_type = data.get('task_type', 'auto')
         model_type = data.get('model_type', 'random_forest')
         n_clusters = int(data.get('n_clusters', 3))
 
         df = _dataframe_store.get(session_key)
         if df is None:
-            # Try reloading from DB session
             db_session = DataSession.objects.filter(session_key=session_key).first()
             if db_session and db_session.source_type == 'sql':
                 df = load_from_sql(db_session.sql_connection, db_session.sql_query)
@@ -177,11 +178,9 @@ def run_analysis(request):
         engine = HealthcareMLEngine()
         engine.load_dataframe(df)
 
-        # Auto-detect or use specified task
         if task_type == 'auto' and target_col:
             task_type = engine.auto_detect_task(target_col)
 
-        # Run the appropriate task
         if task_type == 'clustering' or not target_col:
             result = engine.run_clustering(feature_cols, n_clusters=n_clusters)
         elif task_type == 'regression':
@@ -191,7 +190,6 @@ def run_analysis(request):
         else:
             result = engine.run_regression(feature_cols, target_col, model_type)
 
-        # Save result
         db_session = DataSession.objects.filter(session_key=session_key).first()
         if db_session:
             AnalysisResult.objects.create(
@@ -206,7 +204,6 @@ def run_analysis(request):
         return JsonResponse({'success': True, 'result': result})
 
     except Exception as e:
-        import traceback
         return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
 
 
@@ -259,14 +256,12 @@ def chat(request):
         if not user_message:
             return JsonResponse({'success': False, 'error': 'Empty message'})
 
-        # Save user message
         ChatMessage.objects.create(
             session_key=session_key,
             role='user',
             message=user_message
         )
 
-        # Build context
         dataset_context = None
         ml_result = None
 
@@ -287,21 +282,18 @@ def chat(request):
             except:
                 pass
         else:
-            # Get latest result
             latest = AnalysisResult.objects.filter(
                 session__session_key=session_key
             ).order_by('-created_at').first()
             if latest:
                 ml_result = latest.get_result()
 
-        # Call LLM
         llm = GroqLLMClient(
             api_key=settings.GROQ_API_KEY,
             model=settings.GROQ_MODEL
         )
         response = llm.ask(user_message, dataset_context, ml_result)
 
-        # Save AI response
         ChatMessage.objects.create(
             session_key=session_key,
             role='ai',
@@ -340,11 +332,6 @@ def get_columns(request):
 # ─────────────────────────────────────────────
 @csrf_exempt
 def get_column_stats(request):
-    """
-    Returns per-column stats for building smart input widgets:
-    - numeric columns: min, max, mean, median, std
-    - categorical columns: all unique values (for dropdown)
-    """
     session_key = get_or_create_session_key(request)
     df = _dataframe_store.get(session_key)
 
@@ -371,7 +358,6 @@ def get_column_stats(request):
                 'mean': round(float(col_data.mean()), 2),
                 'median': round(float(col_data.median()), 2),
                 'std': round(float(col_data.std()), 2),
-                # Suggest a step size based on range
                 'step': round(float((col_data.max() - col_data.min()) / 100), 3) or 1,
             }
         else:
@@ -385,13 +371,11 @@ def get_column_stats(request):
     return JsonResponse({'success': True, 'stats': stats})
 
 
-
 # ─────────────────────────────────────────────
 #  MEDICAL IMAGE ANALYSIS
 # ─────────────────────────────────────────────
 @csrf_exempt
 def analyze_image(request):
-    """Analyze medical image (X-ray, CT, Sonography, MRI) using Groq vision model"""
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
     try:
@@ -410,14 +394,13 @@ def analyze_image(request):
 
         import requests as req
 
-        # Use Groq vision model
         headers = {
             'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json'
         }
 
         payload = {
-            'model': 'meta-llama/llama-4-scout-17b-16e-instruct',  # Groq vision model
+            'model': 'meta-llama/llama-4-scout-17b-16e-instruct',
             'messages': [
                 {
                     'role': 'user',
@@ -439,7 +422,6 @@ def analyze_image(request):
             'temperature': 0.3
         }
 
-        # Try vision models in order
         vision_models = [
             'meta-llama/llama-4-scout-17b-16e-instruct',
             'llama-3.2-11b-vision-preview',
@@ -472,27 +454,26 @@ def analyze_image(request):
         return JsonResponse({'success': False, 'error': f'Vision model error: {last_error}'})
 
     except Exception as e:
-        import traceback
         return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
+
 
 # ─────────────────────────────────────────────
 #  TEST LLM CONNECTION
 # ─────────────────────────────────────────────
 @csrf_exempt
 def test_llm(request):
-    """Quick endpoint to verify Groq API key works — visit /api/test-llm/ in browser"""
     key = settings.GROQ_API_KEY
     key_set = bool(key and key != 'your-groq-api-key-here')
-    
+
     if not key_set:
         return JsonResponse({
             'api_key_set': False,
             'api_key_preview': 'NOT SET — open healthcare_ai/settings.py and replace your-groq-api-key-here',
             'llm_success': False,
-            'llm_message': 'API key not configured. Open healthcare_ai/settings.py and set your key from https://console.groq.com',
+            'llm_message': 'API key not configured.',
             'model_used': '—',
         })
-    
+
     from ml_engine import GroqLLMClient
     llm = GroqLLMClient(api_key=key)
     result = llm.ask("Say hello in one sentence.")
@@ -502,7 +483,7 @@ def test_llm(request):
         'llm_success': result['success'],
         'llm_message': result['message'],
         'model_used': result.get('model_used', '—'),
-        'fix': 'If 401 error: your key is invalid or expired. Generate a new one at https://console.groq.com/keys' if not result['success'] else 'Working correctly!',
+        'fix': 'If 401 error: your key is invalid or expired.' if not result['success'] else 'Working correctly!',
     })
 
 
@@ -518,24 +499,209 @@ def clear_session(request):
         del _dataframe_store[session_key]
     return JsonResponse({'success': True})
 
+
 # ─────────────────────────────────────────────
-#  DEBUG API KEY (visit /api/debug-key/ to check)
+#  DEBUG API KEY
 # ─────────────────────────────────────────────
 @csrf_exempt
 def debug_key(request):
     key = settings.GROQ_API_KEY
     is_placeholder = (key == 'your-groq-api-key-here' or not key)
-    # Show first 8 and last 4 chars only
     if key and len(key) > 12:
         preview = key[:8] + '...' + key[-4:]
     else:
         preview = key or 'EMPTY'
-    
+
     return JsonResponse({
         'key_preview': preview,
         'is_placeholder': is_placeholder,
         'key_length': len(key) if key else 0,
         'starts_with_gsk': key.startswith('gsk_') if key else False,
         'settings_file': str(settings.BASE_DIR / 'healthcare_ai' / 'settings.py'),
-        'message': 'KEY IS PLACEHOLDER - edit settings.py' if is_placeholder else 'Key looks set - if still 401, key may be invalid/expired on Groq',
+        'message': 'KEY IS PLACEHOLDER - edit settings.py' if is_placeholder else 'Key looks set!',
     })
+
+
+# ═════════════════════════════════════════════════════════════════
+#  NEW FEATURES — LOGIN, XAI, RISK ENGINE, TRENDS, SIMILARITY
+# ═════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────
+#  LOGIN / AUTH
+# ─────────────────────────────────────────────
+def login_view(request):
+    """Serves the login page"""
+    if request.user.is_authenticated:
+        return redirect('/')
+    return render(request, 'healthcare_app/login.html')
+
+
+@csrf_exempt
+def api_login(request):
+    """Handles JSON login POST from the login page"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        role = data.get('role', 'physician')
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return JsonResponse({
+                'success': True,
+                'username': user.username,
+                'role': role,
+                'redirect': '/'
+            })
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid credentials. Please try again.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@csrf_exempt
+def api_logout(request):
+    logout(request)
+    return JsonResponse({'success': True, 'redirect': '/login/'})
+
+
+# ─────────────────────────────────────────────
+#  ① EXPLAINABLE AI
+# ─────────────────────────────────────────────
+@csrf_exempt
+def run_explainability(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+
+    session_key = get_or_create_session_key(request)
+
+    try:
+        data = json.loads(request.body)
+        feature_cols = data.get('feature_columns', [])
+        target_col = data.get('target_column', '')
+        model_type = data.get('model_type', 'random_forest')
+        sample_index = int(data.get('sample_index', 0))
+        input_values = data.get('input_values', None)
+
+        df = _dataframe_store.get(session_key)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file first.'})
+
+        if not feature_cols:
+            return JsonResponse({'success': False, 'error': 'Please select at least one feature column.'})
+
+        if not target_col:
+            return JsonResponse({'success': False, 'error': 'Please select a target column (click twice on a column).'})
+
+        engine = HealthcareMLEngine()
+        engine.load_dataframe(df)
+        result = engine.run_explainability(
+            feature_cols, target_col, model_type,
+            sample_index=sample_index,
+            input_values=input_values
+        )
+        return JsonResponse({'success': True, 'result': result})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
+
+
+# ─────────────────────────────────────────────
+#  ② CLINICAL RISK & ALERT ENGINE
+# ─────────────────────────────────────────────
+@csrf_exempt
+def run_risk_engine(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+
+    session_key = get_or_create_session_key(request)
+
+    try:
+        data = json.loads(request.body)
+        feature_cols = data.get('feature_columns', [])
+        target_col = data.get('target_column', None)
+        thresholds = data.get('thresholds', None)
+
+        df = _dataframe_store.get(session_key)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file first.'})
+
+        if not feature_cols:
+            return JsonResponse({'success': False, 'error': 'Please select at least one feature column.'})
+
+        engine = HealthcareMLEngine()
+        engine.load_dataframe(df)
+        result = engine.run_risk_engine(feature_cols, target_col, thresholds)
+        return JsonResponse({'success': True, 'result': result})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
+
+
+# ─────────────────────────────────────────────
+#  ③ TIME-SERIES / TREND ANALYSIS
+# ─────────────────────────────────────────────
+@csrf_exempt
+def run_trend_analysis(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+
+    session_key = get_or_create_session_key(request)
+
+    try:
+        data = json.loads(request.body)
+        feature_cols = data.get('feature_columns', [])
+        time_col = data.get('time_column', None)
+        target_col = data.get('target_column', None)
+        forecast_steps = int(data.get('forecast_steps', 10))
+
+        df = _dataframe_store.get(session_key)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file first.'})
+
+        if not feature_cols:
+            return JsonResponse({'success': False, 'error': 'Please select at least one feature column.'})
+
+        engine = HealthcareMLEngine()
+        engine.load_dataframe(df)
+        result = engine.run_trend_analysis(feature_cols, time_col, target_col, forecast_steps)
+        return JsonResponse({'success': True, 'result': result})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
+
+
+# ─────────────────────────────────────────────
+#  ④ PATIENT SIMILARITY ENGINE
+# ─────────────────────────────────────────────
+@csrf_exempt
+def run_patient_similarity(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+
+    session_key = get_or_create_session_key(request)
+
+    try:
+        data = json.loads(request.body)
+        feature_cols = data.get('feature_columns', [])
+        query_index = int(data.get('query_index', 0))
+        query_values = data.get('query_values', None)
+        n_similar = int(data.get('n_similar', 5))
+
+        df = _dataframe_store.get(session_key)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file first.'})
+
+        if not feature_cols:
+            return JsonResponse({'success': False, 'error': 'Please select at least one feature column.'})
+
+        engine = HealthcareMLEngine()
+        engine.load_dataframe(df)
+        result = engine.run_patient_similarity(feature_cols, query_index, query_values, n_similar)
+        return JsonResponse({'success': True, 'result': result})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e), 'trace': traceback.format_exc()})
