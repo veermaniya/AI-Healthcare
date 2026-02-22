@@ -311,7 +311,66 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .img-ask-area input::placeholder{color:var(--text3)}
 .img-disclaimer{margin-top:10px;padding:9px 11px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius);font-size:10px;color:var(--text3);line-height:1.5}
 
-/* ═══ INSIGHTS / QUALITY / PRIVACY / REPORT STYLES ═══ */
+/* ═══ 6 NEW FEATURE STYLES ═══ */
+/* Patient Dashboard */
+.patient-value-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.pv-card{padding:11px 13px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .2s}
+.pv-card.feat{border-left:3px solid var(--accent)}
+.pv-card.tgt{border-left:3px solid var(--accent3)}
+.pv-card.outlier{border-left:3px solid var(--danger);background:rgba(248,113,113,.05)}
+.pv-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.pv-value{font-size:16px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace}
+.pv-pct{font-size:9px;color:var(--text3);margin-top:3px}
+.pv-bar{height:3px;background:var(--surface3);border-radius:2px;margin-top:5px;overflow:hidden}
+.pv-bar-fill{height:100%;border-radius:2px;background:var(--accent)}
+.pv-bar-fill.hi{background:var(--danger)}
+.pv-bar-fill.lo{background:var(--accent2)}
+.risk-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;border:4px solid var(--border)}
+.risk-ring.HIGH{border-color:var(--danger);background:rgba(248,113,113,.08)}
+.risk-ring.MEDIUM{border-color:var(--warn);background:rgba(251,191,36,.07)}
+.risk-ring.LOW{border-color:var(--accent2);background:rgba(52,211,153,.07)}
+.sim-mini-table{width:100%;border-collapse:collapse;font-size:11px}
+.sim-mini-table td,.sim-mini-table th{padding:6px 9px;border-bottom:1px solid rgba(99,179,237,.07)}
+.sim-mini-table th{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;background:var(--surface2)}
+/* Survival */
+.km-group-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.km-legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.survival-stat-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+/* Multi-target */
+.mt-result-card{padding:14px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
+.mt-result-card.rank1{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.04)}
+.mt-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.mt-rank.r1{background:rgba(52,211,153,.2);color:var(--accent2)}
+.mt-rank.r2{background:rgba(56,189,248,.15);color:var(--accent)}
+.mt-rank.rn{background:var(--surface3);color:var(--text3)}
+.mt-perf-bar{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.mt-perf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+/* Alert Rules */
+.rule-builder{background:var(--surface2);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--border)}
+.rule-row{display:grid;grid-template-columns:1fr 120px 70px 100px 1fr auto;gap:7px;align-items:center;margin-bottom:7px}
+.alert-triggered{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:var(--radius);margin-bottom:7px;border:1px solid transparent;animation:slideIn .3s ease}
+.alert-triggered.critical{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.25)}
+.alert-triggered.warning{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.2)}
+.alert-triggered.info{background:rgba(56,189,248,.06);border-color:rgba(56,189,248,.15)}
+.alert-triggered.clear{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.18)}
+.alert-pct-bar{width:70px;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:5px}
+.alert-pct-fill{height:100%;border-radius:3px}
+/* Dataset Compare */
+.compare-col-row{display:grid;grid-template-columns:140px 1fr 1fr 90px 80px;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;margin-bottom:4px;font-size:11px}
+.compare-col-row:nth-child(even){background:rgba(56,189,248,.02)}
+.compare-col-row.sig{background:rgba(251,191,36,.06)}
+.compare-bar-wrap{display:flex;align-items:center;gap:5px}
+.compare-bar{height:5px;border-radius:3px;flex:1;background:var(--surface3);overflow:hidden}
+.compare-bar-a{height:100%;border-radius:3px;background:var(--accent)}
+.compare-bar-b{height:100%;border-radius:3px;background:var(--accent3)}
+/* ICD Coding */
+.icd-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:7px;background:rgba(56,189,248,.15);color:var(--accent);border:1px solid rgba(56,189,248,.3)}
+.drug-flag{padding:10px 13px;border-radius:var(--radius);margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .3s ease}
+.drug-flag.HIGH{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25)}
+.drug-flag.MEDIUM{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2)}
+.coding-rec{padding:9px 13px;background:var(--surface2);border-radius:var(--radius);margin-bottom:6px;border-left:3px solid var(--accent);font-size:12px;color:var(--text2);line-height:1.6}
+.coding-rec.gap{border-left-color:var(--warn)}
+.coding-rec.note{border-left-color:var(--accent3)}
 .insight-narrative{padding:16px 18px;background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(52,211,153,.04));border:1px solid rgba(56,189,248,.2);border-radius:var(--radius-lg);font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:14px;border-left:4px solid var(--accent);position:relative}
 .insight-narrative::before{content:'💡';position:absolute;top:14px;right:14px;font-size:18px;opacity:.4}
 .obs-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -523,6 +582,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <button class="mtab" onclick="switchTab('quality')" id="mtab-quality">🧪 Data Quality <span class="new-badge">NEW</span></button>
     <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy">🔒 Privacy <span class="new-badge">NEW</span></button>
     <button class="mtab" onclick="switchTab('report')" id="mtab-report">📄 Report <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('patient')" id="mtab-patient">🧑‍⚕️ Patient View <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('survival')" id="mtab-survival">📉 Survival <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget">🎯 Multi-Target <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts">🔔 Alert Rules <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('compare')" id="mtab-compare">⚖️ Compare <span class="new-badge">NEW</span></button>
+    <button class="mtab" onclick="switchTab('coding')" id="mtab-coding">💊 ICD Coding <span class="new-badge">NEW</span></button>
   </div>
 
   <!-- ANALYTICS TAB -->
@@ -546,6 +611,12 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="pill">🧪 Data Quality</div>
         <div class="pill">📄 AI Reports</div>
         <div class="pill">🔒 PHI Privacy</div>
+        <div class="pill">🧑‍⚕️ Patient Dashboard</div>
+        <div class="pill">📉 Survival Analysis</div>
+        <div class="pill">🎯 Multi-Target</div>
+        <div class="pill">🔔 Alert Rules</div>
+        <div class="pill">⚖️ Dataset Compare</div>
+        <div class="pill">💊 ICD Coding</div>
       </div>
     </div>
 
@@ -1005,6 +1076,271 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           </span>
         </div>
         <iframe id="report-frame" class="report-preview-frame"></iframe>
+      </div>
+    </div>
+  </div>
+  <!-- ══ PATIENT DASHBOARD TAB ══ -->
+  <div class="tpanel" id="tpanel-patient">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🧑‍⚕️ Patient Dashboard</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Select any patient row — see all values, percentile ranks, composite risk score, predicted outcome, and most similar patients in one unified view.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--text3)">Patient Row #</span>
+        <input type="number" id="patientRowIdx" value="0" min="0" class="cfg-select" style="width:90px;margin-bottom:0">
+        <button class="btn btn-primary btn-sm" onclick="runPatientDashboard()">🧑‍⚕️ View Patient</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="patientRowIdx.value=Math.max(0,+patientRowIdx.value-1);runPatientDashboard()">◀ Prev</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="patientRowIdx.value=+patientRowIdx.value+1;runPatientDashboard()">Next ▶</button>
+      </div>
+    </div>
+    <div id="patient-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:12px">🧑‍⚕️</div>
+      <div style="font-size:13px">Upload a dataset and select columns, then click View Patient.</div>
+    </div>
+    <div id="patient-result" style="display:none">
+      <!-- Risk + Nav -->
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+          <div class="risk-ring" id="patient-risk-ring">
+            <div id="patient-risk-score" style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace"></div>
+            <div style="font-size:9px;color:var(--text3)">Risk</div>
+          </div>
+          <div style="flex:1">
+            <div id="patient-risk-label" style="font-size:14px;font-weight:700;margin-bottom:4px"></div>
+            <div id="patient-anomaly" style="font-size:11px;color:var(--text3);line-height:1.6"></div>
+            <div id="patient-missing" style="font-size:10px;color:var(--warn);margin-top:4px"></div>
+          </div>
+          <div id="patient-prediction-box" style="display:none;padding:12px 16px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:var(--radius);text-align:center">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px">PREDICTED OUTCOME</div>
+            <div id="patient-pred-val" style="font-size:20px;font-weight:700;color:var(--accent2);font-family:'DM Mono',monospace"></div>
+          </div>
+        </div>
+      </div>
+      <!-- All values grid -->
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">📊 All Column Values — Percentile vs Population</div>
+        <div class="patient-value-grid" id="patient-values-grid"></div>
+      </div>
+      <!-- Population comparison + similar patients -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0">
+        <div class="result-card" style="margin-bottom:0">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📈 vs Population Average</div>
+          <div id="patient-pop-bars" class="feat-bars"></div>
+        </div>
+        <div class="result-card" style="margin-bottom:0">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">👥 Most Similar Patients</div>
+          <div id="patient-similar-table"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SURVIVAL ANALYSIS TAB ══ -->
+  <div class="tpanel" id="tpanel-survival">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),var(--accent))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">📉 Kaplan-Meier Survival Analysis</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Standard clinical research tool. Estimate time-to-event survival curves, compare groups, find median survival. Requires a duration column (time) and event column (0/1).</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label class="cfg-label">Duration Column (time to event/censoring)</label>
+          <select id="survDurationCol" class="cfg-select" style="margin-bottom:0"></select>
+        </div>
+        <div>
+          <label class="cfg-label">Event Column (1=event, 0=censored)</label>
+          <select id="survEventCol" class="cfg-select" style="margin-bottom:0"></select>
+        </div>
+        <div>
+          <label class="cfg-label">Stratify By (optional group column)</label>
+          <select id="survGroupCol" class="cfg-select" style="margin-bottom:0"><option value="">— No grouping —</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="runSurvival()">📉 Run Survival Analysis</button>
+    </div>
+    <div id="survival-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:12px">📉</div>
+      <div style="font-size:13px">Select duration and event columns, then run survival analysis.</div>
+    </div>
+    <div id="survival-result" style="display:none">
+      <!-- KPI row -->
+      <div class="metrics-grid" id="survival-kpis" style="margin-bottom:14px"></div>
+      <!-- Kaplan-Meier Chart -->
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📉 Kaplan-Meier Survival Curve</div>
+        <div id="survival-legend" class="km-group-legend"></div>
+        <div class="chart-wrap" style="height:240px"><canvas id="survivalChart"></canvas></div>
+      </div>
+      <!-- Median survival + interpretation -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="result-card" style="margin-bottom:0">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⏱ Median Survival by Group</div>
+          <div id="survival-medians"></div>
+        </div>
+        <div class="result-card" style="margin-bottom:0">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">💬 Clinical Interpretation</div>
+          <div id="survival-interpretation" style="font-size:12px;color:var(--text2);line-height:1.8;padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MULTI-TARGET TAB ══ -->
+  <div class="tpanel" id="tpanel-multitarget">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent4))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🎯 Multi-Target Prediction Comparator</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Run the same feature set against multiple outcome columns simultaneously. Compare model performance side-by-side — e.g. predict Diabetes AND Heart Disease AND Readmission together.</div>
+      <div style="margin-bottom:12px">
+        <label class="cfg-label">Select Target Columns to Compare (click multiple)</label>
+        <div id="mt-target-selector" style="display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);min-height:44px"></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px">Selected: <span id="mt-target-count" style="color:var(--accent)">0</span> targets (need ≥2)</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="runMultiTarget()">🎯 Compare All Targets</button>
+    </div>
+    <div id="multitarget-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:12px">🎯</div>
+      <div style="font-size:13px">Upload a dataset, select feature columns in the sidebar, then select ≥2 target columns above.</div>
+    </div>
+    <div id="multitarget-result" style="display:none">
+      <div class="result-card" style="margin-bottom:14px;padding:14px 18px;background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.3)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🏆 Best Performing Target</div>
+        <div id="mt-best" style="font-size:14px;font-weight:700;color:var(--accent2)"></div>
+      </div>
+      <div id="mt-results-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ ALERT RULES TAB ══ -->
+  <div class="tpanel" id="tpanel-alerts">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--danger),var(--warn))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🔔 Clinical Alert Rules Builder</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Define custom threshold rules (e.g. Glucose > 140 → Critical). Auto-suggests rules based on your column names. Run on current dataset to see how many patients trigger each alert.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="loadSuggestedRules()">✨ Auto-Suggest Rules</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)" onclick="addRuleRow()">＋ Add Rule</button>
+        <button class="btn btn-sm" style="background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:var(--accent2)" onclick="runAlerts()">▶ Evaluate All Rules</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="clearRules()">🗑 Clear</button>
+      </div>
+    </div>
+    <!-- Rule builder -->
+    <div class="result-card" style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Alert Rules</div>
+      <div style="display:grid;grid-template-columns:1fr 130px 70px 100px 1fr 36px;gap:6px;margin-bottom:6px">
+        <span style="font-size:9px;color:var(--text3);padding:0 4px">Column</span>
+        <span style="font-size:9px;color:var(--text3);padding:0 4px">Operator</span>
+        <span style="font-size:9px;color:var(--text3);padding:0 4px">Value</span>
+        <span style="font-size:9px;color:var(--text3);padding:0 4px">Severity</span>
+        <span style="font-size:9px;color:var(--text3);padding:0 4px">Action / Name</span>
+        <span></span>
+      </div>
+      <div id="alert-rules-rows"></div>
+    </div>
+    <!-- Results -->
+    <div id="alerts-result" style="display:none">
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div id="alerts-status-badge" style="font-size:13px;font-weight:700;padding:8px 18px;border-radius:var(--radius)"></div>
+          <div class="metrics-grid" id="alerts-kpis" style="margin-bottom:0;flex:1;min-width:260px"></div>
+        </div>
+      </div>
+      <div id="alerts-triggered-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ DATASET COMPARE TAB ══ -->
+  <div class="tpanel" id="tpanel-compare">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">⚖️ Dataset Comparator</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Compare two datasets statistically — before/after treatment, control vs intervention, two time periods. Detects significant differences using Cohen's d effect size.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px">
+        <div>
+          <label class="cfg-label">Dataset A — Already loaded (current session)</label>
+          <div style="padding:8px 10px;background:var(--surface2);border-radius:var(--radius);font-size:11px;color:var(--accent2);border:1px solid rgba(52,211,153,.2)" id="compare-a-info">No dataset loaded yet</div>
+        </div>
+        <div>
+          <label class="cfg-label">Dataset B — Upload second file to compare</label>
+          <div class="upload-zone" style="padding:12px;margin-bottom:0" id="compareUploadZone">
+            <input type="file" id="compareFileInput" accept=".xlsx,.xls,.csv" onchange="handleCompareUpload(this)">
+            <div style="font-size:20px;margin-bottom:4px">📤</div>
+            <div style="font-size:10px;color:var(--text3)"><strong style="color:var(--accent)">Upload</strong> second dataset</div>
+          </div>
+          <div id="compare-b-info" style="display:none;padding:8px 10px;background:var(--surface2);border-radius:var(--radius);font-size:11px;color:var(--accent3);border:1px solid rgba(244,114,182,.2);margin-top:6px"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="compareNameA" class="cfg-select" placeholder="Name A (e.g. Before Treatment)" style="width:200px;margin-bottom:0;font-size:11px" value="Dataset A">
+        <input id="compareNameB" class="cfg-select" placeholder="Name B (e.g. After Treatment)" style="width:200px;margin-bottom:0;font-size:11px" value="Dataset B">
+        <button class="btn btn-primary btn-sm" onclick="runCompare()">⚖️ Compare Datasets</button>
+      </div>
+    </div>
+    <div id="compare-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:12px">⚖️</div>
+      <div style="font-size:13px">Load Dataset A (main upload), then upload Dataset B above.</div>
+    </div>
+    <div id="compare-result" style="display:none">
+      <div class="result-card" style="margin-bottom:14px;padding:14px 18px;background:rgba(56,189,248,.04);border-color:rgba(56,189,248,.2)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">📋 Summary</div>
+        <div id="compare-summary" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
+      </div>
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">📊 Column-by-Column Comparison</div>
+          <div style="margin-left:auto;display:flex;gap:10px;font-size:10px">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:4px;background:var(--accent);border-radius:2px;display:inline-block"></span><span id="compare-name-a-lbl">A</span></span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:4px;background:var(--accent3);border-radius:2px;display:inline-block"></span><span id="compare-name-b-lbl">B</span></span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:140px 1fr 1fr 90px 80px;gap:8px;padding:6px 10px;margin-bottom:4px">
+          <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Column</span>
+          <span style="font-size:9px;color:var(--accent)">Dataset A</span>
+          <span style="font-size:9px;color:var(--accent3)">Dataset B</span>
+          <span style="font-size:9px;color:var(--text3)">Difference</span>
+          <span style="font-size:9px;color:var(--text3)">Effect</span>
+        </div>
+        <div id="compare-cols-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ICD CODING TAB ══ -->
+  <div class="tpanel" id="tpanel-coding">
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,var(--accent3))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">💊 Clinical Coding Assistant</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Automatically detects ICD-10 codes from your column names and data values. Flags potential drug interactions. Provides LLM-powered clinical coding recommendations.</div>
+      <button class="btn btn-primary btn-sm" onclick="runCoding()">💊 Analyse for ICD Codes</button>
+    </div>
+    <div id="coding-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:12px">💊</div>
+      <div style="font-size:13px">Upload a healthcare dataset to detect ICD-10 codes and drug interactions.</div>
+    </div>
+    <div id="coding-result" style="display:none">
+      <!-- ICD-10 detections -->
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏥 Detected ICD-10 Codes</div>
+        <div id="coding-icd-list"></div>
+      </div>
+      <!-- Drug interactions -->
+      <div class="result-card" style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠️ Drug Interaction Flags</div>
+        <div id="coding-drug-list"></div>
+      </div>
+      <!-- LLM advice -->
+      <div id="coding-llm-advice" style="display:none">
+        <div class="result-card" style="margin-bottom:14px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤖 AI Coding Recommendations</div>
+          <div id="coding-recs"></div>
+        </div>
+        <div class="result-card" style="margin-bottom:14px">
+          <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Documentation Gaps</div>
+          <div id="coding-gaps"></div>
+        </div>
+        <div class="result-card" style="margin-bottom:0">
+          <div style="font-size:10px;font-weight:600;color:var(--accent3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">💡 Suggested Additional Fields</div>
+          <div id="coding-suggestions"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1799,6 +2135,473 @@ function printReport(){
   frame.contentWindow.print();
 }
 
+
+// ════════════════════════════════════════════════════════════
+// 6 NEW FEATURE JS
+// ════════════════════════════════════════════════════════════
+
+// ── Helper: populate survival column selects when data loads ──
+function populateSurvivalSelects(){
+  const numeric = colInfo.filter(c=>c.col_type==='numeric');
+  const all     = colInfo;
+  ['survDurationCol','survEventCol'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.innerHTML='<option value="">— Select column —</option>';
+    numeric.forEach(c=>el.innerHTML+=`<option value="${c.name}">${c.name}</option>`);
+  });
+  const grp=document.getElementById('survGroupCol');
+  grp.innerHTML='<option value="">— No grouping —</option>';
+  all.forEach(c=>grp.innerHTML+=`<option value="${c.name}">${c.name}</option>`);
+}
+
+// ── Helper: populate multi-target selector ──
+let mtSelectedTargets=new Set();
+function populateMultiTargetSelector(){
+  const el=document.getElementById('mt-target-selector');
+  el.innerHTML='';
+  colInfo.forEach(c=>{
+    const chip=document.createElement('div');
+    chip.className='chip';chip.textContent=c.name;chip.dataset.col=c.name;
+    chip.onclick=()=>{
+      if(mtSelectedTargets.has(c.name)){mtSelectedTargets.delete(c.name);chip.classList.remove('active');}
+      else{mtSelectedTargets.add(c.name);chip.classList.add('active');}
+      document.getElementById('mt-target-count').textContent=mtSelectedTargets.size;
+    };
+    el.appendChild(chip);
+  });
+}
+
+// ── Override onData to also populate new selects ──
+const _origOnData=onData;
+function onData(d){
+  _origOnData(d);
+  populateSurvivalSelects();
+  populateMultiTargetSelector();
+  // Update compare panel A info
+  const ai=document.getElementById('compare-a-info');
+  if(ai)ai.textContent=`${d.file_name} — ${d.rows?.toLocaleString()} rows × ${d.columns} columns`;
+}
+
+// ══════════════════════════════════════════
+// 1. PATIENT DASHBOARD
+// ══════════════════════════════════════════
+async function runPatientDashboard(){
+  const rowIdx=parseInt(document.getElementById('patientRowIdx').value)||0;
+  const feats=[...selFeatures];
+  if(!feats.length){notif('Select feature columns first','error');return;}
+  showLoad('Loading Patient Profile...','Calculating risk score and similar patients');
+  const d=await post('/api/patient-dashboard/',{
+    row_index:rowIdx,
+    feature_columns:feats,
+    target_column:selTarget||''
+  });
+  hideLoad();
+  if(!d.success){notif(d.error,'error');return;}
+  const r=d.result;
+  document.getElementById('patient-empty').style.display='none';
+  document.getElementById('patient-result').style.display='block';
+
+  // Risk ring
+  const ring=document.getElementById('patient-risk-ring');
+  ring.className='risk-ring '+r.risk_level;
+  document.getElementById('patient-risk-score').textContent=r.risk_score+'%';
+  document.getElementById('patient-risk-label').innerHTML=
+    `<span style="color:${r.risk_level==='HIGH'?'var(--danger)':r.risk_level==='MEDIUM'?'var(--warn)':'var(--accent2)'}">${r.risk_level} RISK</span> — Patient #${r.row_index} of ${r.total_patients}`;
+  document.getElementById('patient-anomaly').textContent=r.anomaly_flag?('⚠️ '+r.anomaly_reason):'✅ No anomalies detected';
+  document.getElementById('patient-missing').textContent=r.missing_count>0?`${r.missing_count} missing values`:'';
+
+  // Prediction box
+  const pbox=document.getElementById('patient-prediction-box');
+  if(r.prediction&&r.prediction.prediction!==undefined){
+    pbox.style.display='block';
+    document.getElementById('patient-pred-val').textContent=
+      typeof r.prediction.prediction==='number'?r.prediction.prediction.toFixed(3):r.prediction.prediction;
+  } else pbox.style.display='none';
+
+  // Values grid
+  const grid=document.getElementById('patient-values-grid');grid.innerHTML='';
+  r.profile_values.forEach(v=>{
+    const cls=v.is_outlier?'outlier':v.is_target?'tgt':v.is_feature?'feat':'';
+    const pct=v.percentile!==undefined?v.percentile:null;
+    const dir=v.direction||'normal';
+    const barColor=dir==='high'?'hi':dir==='low'?'lo':'';
+    const missing=v.is_missing?'<span style="font-size:9px;color:var(--warn)">MISSING</span>':'';
+    grid.innerHTML+=`<div class="pv-card ${cls}">
+      <div class="pv-label">${v.column}${v.is_outlier?' ⚠️':''}</div>
+      <div class="pv-value">${v.is_missing?'—':typeof v.value==='number'?v.value.toFixed?v.value.toFixed(2):v.value:String(v.value).slice(0,18)}${missing}</div>
+      ${pct!==null?`<div class="pv-pct">${pct}th percentile · z=${v.z_score}</div><div class="pv-bar"><div class="pv-bar-fill ${barColor}" style="width:${pct}%"></div></div>`:''}
+    </div>`;
+  });
+
+  // Population comparison bars
+  const popDiv=document.getElementById('patient-pop-bars');popDiv.innerHTML='';
+  Object.entries(r.population_stats||{}).slice(0,7).forEach(([col,s])=>{
+    const diff=((s.patient_value-s.population_mean)/Math.max(Math.abs(s.population_mean),0.001)*100).toFixed(1);
+    const col_good=diff>0?'var(--accent4)':'var(--accent2)';
+    popDiv.innerHTML+=`<div class="feat-row" style="margin-bottom:8px">
+      <div class="feat-lbl" title="${col}">${col}</div>
+      <div class="feat-track"><div class="feat-fill" style="width:${s.percentile}%;background:${col_good}"></div></div>
+      <div class="feat-pct" style="color:${col_good}">${diff>0?'+':''}${diff}%</div>
+    </div>`;
+  });
+
+  // Similar patients
+  const simDiv=document.getElementById('patient-similar-table');
+  if(r.similar_patients&&r.similar_patients.length){
+    let rows=r.similar_patients.map(s=>{
+      const vals=Object.entries(s.values).slice(0,3).map(([k,v])=>`${k}:${v}`).join(', ');
+      return `<tr><td>Row #${s.row_index}</td><td style="color:var(--accent2);font-weight:600">${s.similarity_pct}%</td><td style="font-size:9px;color:var(--text3)">${vals}</td></tr>`;
+    }).join('');
+    simDiv.innerHTML=`<table class="sim-mini-table"><thead><tr><th>Patient</th><th>Similarity</th><th>Key Values</th></tr></thead><tbody>${rows}</tbody></table>`;
+  } else simDiv.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">Not enough numeric features for similarity.</div>';
+
+  notif(`Patient #${rowIdx} profile loaded`);
+}
+
+// ══════════════════════════════════════════
+// 2. SURVIVAL ANALYSIS
+// ══════════════════════════════════════════
+const KM_COLORS=['#38bdf8','#34d399','#f472b6','#fb923c','#a78bfa','#fbbf24'];
+async function runSurvival(){
+  const dur=document.getElementById('survDurationCol').value;
+  const evt=document.getElementById('survEventCol').value;
+  const grp=document.getElementById('survGroupCol').value||null;
+  if(!dur||!evt){notif('Select Duration and Event columns','error');return;}
+  showLoad('Running Survival Analysis...','Computing Kaplan-Meier curves');
+  const d=await post('/api/survival-analysis/',{duration_col:dur,event_col:evt,group_col:grp});
+  hideLoad();
+  if(!d.success){notif(d.error,'error');return;}
+  const r=d.result;
+  document.getElementById('survival-empty').style.display='none';
+  document.getElementById('survival-result').style.display='block';
+
+  // KPIs
+  document.getElementById('survival-kpis').innerHTML=`
+    <div class="metric-card"><div class="metric-val">${r.n_total?.toLocaleString()}</div><div class="metric-lbl">Patients</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--danger)">${r.n_events}</div><div class="metric-lbl">Events</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--accent2)">${r.n_censored}</div><div class="metric-lbl">Censored</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--warn)">${r.event_rate}%</div><div class="metric-lbl">Event Rate</div></div>`;
+
+  // KM Chart
+  if(charts.survival)charts.survival.destroy();
+  const groups=r.groups||{};
+  const groupNames=Object.keys(groups);
+  const datasets=[];
+  const legend=document.getElementById('survival-legend');legend.innerHTML='';
+  groupNames.forEach((grpName,i)=>{
+    const c=KM_COLORS[i%KM_COLORS.length];
+    const curve=groups[grpName];
+    datasets.push({
+      label:grpName,
+      data:curve.times.map((t,j)=>({x:t,y:curve.survival[j]})),
+      borderColor:c,fill:false,stepped:'after',
+      borderWidth:2,pointRadius:0,tension:0
+    });
+    // CI band
+    datasets.push({
+      label:`${grpName} CI`,
+      data:curve.times.map((t,j)=>({x:t,y:curve.ci_upper[j]})),
+      borderColor:'transparent',
+      backgroundColor:c.replace('rgb','rgba').replace(')',',0.08)'),
+      fill:'+1',stepped:'after',pointRadius:0,tension:0,borderWidth:0
+    });
+    datasets.push({
+      label:`${grpName} CI lower`,
+      data:curve.times.map((t,j)=>({x:t,y:curve.ci_lower[j]})),
+      borderColor:'transparent',fill:false,stepped:'after',pointRadius:0,tension:0,borderWidth:0
+    });
+    legend.innerHTML+=`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span class="km-legend-dot" style="background:${c}"></span>${grpName}</div>`;
+  });
+  const ctx=document.getElementById('survivalChart').getContext('2d');
+  charts.survival=new Chart(ctx,{
+    type:'line',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{type:'linear',title:{display:true,text:'Time',color:'#64748b'},ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(99,179,237,.06)'}},
+        y:{min:0,max:1,title:{display:true,text:'Survival Probability',color:'#64748b'},ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(99,179,237,.06)'}}
+      }
+    }
+  });
+
+  // Medians
+  const medDiv=document.getElementById('survival-medians');medDiv.innerHTML='';
+  Object.entries(r.median_survival||{}).forEach(([grp,med],i)=>{
+    const c=KM_COLORS[i%KM_COLORS.length];
+    medDiv.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius);margin-bottom:6px">
+      <span class="km-legend-dot" style="background:${c};width:10px;height:10px;border-radius:50%;flex-shrink:0"></span>
+      <div style="flex:1;font-size:12px;font-weight:600;color:var(--text)">${grp}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:${c}">${med!=null?med+' units':'Not reached'}</div>
+    </div>`;
+  });
+
+  document.getElementById('survival-interpretation').textContent=r.interpretation||'—';
+  notif('Kaplan-Meier analysis complete!');
+}
+
+// ══════════════════════════════════════════
+// 3. MULTI-TARGET COMPARATOR
+// ══════════════════════════════════════════
+async function runMultiTarget(){
+  const feats=[...selFeatures];
+  const targets=[...mtSelectedTargets];
+  if(!feats.length){notif('Select feature columns in the sidebar first','error');return;}
+  if(targets.length<2){notif('Select at least 2 target columns to compare','error');return;}
+  showLoad('Comparing Targets...','Training models for each target column');
+  const d=await post('/api/multi-target-compare/',{
+    feature_columns:feats,target_columns:targets,model_type:'random_forest'
+  });
+  hideLoad();
+  if(!d.success){notif(d.error,'error');return;}
+  const r=d.result;
+  document.getElementById('multitarget-empty').style.display='none';
+  document.getElementById('multitarget-result').style.display='block';
+
+  document.getElementById('mt-best').textContent=
+    r.best_target?`${r.best_target} — ${(r.best_performance*100).toFixed(1)}% performance`:'No successful models';
+
+  const list=document.getElementById('mt-results-list');list.innerHTML='';
+  (r.results||[]).forEach(res=>{
+    if(res.status==='error'){
+      list.innerHTML+=`<div class="mt-result-card"><div class="mt-rank rn">!</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--danger)">${res.target}</div><div style="font-size:10px;color:var(--text3)">${res.error}</div></div></div>`;
+      return;
+    }
+    const perf=res.performance||0;
+    const rankCls=res.rank===1?'r1':res.rank===2?'r2':'rn';
+    const metric=res.task==='regression'?`R² ${(perf*100).toFixed(1)}%`:`Acc ${(perf*100).toFixed(1)}%`;
+    const taskBadge=res.task==='regression'?'<span class="result-badge badge-reg" style="font-size:9px">REG</span>':'<span class="result-badge badge-cls" style="font-size:9px">CLS</span>';
+    const top3=(res.feature_importance||[]).slice(0,3).map(f=>f.feature).join(', ');
+    list.innerHTML+=`<div class="mt-result-card ${res.rank===1?'rank1':''}">
+      <div class="mt-rank ${rankCls}">#${res.rank}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${res.target}</span>${taskBadge}
+        </div>
+        <div class="mt-perf-bar"><div class="mt-perf-fill" style="width:${perf*100}%"></div></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">Top features: ${top3||'—'} · ${res.n_rows} rows</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:${res.rank===1?'var(--accent2)':'var(--accent)'}">${metric}</div>
+      </div>
+    </div>`;
+  });
+  notif(`Compared ${r.results.length} targets!`);
+}
+
+// ══════════════════════════════════════════
+// 4. ALERT RULES BUILDER
+// ══════════════════════════════════════════
+let alertRules=[];
+function addRuleRow(rule={}){
+  const id='rule-'+Date.now()+Math.random().toString(36).slice(2,5);
+  const colOpts=colInfo.map(c=>`<option value="${c.name}" ${rule.column===c.name?'selected':''}>${c.name}</option>`).join('');
+  const ops=['>', '<', '>=', '<=', '==', '!='];
+  const opOpts=ops.map(o=>`<option value="${o}" ${rule.operator===o?'selected':''}>${o}</option>`).join('');
+  const sevs=['critical','warning','info'];
+  const sevOpts=sevs.map(s=>`<option value="${s}" ${rule.severity===s?'selected':''}>${s}</option>`).join('');
+  const div=document.createElement('div');
+  div.id=id;div.className='rule-builder';
+  div.style.cssText='display:grid;grid-template-columns:1fr 110px 70px 100px 1fr 36px;gap:6px;align-items:center;padding:10px;margin-bottom:6px';
+  div.innerHTML=`
+    <select class="cfg-select" style="margin-bottom:0" data-field="column">${colOpts}</select>
+    <select class="cfg-select" style="margin-bottom:0" data-field="operator">${opOpts}</select>
+    <input type="number" class="cfg-select" style="margin-bottom:0" data-field="value" value="${rule.value||''}">
+    <select class="cfg-select" style="margin-bottom:0" data-field="severity">${sevOpts}</select>
+    <input type="text" class="cfg-select" style="margin-bottom:0" data-field="action" value="${rule.action||rule.name||''}" placeholder="Alert action/name">
+    <button onclick="this.parentElement.remove()" style="width:32px;height:32px;border:none;background:rgba(248,113,113,.15);color:var(--danger);border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">×</button>`;
+  document.getElementById('alert-rules-rows').appendChild(div);
+}
+function gatherRules(){
+  const rows=document.getElementById('alert-rules-rows').children;
+  return Array.from(rows).map(row=>({
+    column:  row.querySelector('[data-field=column]').value,
+    operator:row.querySelector('[data-field=operator]').value,
+    value:   parseFloat(row.querySelector('[data-field=value]').value)||0,
+    severity:row.querySelector('[data-field=severity]').value,
+    action:  row.querySelector('[data-field=action]').value||'Review required',
+    name:    row.querySelector('[data-field=action]').value||'Alert',
+  }));
+}
+async function loadSuggestedRules(){
+  showLoad('Finding Suggested Rules...','Scanning column names for clinical patterns');
+  const r=await fetch('/api/suggest-alert-rules/').then(r=>r.json());
+  hideLoad();
+  if(!r.success){notif(r.error||'Upload data first','error');return;}
+  document.getElementById('alert-rules-rows').innerHTML='';
+  (r.suggestions||[]).slice(0,10).forEach(rule=>addRuleRow(rule));
+  notif(`${r.suggestions.length} rules auto-suggested!`);
+}
+function clearRules(){document.getElementById('alert-rules-rows').innerHTML='';}
+async function runAlerts(){
+  const rules=gatherRules();
+  if(!rules.length){notif('Add at least one rule first','error');return;}
+  showLoad('Evaluating Alert Rules...','Scanning dataset for triggered conditions');
+  const d=await post('/api/evaluate-alert-rules/',{rules});
+  hideLoad();
+  if(!d.success){notif(d.error,'error');return;}
+  const r=d.result;
+  document.getElementById('alerts-result').style.display='block';
+
+  // Status banner
+  const badge=document.getElementById('alerts-status-badge');
+  const isCrit=r.overall_status==='CRITICAL',isWarn=r.overall_status==='WARNING';
+  badge.textContent=isCrit?'⛔ CRITICAL ALERTS':isWarn?'⚠️ WARNINGS DETECTED':'✅ ALL CLEAR';
+  badge.style.cssText=`font-size:13px;font-weight:700;padding:8px 18px;border-radius:var(--radius);background:${isCrit?'rgba(248,113,113,.1)':isWarn?'rgba(251,191,36,.08)':'rgba(52,211,153,.08)'};color:${isCrit?'var(--danger)':isWarn?'var(--warn)':'var(--accent2)'};border:1px solid ${isCrit?'rgba(248,113,113,.3)':isWarn?'rgba(251,191,36,.25)':'rgba(52,211,153,.25)'}`;
+
+  document.getElementById('alerts-kpis').innerHTML=`
+    <div class="metric-card"><div class="metric-val" style="color:var(--danger)">${r.critical_alerts}</div><div class="metric-lbl">Critical</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--warn)">${r.warning_alerts}</div><div class="metric-lbl">Warnings</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:var(--accent)">${r.rules_evaluated}</div><div class="metric-lbl">Rules Checked</div></div>`;
+
+  const list=document.getElementById('alerts-triggered-list');list.innerHTML='';
+  (r.triggered||[]).forEach(t=>{
+    const isTrig=t.status==='TRIGGERED';
+    const sc=t.severity==='critical'?'critical':t.severity==='warning'?'warning':t.status==='TRIGGERED'?'info':'clear';
+    const icon=t.severity==='critical'?'⛔':t.severity==='warning'?'⚠️':isTrig?'ℹ️':'✅';
+    const barColor=t.severity==='critical'?'var(--danger)':t.severity==='warning'?'var(--warn)':'var(--accent)';
+    list.innerHTML+=`<div class="alert-triggered ${isTrig?sc:'clear'}">
+      <span style="font-size:18px;flex-shrink:0">${icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px">${t.rule_name}</div>
+        <div style="font-size:10px;color:var(--text3);line-height:1.6">${t.action}${t.error?' — Error: '+t.error:''}</div>
+      </div>
+      ${isTrig?`<div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:${barColor}">${t.n_triggered} patients</div>
+        <div style="font-size:9px;color:var(--text3)">${t.percent}% of dataset</div>
+        <div class="alert-pct-bar"><div class="alert-pct-fill" style="width:${Math.min(t.percent,100)}%;background:${barColor}"></div></div>
+      </div>`:'<div style="font-size:10px;color:var(--accent2);font-weight:600">CLEAR</div>'}
+    </div>`;
+  });
+  notif(`${r.critical_alerts} critical · ${r.warning_alerts} warnings`);
+}
+
+// ══════════════════════════════════════════
+// 5. DATASET COMPARATOR
+// ══════════════════════════════════════════
+let compareBData=null;
+async function handleCompareUpload(input){
+  const file=input.files[0];if(!file)return;
+  showLoad('Reading Dataset B...','Parsing columns');
+  const fd=new FormData();fd.append('file',file);
+  // We parse it client-side by loading into a temp fetch
+  // Actually we'll read it via a hidden upload then save rows
+  const r=await fetch('/api/upload-temp/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd});
+  // If no temp endpoint, we'll read via preview from the main upload temporarily
+  // Simpler: re-upload as main, grab data_json, restore
+  // Better approach: upload to a temp key and get rows back
+  // For simplicity: read file as FormData, get preview back from standard upload
+  const d2=await fetch('/api/upload/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd}).then(r=>r.json());
+  hideLoad();
+  if(!d2.success){notif(d2.error,'error');return;}
+  compareBData=d2.preview; // use preview rows for comparison
+  document.getElementById('compare-b-info').style.display='block';
+  document.getElementById('compare-b-info').textContent=`${file.name} — ${d2.rows?.toLocaleString()} rows × ${d2.columns} columns`;
+  notif('Dataset B loaded: '+file.name);
+}
+async function runCompare(){
+  if(!compareBData){notif('Upload Dataset B first','error');return;}
+  const nameA=document.getElementById('compareNameA').value||'Dataset A';
+  const nameB=document.getElementById('compareNameB').value||'Dataset B';
+  showLoad('Comparing Datasets...','Statistical difference analysis');
+  const d=await post('/api/compare-datasets/',{data_b:compareBData,name_a:nameA,name_b:nameB});
+  hideLoad();
+  if(!d.success){notif(d.error,'error');return;}
+  const r=d.result;
+  document.getElementById('compare-empty').style.display='none';
+  document.getElementById('compare-result').style.display='block';
+  document.getElementById('compare-summary').textContent=r.summary||'';
+  document.getElementById('compare-name-a-lbl').textContent=nameA;
+  document.getElementById('compare-name-b-lbl').textContent=nameB;
+
+  const list=document.getElementById('compare-cols-list');list.innerHTML='';
+  const maxMean=Math.max(...(r.col_comparisons||[]).map(c=>Math.max(Math.abs(c.mean_a),Math.abs(c.mean_b))||1));
+  (r.col_comparisons||[]).slice(0,30).forEach(c=>{
+    const sig=c.significant;
+    const effColor=c.effect_size==='large'?'var(--danger)':c.effect_size==='medium'?'var(--warn)':'var(--text3)';
+    const barA=Math.abs(c.mean_a)/maxMean*100;
+    const barB=Math.abs(c.mean_b)/maxMean*100;
+    list.innerHTML+=`<div class="compare-col-row ${sig?'sig':''}">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.column}">${c.column}${sig?' *':''}</div>
+      <div class="compare-bar-wrap"><div class="compare-bar"><div class="compare-bar-a" style="width:${barA}%"></div></div><span style="font-size:10px;color:var(--accent);width:55px;text-align:right;flex-shrink:0">${c.mean_a}</span></div>
+      <div class="compare-bar-wrap"><div class="compare-bar"><div class="compare-bar-b" style="width:${barB}%"></div></div><span style="font-size:10px;color:var(--accent3);width:55px;text-align:right;flex-shrink:0">${c.mean_b}</span></div>
+      <div style="font-size:10px;font-weight:600;color:${c.mean_diff>0?'var(--accent)':'var(--accent3)'}">${c.mean_diff>0?'+':''}${c.mean_diff}</div>
+      <div style="font-size:9px;font-weight:700;color:${effColor};text-transform:uppercase">${c.effect_size}</div>
+    </div>`;
+  });
+  notif(`Found ${r.n_significant} significant differences`);
+}
+
+// ══════════════════════════════════════════
+// 6. ICD CLINICAL CODING
+// ══════════════════════════════════════════
+async function runCoding(){
+  showLoad('Scanning for ICD-10 Codes...','Detecting clinical terminology and drug interactions');
+  const r=await fetch('/api/clinical-coding/').then(r=>r.json());
+  hideLoad();
+  if(!r.success){notif(r.error||'Upload data first','error');return;}
+  const res=r.result;
+  document.getElementById('coding-empty').style.display='none';
+  document.getElementById('coding-result').style.display='block';
+
+  // ICD-10 list
+  const icdDiv=document.getElementById('coding-icd-list');
+  if(res.icd10_suggestions&&res.icd10_suggestions.length){
+    icdDiv.innerHTML='';
+    res.icd10_suggestions.forEach(s=>{
+      icdDiv.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:6px;border:1px solid var(--border)">
+        <span class="icd-badge">${s.icd10_code}</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${s.description}</div>
+          <div style="font-size:10px;color:var(--text3)">Detected in column: <code style="font-family:'DM Mono',monospace;color:var(--accent)">${s.column}</code>${s.value?' · value: "'+s.value+'"':''}</div>
+        </div>
+        <span style="font-size:9px;color:var(--text3);text-transform:uppercase">${s.match_type.replace('_',' ')}</span>
+      </div>`;
+    });
+  } else {
+    icdDiv.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px">No ICD-10 patterns detected in column names or values. Try datasets with clinical terminology (diabetes, glucose, hypertension, etc.)</div>';
+  }
+
+  // Drug interactions
+  const drugDiv=document.getElementById('coding-drug-list');
+  if(res.drug_interaction_flags&&res.drug_interaction_flags.length){
+    drugDiv.innerHTML='';
+    res.drug_interaction_flags.forEach(f=>{
+      drugDiv.innerHTML+=`<div class="drug-flag ${f.severity}">
+        <span style="font-size:20px">${f.severity==='HIGH'?'⛔':'⚠️'}</span>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px">${f.drug_a.toUpperCase()} + ${f.drug_b.toUpperCase()}</div>
+          <div style="font-size:11px;color:var(--text2)">${f.message}</div>
+        </div>
+        <span class="phi-risk-badge ${f.severity==='HIGH'?'phi-risk-high':'phi-risk-med'}" style="margin-left:auto;flex-shrink:0">${f.severity}</span>
+      </div>`;
+    });
+  } else {
+    drugDiv.innerHTML='<div style="color:var(--accent2);font-size:12px;padding:8px">✅ No drug interaction patterns detected.</div>';
+  }
+
+  // LLM advice
+  if(res.llm_advice){
+    document.getElementById('coding-llm-advice').style.display='block';
+    const recDiv=document.getElementById('coding-recs');recDiv.innerHTML='';
+    (res.llm_advice.coding_recommendations||[]).forEach(r=>{
+      recDiv.innerHTML+=`<div class="coding-rec">${r}</div>`;
+    });
+    const gapDiv=document.getElementById('coding-gaps');gapDiv.innerHTML='';
+    (res.llm_advice.documentation_gaps||[]).forEach(g=>{
+      gapDiv.innerHTML+=`<div class="coding-rec gap">${g}</div>`;
+    });
+    const sugDiv=document.getElementById('coding-suggestions');sugDiv.innerHTML='';
+    (res.llm_advice.suggested_fields||[]).forEach(s=>{
+      sugDiv.innerHTML+=`<div class="coding-rec note">${s}</div>`;
+    });
+  }
+
+  notif(`Found ${res.icd10_suggestions?.length||0} ICD codes · ${res.drug_interaction_flags?.length||0} drug flags`);
+}
+
+// ══════════════════════════════════════════
 // ══ SESSION RESTORE ══
 (async()=>{
   const d=await fetch('/api/columns/').then(r=>r.json());

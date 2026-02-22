@@ -10,6 +10,10 @@ import json
 import logging
 import pandas as pd
 import numpy as np
+import json
+import logging
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST, require_GET
 
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -821,4 +825,236 @@ def anonymise_data(request):
         })
     except Exception as e:
         logger.error("Anonymise error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@require_POST
+def patient_dashboard(request):
+    """
+    📊 Unified Patient Dashboard
+    POST body: {
+        "row_index": 0,
+        "feature_columns": [...],
+        "target_column": "col"   # optional
+    }
+    """
+    try:
+        from ml_engine.engine_features2 import PatientDashboardEngine
+        from ml_engine import HealthcareMLEngine
+
+        data         = json.loads(request.body)
+        row_index    = int(data.get('row_index', 0))
+        feature_cols = data.get('feature_columns', [])
+        target_col   = data.get('target_column', '') or None
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        ml_engine = None
+        if target_col and feature_cols:
+            ml_engine = HealthcareMLEngine()
+            ml_engine.load_dataframe(df)
+
+        engine = PatientDashboardEngine()
+        result = engine.get_patient_profile(
+            df, row_index, feature_cols, target_col, ml_engine
+        )
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']})
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Patient dashboard error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def multi_target_compare(request):
+    """
+    🎯 Multi-Target Prediction Comparator
+    POST body: {
+        "feature_columns": [...],
+        "target_columns":  ["col1", "col2", "col3"],
+        "model_type": "random_forest"
+    }
+    """
+    try:
+        from ml_engine.engine_features2 import MultiTargetComparator
+
+        data         = json.loads(request.body)
+        feature_cols = data.get('feature_columns', [])
+        target_cols  = data.get('target_columns', [])
+        model_type   = data.get('model_type', 'random_forest')
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+        if not feature_cols:
+            return JsonResponse({'success': False, 'error': 'Select feature columns.'})
+        if len(target_cols) < 2:
+            return JsonResponse({'success': False, 'error': 'Select at least 2 target columns to compare.'})
+
+        engine = MultiTargetComparator()
+        result = engine.compare_targets(df, feature_cols, target_cols, model_type)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Multi-target error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def survival_analysis(request):
+    """
+    📈 Kaplan-Meier Survival Analysis
+    POST body: {
+        "duration_col": "days_to_event",
+        "event_col":    "died",
+        "group_col":    "treatment_group"  # optional
+    }
+    """
+    try:
+        from ml_engine.engine_features2 import SurvivalAnalysisEngine
+
+        data         = json.loads(request.body)
+        duration_col = data.get('duration_col', '')
+        event_col    = data.get('event_col', '')
+        group_col    = data.get('group_col', None)
+
+        if not duration_col or not event_col:
+            return JsonResponse({'success': False, 'error': 'duration_col and event_col are required.'})
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        engine = SurvivalAnalysisEngine()
+        result = engine.run_kaplan_meier(df, duration_col, event_col, group_col)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']})
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Survival error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def evaluate_alert_rules(request):
+    """
+    🔔 Evaluate custom clinical alert rules
+    POST body: {
+        "rules": [
+            {"name":"High Glucose","column":"glucose","operator":">","value":140,"severity":"critical","action":"Review now"},
+            ...
+        ]
+    }
+    """
+    try:
+        from ml_engine.engine_features2 import AlertRulesEngine
+
+        data  = json.loads(request.body)
+        rules = data.get('rules', [])
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        engine = AlertRulesEngine()
+        result = engine.evaluate_rules(df, rules)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Alert rules error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_GET
+def suggest_alert_rules(request):
+    """
+    🔔 Auto-suggest alert rules based on column names.
+    GET — no body needed.
+    """
+    try:
+        from ml_engine.engine_features2 import AlertRulesEngine
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        engine  = AlertRulesEngine()
+        rules   = engine.suggest_rules(df)
+        return JsonResponse({'success': True, 'suggestions': rules})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def compare_datasets(request):
+    """
+    🌐 Dataset Comparator (before/after, control/treatment)
+    POST body: {
+        "data_b": [...],      # second dataset as list of row dicts
+        "name_a": "Before",
+        "name_b": "After"
+    }
+    Note: Dataset A is always the current session dataset.
+    """
+    try:
+        import pandas as pd
+        from ml_engine.engine_features2 import DatasetComparator
+
+        data   = json.loads(request.body)
+        name_a = data.get('name_a', 'Dataset A')
+        name_b = data.get('name_b', 'Dataset B')
+        rows_b = data.get('data_b', [])
+
+        df_a = _get_df(request)
+        if df_a is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded for Dataset A.'})
+        if not rows_b:
+            return JsonResponse({'success': False, 'error': 'data_b is empty — provide second dataset rows.'})
+
+        df_b = pd.DataFrame(rows_b)
+        engine = DatasetComparator()
+        result = engine.compare(df_a, df_b, name_a, name_b)
+        if 'error' in result:
+            return JsonResponse({'success': False, 'error': result['error']})
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Dataset compare error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_GET
+def clinical_coding(request):
+    """
+    💊 Clinical Coding Assistant — ICD-10 detection + drug interaction flags.
+    GET — scans current session dataset.
+    Optional query param: ?row_index=0 to include specific patient context.
+    """
+    try:
+        from ml_engine.engine_features2 import ClinicalCodingAssistant
+
+        df      = _get_df(request)
+        session = _get_session(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        col_info = session.get_columns() if session else []
+
+        # Optional: get a specific patient row for context
+        row_index = request.GET.get('row_index')
+        patient_row = None
+        if row_index is not None:
+            try:
+                idx = int(row_index)
+                if 0 <= idx < len(df):
+                    patient_row = df.iloc[idx].fillna('').to_dict()
+            except Exception:
+                pass
+
+        engine = ClinicalCodingAssistant()
+        llm    = _get_llm()
+        result = engine.get_llm_coding_advice(df, col_info, llm_client=llm,
+                                               patient_row=patient_row)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Clinical coding error: %s", e)
         return JsonResponse({'success': False, 'error': str(e)})

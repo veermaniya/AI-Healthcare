@@ -1,5 +1,4 @@
-# healthcare_app/urls.py — complete URL routing
-
+# healthcare_app/urls.py — complete URL routing (all features)
 from django.urls import path
 from . import views
 
@@ -24,16 +23,25 @@ urlpatterns = [
     path('api/chat/',          views.chat,             name='chat'),
     path('api/analyze-image/', views.analyze_image,    name='analyze_image'),
 
-    # ── Advanced AI (existing 4) ───────────────────────────
+    # ── Advanced AI (batch 1) ──────────────────────────────
     path('api/run-explainability/',     views.run_explainability,    name='run_explainability'),
     path('api/run-risk-engine/',        views.run_risk_engine,       name='run_risk_engine'),
     path('api/run-trend-analysis/',     views.run_trend_analysis,    name='run_trend_analysis'),
     path('api/run-patient-similarity/', views.run_patient_similarity, name='run_patient_similarity'),
 
-    # ── NEW: 4 feature endpoints ───────────────────────────
+    # ── Batch 2: Insights / Quality / Report / Privacy ─────
     path('api/clinical-insights/', views.clinical_insights, name='clinical_insights'),
     path('api/data-quality/',      views.data_quality,      name='data_quality'),
     path('api/generate-report/',   views.generate_report,   name='generate_report'),
     path('api/privacy-check/',     views.privacy_check,     name='privacy_check'),
     path('api/anonymise/',         views.anonymise_data,    name='anonymise_data'),
+
+    # ── Batch 3: 6 New Features ────────────────────────────
+    path('api/patient-dashboard/',     views.patient_dashboard,     name='patient_dashboard'),
+    path('api/survival-analysis/',     views.survival_analysis,     name='survival_analysis'),
+    path('api/multi-target-compare/',  views.multi_target_compare,  name='multi_target_compare'),
+    path('api/evaluate-alert-rules/',  views.evaluate_alert_rules,  name='evaluate_alert_rules'),
+    path('api/suggest-alert-rules/',   views.suggest_alert_rules,   name='suggest_alert_rules'),
+    path('api/compare-datasets/',      views.compare_datasets,      name='compare_datasets'),
+    path('api/clinical-coding/',       views.clinical_coding,       name='clinical_coding'),
 ]
