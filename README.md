@@ -156,7 +156,7 @@ healthcare_ai/
 | SQLite Database | Free (included) |
 | Hosting (local) | Free |
 
-**Total Cost: $0 — Perfect for healthcare charity!**
+**Total Cost: $0 — Perfect for healthcare !**
 
 For production/cloud hosting:
 - **Railway.app** — Free tier available
@@ -184,9 +184,9 @@ GROQ_API_KEY = os.environ['GROQ_API_KEY']
 
 ## 📞 Support & Contribution
 
-This is a **free charity project** for global healthcare access.
-Feel free to contribute, report issues, and share with healthcare organizations!
+This is a **free charity project** aimed at promoting global healthcare access.
+Feel free to contribute, report issues, and share with healthcare organisations!
 
 ---
 
-*Built with ❤️ for healthcare charity. Free forever.*
+*Built with ❤️ for healthcare.*
