@@ -643,3 +643,182 @@ def run_patient_similarity(request):
     except Exception as e:
         logger.error("Similarity error: %s", e)
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ═══════════════════════════════════════════════════════════
+#  NEW FEATURE ENDPOINTS
+#  1. Clinical Insights   /api/clinical-insights/
+#  2. Data Quality        /api/data-quality/
+#  3. Generate Report     /api/generate-report/
+#  4. Privacy Check       /api/privacy-check/
+#  4b. Anonymise          /api/anonymise/
+# ═══════════════════════════════════════════════════════════
+
+from ml_engine.engine_extensions import (
+    ClinicalInsightsEngine,
+    DataQualityEngine,
+    ReportGenerator,
+    PrivacyEngine,
+)
+
+
+@require_POST
+def clinical_insights(request):
+    """
+    🤖 Auto Clinical Insights — LLM narrative summary + chart interpretation.
+    POST body: { "feature_columns": [...], "target_column": "col" }
+    Uses the latest ML result from session. Falls back to rule-based if no LLM key.
+    """
+    try:
+        session = _get_session(request)
+        if session is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        ar = _get_latest_result(session)
+        if ar is None:
+            return JsonResponse({'success': False, 'error': 'Run an ML analysis first (Analytics tab).'})
+
+        ml_result = ar.get_result()
+        col_info  = session.get_columns()
+
+        engine  = ClinicalInsightsEngine()
+        llm     = _get_llm()
+        insights = engine.generate_narrative(ml_result, col_info, llm_client=llm)
+
+        return JsonResponse({'success': True, 'insights': insights})
+    except Exception as e:
+        logger.error("Insights error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_GET
+def data_quality(request):
+    """
+    🧪 Data Quality & Bias Detection.
+    GET — no body needed, runs on current session dataset.
+    Returns missing data report, outlier detection, class imbalance, overall score.
+    """
+    try:
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        engine = DataQualityEngine()
+        result = engine.run_quality_check(df)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Quality error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def generate_report(request):
+    """
+    📄 Generate HTML Clinical Report (printable as PDF from browser).
+    POST body: {} — uses current session data + latest ML result automatically.
+    Returns { success, html } — the frontend opens in a new tab for print/save.
+    """
+    try:
+        session = _get_session(request)
+        if session is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        ar = _get_latest_result(session)
+        if ar is None:
+            return JsonResponse({'success': False, 'error': 'Run an ML analysis first to generate a report.'})
+
+        ml_result = ar.get_result()
+        col_info  = session.get_columns()
+        df        = _get_df(request)
+
+        # Generate insights (rule-based fallback if no LLM)
+        insights_engine = ClinicalInsightsEngine()
+        llm      = _get_llm()
+        insights = insights_engine.generate_narrative(ml_result, col_info, llm_client=llm)
+
+        # Run quality check
+        quality = DataQualityEngine().run_quality_check(df) if df is not None else {
+            'overall_score': 0, 'grade': '?', 'issues': [], 'warnings': [],
+            'recommendation': 'No data available for quality check.',
+        }
+
+        # Generate HTML report
+        session_info = {
+            'file_name': session.file_name,
+            'row_count': session.row_count,
+            'col_count': session.col_count,
+        }
+        reporter = ReportGenerator()
+        html     = reporter.generate_html_report(session_info, ml_result, insights, quality)
+
+        return JsonResponse({'success': True, 'html': html})
+    except Exception as e:
+        logger.error("Report error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_GET
+def privacy_check(request):
+    """
+    🔒 Privacy & PHI Detection.
+    GET — scans current dataset for PHI columns, returns compliance score + recommendations.
+    """
+    try:
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+
+        engine = PrivacyEngine()
+        result = engine.run_privacy_check(df)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as e:
+        logger.error("Privacy check error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_POST
+def anonymise_data(request):
+    """
+    🔐 Anonymise PHI columns and re-save the session dataset.
+    POST body: {
+        "columns":  ["name", "email"],   -- columns to anonymise
+        "method":   "hash"               -- hash | mask | drop | pseudonymise
+    }
+    After anonymisation the session dataset is updated so all subsequent
+    analysis uses the clean anonymised data.
+    """
+    try:
+        data    = json.loads(request.body)
+        columns = data.get('columns', [])
+        method  = data.get('method', 'hash')
+
+        if method not in ('hash', 'mask', 'drop', 'pseudonymise'):
+            return JsonResponse({'success': False, 'error': f'Unknown method: {method}. Use hash/mask/drop/pseudonymise.'})
+
+        df = _get_df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+        if not columns:
+            return JsonResponse({'success': False, 'error': 'Specify at least one column to anonymise.'})
+
+        engine          = PrivacyEngine()
+        anon_df, audit  = engine.anonymise(df, columns, method=method)
+
+        # Re-save anonymised dataset back into session
+        session = _get_session(request)
+        _save_session(
+            request, anon_df,
+            source_type=session.source_type if session else 'excel',
+            file_name=(session.file_name if session else 'dataset') + ' [anonymised]',
+        )
+
+        return JsonResponse({
+            'success':       True,
+            'audit_log':     audit,
+            'columns_after': list(anon_df.columns),
+            'rows':          len(anon_df),
+            'message':       f"{len(audit)} column(s) anonymised using '{method}' method. Dataset updated.",
+        })
+    except Exception as e:
+        logger.error("Anonymise error: %s", e)
+        return JsonResponse({'success': False, 'error': str(e)})

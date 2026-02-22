@@ -1,4 +1,4 @@
-# healthcare_app/urls.py
+# healthcare_app/urls.py — complete URL routing
 
 from django.urls import path
 from . import views
@@ -8,7 +8,7 @@ urlpatterns = [
     # Main page
     path('', views.index, name='index'),
 
-    # Dataset — upload / SQL / columns / stats / filter / clear
+    # ── Dataset ────────────────────────────────────────────
     path('api/upload/',        views.upload_file,      name='upload_file'),
     path('api/connect-sql/',   views.connect_sql,      name='connect_sql'),
     path('api/columns/',       views.get_columns,      name='get_columns'),
@@ -16,17 +16,24 @@ urlpatterns = [
     path('api/filter/',        views.filter_data,      name='filter_data'),
     path('api/clear/',         views.clear_session,    name='clear_session'),
 
-    # ML — analysis + single-patient prediction
+    # ── ML Analysis ────────────────────────────────────────
     path('api/run-analysis/',  views.run_analysis,     name='run_analysis'),
     path('api/predict/',       views.predict,          name='predict'),
 
-    # Chat & medical imaging
+    # ── Chat & Imaging ─────────────────────────────────────
     path('api/chat/',          views.chat,             name='chat'),
     path('api/analyze-image/', views.analyze_image,    name='analyze_image'),
 
-    # 4 new advanced AI endpoints
+    # ── Advanced AI (existing 4) ───────────────────────────
     path('api/run-explainability/',     views.run_explainability,    name='run_explainability'),
     path('api/run-risk-engine/',        views.run_risk_engine,       name='run_risk_engine'),
     path('api/run-trend-analysis/',     views.run_trend_analysis,    name='run_trend_analysis'),
     path('api/run-patient-similarity/', views.run_patient_similarity, name='run_patient_similarity'),
+
+    # ── NEW: 4 feature endpoints ───────────────────────────
+    path('api/clinical-insights/', views.clinical_insights, name='clinical_insights'),
+    path('api/data-quality/',      views.data_quality,      name='data_quality'),
+    path('api/generate-report/',   views.generate_report,   name='generate_report'),
+    path('api/privacy-check/',     views.privacy_check,     name='privacy_check'),
+    path('api/anonymise/',         views.anonymise_data,    name='anonymise_data'),
 ]
