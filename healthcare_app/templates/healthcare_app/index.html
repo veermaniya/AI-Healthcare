@@ -107,12 +107,60 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* MAIN */
 .main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
 
-/* main tab bar */
-.main-tabs{flex-shrink:0;display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px}
-.mtab{height:44px;padding:0 16px;border:none;background:transparent;color:var(--text3);font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all .2s;flex-shrink:0;margin-bottom:-1px}
-.mtab:hover{color:var(--text2)}
-.mtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* ── TAB NAV SYSTEM ── */
+.main-tabs{
+  flex-shrink:0;
+  display:flex;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0;
+  overflow:hidden; /* outer clip */
+  position:relative;
+}
+/* scrollable inner track */
+.tabs-scroll{
+  display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  flex:1;
+  padding:0 8px;
+  scroll-behavior:smooth;
+}
+.tabs-scroll::-webkit-scrollbar{display:none}
+/* arrow buttons */
+.tab-arrow{
+  flex-shrink:0;width:28px;height:44px;
+  background:var(--surface);
+  border:none;cursor:pointer;
+  color:var(--text3);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;z-index:2;
+  border-bottom:1px solid var(--border);
+}
+.tab-arrow:hover{color:var(--accent);background:var(--surface2)}
+.tab-arrow.hidden{opacity:0;pointer-events:none}
+/* tab groups */
+.tab-group-sep{
+  width:1px;height:22px;
+  background:var(--border);
+  flex-shrink:0;align-self:center;margin:0 4px;
+}
+.mtab{
+  height:44px;padding:0 11px;
+  border:none;background:transparent;
+  color:var(--text3);font-size:11px;font-weight:500;
+  cursor:pointer;border-bottom:2px solid transparent;
+  white-space:nowrap;display:flex;align-items:center;gap:5px;
+  font-family:'DM Sans',sans-serif;transition:all .2s;
+  flex-shrink:0;margin-bottom:-1px;
+  border-radius:0;position:relative;
+}
+.mtab:hover{color:var(--text2);background:rgba(56,189,248,.04)}
+.mtab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(56,189,248,.05)}
 .new-badge{background:linear-gradient(135deg,var(--accent3),#e879f9);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:5px}
+/* tab counter badge (for tabs that require data) */
+.tab-lock{font-size:8px;color:var(--text3);opacity:.6}
 
 /* tab panels - each scrolls independently */
 .tpanel{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 22px;min-height:0}
@@ -514,7 +562,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
     <div id="tab-excel">
       <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleUpload(this)">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
         <div style="font-size:24px;margin-bottom:6px">📋</div>
         <div style="font-size:11px;color:var(--text3);line-height:1.5"><strong style="color:var(--accent)">Click to upload</strong> or drag & drop<br>Excel (.xlsx, .xls) or CSV</div>
       </div>
@@ -570,24 +618,35 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <!-- ════ MAIN ════ -->
 <main class="main">
 
-  <div class="main-tabs">
-    <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics">📊 Analytics</button>
-    <button class="mtab" onclick="switchTab('preview')" id="mtab-preview">📋 Data Preview</button>
-    <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging">🔬 Medical Imaging</button>
-    <button class="mtab" onclick="switchTab('xai')" id="mtab-xai">🧠 Explainability <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('risk')" id="mtab-risk">⚠️ Risk Engine <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('trends')" id="mtab-trends">📈 Trends <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity">👥 Similarity <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('insights')" id="mtab-insights">💡 AI Insights <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('quality')" id="mtab-quality">🧪 Data Quality <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy">🔒 Privacy <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('report')" id="mtab-report">📄 Report <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('patient')" id="mtab-patient">🧑‍⚕️ Patient View <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('survival')" id="mtab-survival">📉 Survival <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget">🎯 Multi-Target <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts">🔔 Alert Rules <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('compare')" id="mtab-compare">⚖️ Compare <span class="new-badge">NEW</span></button>
-    <button class="mtab" onclick="switchTab('coding')" id="mtab-coding">💊 ICD Coding <span class="new-badge">NEW</span></button>
+  <div class="main-tabs" id="mainTabs">
+    <button class="tab-arrow" id="tabArrowLeft" onclick="scrollTabs(-1)" title="Scroll left">‹</button>
+    <div class="tabs-scroll" id="tabsScroll">
+      <!-- GROUP 1: Core -->
+      <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics" data-group="core">📊 Analytics</button>
+      <button class="mtab" onclick="switchTab('preview')" id="mtab-preview" data-group="core">📋 Data Preview</button>
+      <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging" data-group="core">🔬 Medical Imaging</button>
+      <div class="tab-group-sep" title="AI Analysis"></div>
+      <!-- GROUP 2: AI Analysis -->
+      <button class="mtab" onclick="switchTab('xai')" id="mtab-xai" data-group="ai">🧠 Explainability</button>
+      <button class="mtab" onclick="switchTab('risk')" id="mtab-risk" data-group="ai">⚠️ Risk Engine</button>
+      <button class="mtab" onclick="switchTab('trends')" id="mtab-trends" data-group="ai">📈 Trends</button>
+      <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity" data-group="ai">👥 Similarity</button>
+      <button class="mtab" onclick="switchTab('insights')" id="mtab-insights" data-group="ai">💡 AI Insights</button>
+      <div class="tab-group-sep" title="Clinical Tools"></div>
+      <!-- GROUP 3: Clinical -->
+      <button class="mtab" onclick="switchTab('quality')" id="mtab-quality" data-group="clinical">🧪 Data Quality</button>
+      <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy" data-group="clinical">🔒 Privacy</button>
+      <button class="mtab" onclick="switchTab('patient')" id="mtab-patient" data-group="clinical">🧑‍⚕️ Patient View</button>
+      <button class="mtab" onclick="switchTab('survival')" id="mtab-survival" data-group="clinical">📉 Survival</button>
+      <button class="mtab" onclick="switchTab('coding')" id="mtab-coding" data-group="clinical">💊 ICD Coding</button>
+      <div class="tab-group-sep" title="Advanced"></div>
+      <!-- GROUP 4: Advanced -->
+      <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget" data-group="advanced">🎯 Multi-Target</button>
+      <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts" data-group="advanced">🔔 Alert Rules</button>
+      <button class="mtab" onclick="switchTab('compare')" id="mtab-compare" data-group="advanced">⚖️ Compare</button>
+      <button class="mtab" onclick="switchTab('report')" id="mtab-report" data-group="advanced">📄 Report</button>
+    </div>
+    <button class="tab-arrow" id="tabArrowRight" onclick="scrollTabs(1)" title="Scroll right">›</button>
   </div>
 
   <!-- ANALYTICS TAB -->
@@ -1408,13 +1467,114 @@ function showLoad(t='Loading...',s='Please wait'){document.getElementById('loadi
 function hideLoad(){document.getElementById('loadingOverlay').classList.remove('active');}
 async function post(url,data){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify(data)});return r.json();}
 
-// ══ MAIN TABS ══
-function switchTab(tab){
-  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tpanel-'+tab).classList.add('active');
-  document.getElementById('mtab-'+tab).classList.add('active');
+// ══ MAIN TABS — ENHANCED ══
+// Tab registry: defines order, display name, and optional init callback
+const TAB_REGISTRY = [
+  {id:'analytics',   label:'📊 Analytics',      group:'core'},
+  {id:'preview',     label:'📋 Data Preview',    group:'core'},
+  {id:'imaging',     label:'🔬 Medical Imaging', group:'core'},
+  {id:'xai',         label:'🧠 Explainability',  group:'ai'},
+  {id:'risk',        label:'⚠️ Risk Engine',     group:'ai'},
+  {id:'trends',      label:'📈 Trends',          group:'ai'},
+  {id:'similarity',  label:'👥 Similarity',      group:'ai'},
+  {id:'insights',    label:'💡 AI Insights',     group:'ai'},
+  {id:'quality',     label:'🧪 Data Quality',    group:'clinical'},
+  {id:'privacy',     label:'🔒 Privacy',         group:'clinical'},
+  {id:'patient',     label:'🧑‍⚕️ Patient View', group:'clinical'},
+  {id:'survival',    label:'📉 Survival',        group:'clinical'},
+  {id:'coding',      label:'💊 ICD Coding',      group:'clinical'},
+  {id:'multitarget', label:'🎯 Multi-Target',    group:'advanced'},
+  {id:'alerts',      label:'🔔 Alert Rules',     group:'advanced'},
+  {id:'compare',     label:'⚖️ Compare',         group:'advanced'},
+  {id:'report',      label:'📄 Report',          group:'advanced'},
+];
+let _activeTab = 'analytics';
+let _tabInited = new Set(['analytics']); // track lazy-init calls
+
+function switchTab(tab, opts={}) {
+  if(tab === _activeTab && !opts.force) return;
+  _activeTab = tab;
+
+  // swap panel visibility
+  document.querySelectorAll('.tpanel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('tpanel-' + tab);
+  const btn   = document.getElementById('mtab-' + tab);
+  if(panel) { panel.classList.add('active'); panel.scrollTop = 0; }
+  if(btn)   { btn.classList.add('active'); scrollTabIntoView(btn); }
+
+  // update URL hash for deep-linking
+  history.replaceState(null, '', '#' + tab);
+
+  // run any lazy init on first visit
+  if(!_tabInited.has(tab)) {
+    _tabInited.add(tab);
+    _onTabFirstVisit(tab);
+  }
+
+  updateTabArrows();
 }
+
+function _onTabFirstVisit(tab) {
+  // hook: run tab-specific setup on first open
+  if(tab === 'survival' && colInfo.length) populateSurvivalSelects();
+  if(tab === 'multitarget' && colInfo.length) populateMTTargets();
+}
+
+// scroll the active tab button into view inside the scroll track
+function scrollTabIntoView(btn) {
+  const track = document.getElementById('tabsScroll');
+  if(!track || !btn) return;
+  const bLeft = btn.offsetLeft;
+  const bRight = bLeft + btn.offsetWidth;
+  const tLeft = track.scrollLeft;
+  const tRight = tLeft + track.clientWidth;
+  if(bLeft < tLeft + 20)       track.scrollLeft = bLeft - 20;
+  else if(bRight > tRight - 20) track.scrollLeft = bRight - track.clientWidth + 20;
+}
+
+// arrow button scroll
+function scrollTabs(dir) {
+  const track = document.getElementById('tabsScroll');
+  if(track) track.scrollLeft += dir * 180;
+  setTimeout(updateTabArrows, 150);
+}
+
+// show/hide arrow buttons based on scroll position
+function updateTabArrows() {
+  const track = document.getElementById('tabsScroll');
+  const lBtn  = document.getElementById('tabArrowLeft');
+  const rBtn  = document.getElementById('tabArrowRight');
+  if(!track) return;
+  const atStart = track.scrollLeft < 10;
+  const atEnd   = track.scrollLeft >= track.scrollWidth - track.clientWidth - 10;
+  if(lBtn) lBtn.classList.toggle('hidden', atStart);
+  if(rBtn) rBtn.classList.toggle('hidden', atEnd);
+}
+
+// keyboard navigation: Alt+← / Alt+→ to cycle tabs
+document.addEventListener('keydown', e => {
+  if(!e.altKey) return;
+  const ids = TAB_REGISTRY.map(t => t.id);
+  const cur = ids.indexOf(_activeTab);
+  if(e.key === 'ArrowRight' && cur < ids.length - 1) { e.preventDefault(); switchTab(ids[cur+1]); }
+  if(e.key === 'ArrowLeft'  && cur > 0)              { e.preventDefault(); switchTab(ids[cur-1]); }
+});
+
+// restore from URL hash on load
+(function restoreTabFromHash() {
+  const hash = location.hash.replace('#','');
+  if(hash && document.getElementById('tpanel-'+hash)) switchTab(hash);
+})();
+
+// init arrow visibility on load + on scroll
+document.addEventListener('DOMContentLoaded', () => {
+  updateTabArrows();
+  const track = document.getElementById('tabsScroll');
+  if(track) track.addEventListener('scroll', updateTabArrows, {passive:true});
+});
+// also init immediately since DOMContentLoaded may have already fired
+setTimeout(updateTabArrows, 50);
 
 // ══ SOURCE TABS ══
 function switchSrcTab(tab){
@@ -1424,23 +1584,86 @@ function switchSrcTab(tab){
 }
 
 // ══ UPLOAD ══
+let _uploadBusy = false; // guard against re-entrant calls
+
 async function handleUpload(input){
-  const file=input.files[0];if(!file)return;
-  clearSession();
+  // Guard: input.value='' below can re-fire onchange in some browsers — ignore it
+  if(_uploadBusy){ input.value=''; return; }
+  const file = input.files[0];
+  if(!file){ return; }
+
+  _uploadBusy = true;
+
+  // Detach handler, reset value, reattach — the ONLY safe way to allow same-file re-upload
+  input.onchange = null;
+  input.value = '';
+  setTimeout(() => { input.onchange = e => handleUpload(e.target); }, 300);
+
+  // Clear session state locally (no API call needed here — upload endpoint handles server side)
+  resetSessionState();
+
   await handleUploadFile(file);
-  // reset input so same file can be re-uploaded
-  input.value='';
+  _uploadBusy = false;
 }
+
+// Reset all client-side state without hitting the API
+function resetSessionState(){
+  colInfo=[]; selFeatures.clear(); selTarget=null; lastResult=null;
+  document.getElementById('dataset-info').style.display='none';
+  document.getElementById('column-panel').style.display='none';
+  document.getElementById('analysis-panel').style.display='none';
+  const mlCard = document.getElementById('ml-result-card');
+  const clCard = document.getElementById('cluster-result-card');
+  if(mlCard) mlCard.style.display='none';
+  if(clCard) clCard.style.display='none';
+  document.getElementById('welcomeCard').style.display='block';
+  document.getElementById('colList').innerHTML='';
+  document.getElementById('selSummary').textContent='Select feature columns above';
+  pvRows=[]; pvFiltered=[]; pvCols=[]; pvVisible=[]; pvPage=1; pvSortCol=null;
+  const prevHead = document.getElementById('prevHead');
+  const prevBody = document.getElementById('prevBody');
+  const pgBtns   = document.getElementById('pg-btns');
+  const pgInfo   = document.getElementById('pg-info');
+  const prevStats = document.getElementById('prev-stats');
+  const prevSearch = document.getElementById('prevSearch');
+  if(prevHead)  prevHead.innerHTML='';
+  if(prevBody)  prevBody.innerHTML='';
+  if(pgBtns)    pgBtns.innerHTML='';
+  if(pgInfo)    pgInfo.textContent='—';
+  if(prevStats) prevStats.textContent='';
+  if(prevSearch) prevSearch.value='';
+}
+
 async function handleUploadFile(file){
-  showLoad('Reading dataset...','Parsing columns and data types');
-  const fd=new FormData();fd.append('file',file);
+  // Validate before sending
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['xlsx','xls','csv'].includes(ext)){
+    notif('Unsupported file type. Please upload .xlsx, .xls or .csv','error');
+    return;
+  }
+  if(file.size > 100 * 1024 * 1024){
+    notif('File too large — max 100MB','error');
+    return;
+  }
+
+  showLoad('Reading dataset…','Parsing columns and data types');
+  const fd = new FormData();
+  fd.append('file', file);
   try{
-    const r=await fetch('/api/upload/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd});
-    const d=await r.json();
-    if(d.success){onData(d);notif('Loaded '+d.rows+' rows × '+d.columns+' columns');}
-    else notif(d.error,'error');
-  }catch(e){notif('Upload failed: '+e.message,'error');}
-  hideLoad();
+    const r = await fetch('/api/upload/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRF()},
+      body: fd
+    });
+    if(!r.ok) throw new Error('Server error ' + r.status);
+    const d = await r.json();
+    if(d.success){ onData(d); notif('Loaded ' + d.rows + ' rows × ' + d.columns + ' columns'); }
+    else notif(d.error || 'Upload failed', 'error');
+  } catch(e){
+    notif('Upload failed: ' + e.message, 'error');
+  } finally {
+    hideLoad();
+  }
 }
 
 // ══ SQL ══
@@ -1469,6 +1692,11 @@ function onData(d){
   renderPreview(d.preview,d.rows,d.columns);
   fetchColStats();
   switchTab('analytics');
+  // extra panel updates
+  if(typeof populateSurvivalSelects==='function') populateSurvivalSelects();
+  if(typeof populateMultiTargetSelector==='function') populateMultiTargetSelector();
+  const ai=document.getElementById('compare-a-info');
+  if(ai) ai.textContent=`${d.file_name} — ${d.rows?.toLocaleString()} rows × ${d.columns} columns`;
 }
 
 // ══ COLUMNS ══
@@ -1641,43 +1869,34 @@ function quickAsk(msg){document.getElementById('chatInput').value=msg;sendChat()
 function handleChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
 
-// ══ CLEAR ══
+// ══ CLEAR (full — also hits API) ══
 async function clearSession(){
-  await post('/api/clear/',{});
+  try { await post('/api/clear/', {}); } catch(e){}
 
-  // ── reset dataset & ML state ──
-  colInfo=[];selFeatures.clear();selTarget=null;lastResult=null;
-  document.getElementById('dataset-info').style.display='none';
-  document.getElementById('column-panel').style.display='none';
-  document.getElementById('analysis-panel').style.display='none';
-  document.getElementById('ml-result-card').style.display='none';
-  document.getElementById('cluster-result-card').style.display='none';
-  document.getElementById('welcomeCard').style.display='block';
-  document.getElementById('colList').innerHTML='';
-  document.getElementById('selSummary').textContent='Select feature columns above';
-
-  // ── reset preview ──
-  pvRows=[];pvFiltered=[];pvCols=[];pvVisible=[];pvPage=1;pvSortCol=null;
-  document.getElementById('prevHead').innerHTML='';
-  document.getElementById('prevBody').innerHTML='';
-  document.getElementById('pg-btns').innerHTML='';
-  document.getElementById('pg-info').textContent='—';
-  document.getElementById('prev-stats').textContent='';
-  document.getElementById('prevSearch').value='';
+  resetSessionState();
 
   // ── reset medical imaging ──
-  imgFile=null;
-  imgType='xray';
-  document.getElementById('imgPreview').src='';
-  document.getElementById('imgWork').classList.remove('on');
-  document.getElementById('imgUpload').style.display='block';
-  document.getElementById('imgBody').innerHTML='<div style="text-align:center;padding:36px 16px;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔍</div><div style="font-size:12px">Upload a medical image to begin AI analysis</div></div>';
-  document.getElementById('imgQ').value='';
-  document.getElementById('imgLbl').textContent='X-RAY';
-  document.getElementById('imgBadge').textContent='X-RAY';
-  document.getElementById('imgFile').value='';
-  // reset scan type selection back to xray
-  document.querySelectorAll('.img-type-card').forEach(c=>c.classList.remove('sel'));
+  imgFile = null;
+  imgType = 'xray';
+  const imgPreview = document.getElementById('imgPreview');
+  const imgWork    = document.getElementById('imgWork');
+  const imgUpload  = document.getElementById('imgUpload');
+  const imgBody    = document.getElementById('imgBody');
+  const imgQ       = document.getElementById('imgQ');
+  const imgLbl     = document.getElementById('imgLbl');
+  const imgBadge   = document.getElementById('imgBadge');
+  const imgFileEl  = document.getElementById('imgFile');
+  if(imgPreview) imgPreview.src = '';
+  if(imgWork)    imgWork.classList.remove('on');
+  if(imgUpload)  imgUpload.style.display = 'block';
+  if(imgBody)    imgBody.innerHTML = '<div style="text-align:center;padding:36px 16px;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔍</div><div style="font-size:12px">Upload a medical image to begin AI analysis</div></div>';
+  if(imgQ)       imgQ.value = '';
+  if(imgLbl)     imgLbl.textContent = 'X-RAY';
+  if(imgBadge)   imgBadge.textContent = 'X-RAY';
+  // safely reset file input without triggering onchange
+  if(imgFileEl){ imgFileEl.onchange = null; imgFileEl.value = ''; imgFileEl.onchange = e => loadImgFile(e.target.files[0]); }
+
+  document.querySelectorAll('.img-type-card').forEach(c => c.classList.remove('sel'));
   document.querySelector('.img-type-card')?.classList.add('sel');
 
   switchTab('analytics');
@@ -1685,10 +1904,19 @@ async function clearSession(){
 }
 
 // ══ DRAG/DROP dataset ══
-const uz=document.getElementById('uploadZone');
-uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
-uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
-uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleUploadFile(f);});
+const uz = document.getElementById('uploadZone');
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag-over'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('drag-over'));
+uz.addEventListener('drop', e => {
+  e.preventDefault();
+  uz.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if(!f) return;
+  if(_uploadBusy){ notif('Upload already in progress…','error'); return; }
+  _uploadBusy = true;
+  resetSessionState();
+  handleUploadFile(f).finally(() => { _uploadBusy = false; });
+});
 
 // ══ MEDICAL IMAGING ══
 const IMG_LABELS={xray:'X-RAY',ct:'CT SCAN',sono:'SONOGRAPHY',mri:'MRI',retinal:'RETINAL',derma:'DERMATOLOGY'};
@@ -1696,18 +1924,33 @@ const SCAN_NAMES={xray:'chest X-ray / bone X-ray',ct:'CT scan',sono:'sonography 
 function selImgType(type,el){imgType=type;document.querySelectorAll('.img-type-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
 function changeImgType(type){imgType=type;const lbl=IMG_LABELS[type]||type.toUpperCase();document.getElementById('imgLbl').textContent=lbl;document.getElementById('imgBadge').textContent=lbl;if(imgFile)analyzeImg(imgFile,type);}
 function loadImgFile(file){
-  if(!file)return;imgFile=file;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    document.getElementById('imgPreview').src=e.target.result;
-    document.getElementById('imgUpload').style.display='none';
+  if(!file) return;
+  // validate size (10MB)
+  if(file.size > 10 * 1024 * 1024){ notif('Image too large — max 10MB','error'); return; }
+  if(!file.type.startsWith('image/')){ notif('Please upload an image file','error'); return; }
+  imgFile = file;
+  const reader = new FileReader();
+  reader.onerror = () => notif('Failed to read image file','error');
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    const b64 = dataUrl.split(',')[1]; // ← extract base64 ONCE here, avoids double-read
+    document.getElementById('imgPreview').src = dataUrl;
+    document.getElementById('imgUpload').style.display = 'none';
     document.getElementById('imgWork').classList.add('on');
-    const lbl=IMG_LABELS[imgType]||'SCAN';
-    document.getElementById('imgLbl').textContent=lbl;document.getElementById('imgBadge').textContent=lbl;
-    analyzeImg(file,imgType);
-  };reader.readAsDataURL(file);
+    const lbl = IMG_LABELS[imgType] || 'SCAN';
+    document.getElementById('imgLbl').textContent = lbl;
+    document.getElementById('imgBadge').textContent = lbl;
+    analyzeImgB64(b64, imgType, file.type); // pass b64 directly — no second FileReader
+  };
+  reader.readAsDataURL(file);
 }
-function reAnalyze(){if(imgFile)analyzeImg(imgFile,imgType);}
+function reAnalyze(){
+  if(!imgFile) return;
+  // re-read from stored file
+  const r = new FileReader();
+  r.onload = e => analyzeImgB64(e.target.result.split(',')[1], imgType, imgFile.type);
+  r.readAsDataURL(imgFile);
+}
 function clearImage(){
   imgFile=null;
   document.getElementById('imgPreview').src='';
@@ -1719,19 +1962,29 @@ function clearImage(){
   document.getElementById('imgLbl').textContent=IMG_LABELS[imgType]||'SCAN';
   notif('Image cleared');
 }
-async function analyzeImg(file,scanType){
-  const body=document.getElementById('imgBody');
-  body.innerHTML=`<div style="text-align:center;padding:28px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div><div style="margin-top:10px;font-size:11px;color:var(--text3)">Analyzing ${scanType.toUpperCase()} image...</div></div>`;
-  const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
-  const prompt=`You are an expert radiologist analyzing a ${SCAN_NAMES[scanType]||scanType}. Analyze this image and respond ONLY with valid JSON in this exact format:
+async function analyzeImg(file, scanType){
+  // wrapper for backward-compat (reAnalyze, changeImgType)
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => analyzeImgB64(e.target.result.split(',')[1], scanType, file.type);
+  r.readAsDataURL(file);
+}
+
+async function analyzeImgB64(b64, scanType, mimeType){
+  // main analysis — takes already-extracted base64, no FileReader needed
+  const body = document.getElementById('imgBody');
+  body.innerHTML = `<div style="text-align:center;padding:28px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div><div style="margin-top:10px;font-size:11px;color:var(--text3)">Analyzing ${scanType.toUpperCase()} image...</div></div>`;
+  const prompt = `You are an expert radiologist analyzing a ${SCAN_NAMES[scanType]||scanType}. Analyze this image and respond ONLY with valid JSON in this exact format:
 {"quality":{"rating":"Good","note":"brief note"},"findings":[{"type":"normal","label":"Finding Name","description":"detailed description","confidence":85}],"recommendation":"clinical recommendation","summary":"2-3 sentence summary"}
 Types must be: normal, warning, critical, or info. Include 3-6 findings. Educational use only.`;
   try{
-    const r=await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt,scan_type:scanType,mime_type:file.type})});
-    const d=await r.json();
-    if(d.success)renderFindings(d.result);
-    else body.innerHTML=`<div style="padding:14px"><div style="color:var(--danger);font-size:12px;margin-bottom:7px">⚠️ Analysis Error</div><div style="color:var(--text3);font-size:11px">${d.error}</div><div style="margin-top:10px;font-size:10px;color:var(--text3)">Ensure Groq API key is set and supports vision models.</div></div>`;
-  }catch(e){body.innerHTML=`<div style="padding:14px;color:var(--danger);font-size:12px">⚠️ Network error: ${e.message}</div>`;}
+    const r = await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt,scan_type:scanType,mime_type:mimeType||'image/jpeg'})});
+    const d = await r.json();
+    if(d.success) renderFindings(d.result);
+    else body.innerHTML = `<div style="padding:14px"><div style="color:var(--danger);font-size:12px;margin-bottom:7px">⚠️ Analysis Error</div><div style="color:var(--text3);font-size:11px">${d.error}</div><div style="margin-top:10px;font-size:10px;color:var(--text3)">Ensure Groq API key is set and supports vision models.</div></div>`;
+  }catch(e){
+    body.innerHTML = `<div style="padding:14px;color:var(--danger);font-size:12px">⚠️ Network error: ${e.message}</div>`;
+  }
 }
 function renderFindings(result){
   const body=document.getElementById('imgBody');
@@ -1749,17 +2002,17 @@ function renderFindings(result){
   body.innerHTML=h;
 }
 async function askImg(){
-  const q=document.getElementById('imgQ')?.value?.trim();
-  if(!q||!imgFile){notif('Upload an image first','error');return;}
-  const body=document.getElementById('imgBody');
-  body.innerHTML=`<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="text-align:center;padding:18px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div></div>`;
-  const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(imgFile);});
+  const q = document.getElementById('imgQ')?.value?.trim();
+  if(!q || !imgFile){ notif('Upload an image first','error'); return; }
+  const body = document.getElementById('imgBody');
+  body.innerHTML = `<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="text-align:center;padding:18px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div></div>`;
+  const b64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('read fail'));r.readAsDataURL(imgFile);});
   try{
-    const r=await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt:`You are an expert radiologist. For this ${imgType} medical image, answer: ${q}\n\nBe specific and clinically relevant. Educational purposes only.`,scan_type:imgType,mime_type:imgFile.type})});
-    const d=await r.json();
-    if(d.success)body.innerHTML=`<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${d.result.replace(/\n/g,'<br>')}</div><div style="margin-top:10px"><button onclick="reAnalyze()" style="background:transparent;border:1px solid var(--border);border-radius:7px;padding:5px 10px;color:var(--text3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back to full analysis</button></div><div class="img-disclaimer">⚠️ AI response for educational purposes only.</div>`;
-    else{notif(d.error||'Analysis failed','error');reAnalyze();}
-  }catch(e){notif('Network error: '+e.message,'error');reAnalyze();}
+    const r = await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt:`You are an expert radiologist. For this ${imgType} medical image, answer: ${q}\n\nBe specific and clinically relevant. Educational purposes only.`,scan_type:imgType,mime_type:imgFile.type})});
+    const d = await r.json();
+    if(d.success) body.innerHTML=`<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${d.result.replace(/\n/g,'<br>')}</div><div style="margin-top:10px"><button onclick="reAnalyze()" style="background:transparent;border:1px solid var(--border);border-radius:7px;padding:5px 10px;color:var(--text3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back to full analysis</button></div><div class="img-disclaimer">⚠️ AI response for educational purposes only.</div>`;
+    else{ notif(d.error||'Analysis failed','error'); reAnalyze(); }
+  }catch(e){ notif('Network error: '+e.message,'error'); reAnalyze(); }
   document.getElementById('imgQ').value='';
 }
 // drag/drop imaging
@@ -2171,16 +2424,7 @@ function populateMultiTargetSelector(){
   });
 }
 
-// ── Override onData to also populate new selects ──
-const _origOnData=onData;
-function onData(d){
-  _origOnData(d);
-  populateSurvivalSelects();
-  populateMultiTargetSelector();
-  // Update compare panel A info
-  const ai=document.getElementById('compare-a-info');
-  if(ai)ai.textContent=`${d.file_name} — ${d.rows?.toLocaleString()} rows × ${d.columns} columns`;
-}
+// onData override merged into original above
 
 // ══════════════════════════════════════════
 // 1. PATIENT DASHBOARD
@@ -2604,6 +2848,10 @@ async function runCoding(){
 // ══════════════════════════════════════════
 // ══ SESSION RESTORE ══
 (async()=>{
+  // Wire file input safely — inline onchange removed to prevent re-entrant firing
+  const fi = document.getElementById('fileInput');
+  if(fi) fi.onchange = e => handleUpload(e.target);
+
   const d=await fetch('/api/columns/').then(r=>r.json());
   if(d.success&&d.columns.length>0){
     colInfo=d.columns;

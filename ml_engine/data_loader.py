@@ -74,3 +74,49 @@ def dataframe_summary(df: pd.DataFrame) -> dict:
         'null_counts': {col: int(df[col].isnull().sum()) for col in df.columns},
         'preview': df.head(500).fillna('').to_dict(orient='records')
     }
+
+
+def get_column_stats(df) -> dict:
+    """
+    Returns per-column stats for the smart prediction form sliders.
+    Numeric cols: min, max, mean, median, step
+    Categorical cols: unique_values, most_common
+    """
+    import numpy as np
+    stats = {}
+    for col in df.columns:
+        series = df[col].dropna()
+        if len(series) == 0:
+            continue
+        if df[col].dtype in [np.float64, np.float32, np.int64, np.int32, np.int16, np.int8]:
+            col_min  = round(float(series.min()), 3)
+            col_max  = round(float(series.max()), 3)
+            col_mean = round(float(series.mean()), 3)
+            col_med  = round(float(series.median()), 3)
+            col_range = col_max - col_min
+            # sensible step size
+            if col_range == 0:
+                step = 1
+            elif col_range < 1:
+                step = round(col_range / 100, 6)
+            elif col_range < 10:
+                step = 0.1
+            elif col_range < 100:
+                step = 1
+            else:
+                step = round(col_range / 100)
+            stats[col] = {
+                'type': 'numeric',
+                'min': col_min, 'max': col_max,
+                'mean': col_mean, 'median': col_med,
+                'step': step,
+            }
+        else:
+            unique_vals = series.astype(str).unique().tolist()[:50]
+            most_common = series.astype(str).mode().iloc[0] if len(series) > 0 else ''
+            stats[col] = {
+                'type': 'categorical',
+                'unique_values': unique_vals,
+                'most_common': most_common,
+            }
+    return stats

@@ -1,1060 +1,668 @@
-# healthcare_app/views.py
-# Rebuilt to match your ACTUAL models.py schema exactly.
-# DataSession fields used: session_key, source_type, file_name,
-#   sql_connection, sql_query, columns_json, preview_json, data_json,
-#   row_count, col_count
-# AnalysisResult links via session FK + result_json
-# ChatMessage: session_key, role, message, context_type
-
-import json
-import logging
-import pandas as pd
-import numpy as np
-import json
-import logging
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
+import json, uuid, io
+from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from ml_engine import HealthcareMLEngine, GroqLLMClient, load_excel_file, load_from_sql
-from .models import DataSession, AnalysisResult, ChatMessage
+from ml_engine import (
+    HealthcareMLEngine, GroqLLMClient,
+    PatientDashboardEngine, MultiTargetComparator,
+    SurvivalAnalysisEngine, AlertRulesEngine,
+    DatasetComparator, ClinicalCodingAssistant,
+    ClinicalInsightsEngine, DataQualityEngine,
+    ReportGenerator, PrivacyEngine,
+    load_excel_file, load_from_sql, dataframe_summary, get_column_stats,
+)
+from .models import DataSession, ChatMessage, AnalysisResult
 
-logger = logging.getLogger(__name__)
+_dataframe_store = {}   # session_key → DataFrame
+_temp_df_store   = {}   # session_key → temp DataFrame (dataset compare)
 
+# ── helpers ─────────────────────────────────────────────────
+def _sk(request):
+    if 'healthcare_session' not in request.session:
+        request.session['healthcare_session'] = str(uuid.uuid4())
+    return request.session['healthcare_session']
 
-# ═══════════════════════════════════════════════════════════
-#  SESSION HELPERS  (uses columns_json / data_json — NO pickle)
-# ═══════════════════════════════════════════════════════════
+def _df(request):
+    return _dataframe_store.get(_sk(request))
 
-def _ensure_session(request):
-    if not request.session.session_key:
-        request.session.create()
-    return request.session.session_key
+def _engine(request):
+    df = _df(request)
+    if df is None:
+        return None, JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file first.'})
+    e = HealthcareMLEngine()
+    e.load_dataframe(df)
+    return e, None
 
+# ── AUTH ─────────────────────────────────────────────────────
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+    error = ''
+    if request.method == 'POST':
+        u = authenticate(request, username=request.POST.get('username',''),
+                         password=request.POST.get('password',''))
+        if u:
+            login(request, u); return redirect('index')
+        error = 'Invalid username or password'
+    return render(request, 'healthcare_app/login.html', {'error': error})
 
-def _get_session(request):
-    key = _ensure_session(request)
-    try:
-        return DataSession.objects.get(session_key=key)
-    except DataSession.DoesNotExist:
-        return None
+def logout_view(request):
+    logout(request); return redirect('login')
 
-
-def _get_df(request):
-    """Rebuild DataFrame from data_json stored in DataSession."""
-    session = _get_session(request)
-    if session is None:
-        return None
-    try:
-        rows = json.loads(session.data_json or '[]')
-        if not rows:
-            return None
-        return pd.DataFrame(rows)
-    except Exception as e:
-        logger.error("DataFrame rebuild error: %s", e)
-        return None
-
-
-def _save_session(request, df: pd.DataFrame, source_type: str,
-                  file_name: str = '', sql_connection: str = '', sql_query: str = ''):
-    """Save dataset into DataSession as JSON — no pickle, matches your real schema."""
-    key = _ensure_session(request)
-    engine = HealthcareMLEngine()
-    engine.load_dataframe(df)
-    col_info = engine.get_column_info()
-
-    # Store full data as JSON for ML rebuild; preview = first 500 rows
-    data_rows    = df.fillna('').to_dict(orient='records')
-    preview_rows = df.head(500).fillna('').to_dict(orient='records')
-
-    DataSession.objects.update_or_create(
-        session_key=key,
-        defaults={
-            'source_type':    source_type,
-            'file_name':      file_name,
-            'sql_connection': sql_connection,
-            'sql_query':      sql_query,
-            'columns_json':   json.dumps(col_info),
-            'preview_json':   json.dumps(preview_rows),
-            'data_json':      json.dumps(data_rows),
-            'row_count':      len(df),
-            'col_count':      len(df.columns),
-        }
-    )
-    return col_info, preview_rows
-
-
-def _get_col_stats(df: pd.DataFrame) -> dict:
-    """Per-column stats for sliders, smart filters, and prediction hints."""
-    stats = {}
-    for col in df.columns:
-        s = df[col].dropna()
-        if len(s) == 0:
-            continue
-        if pd.api.types.is_numeric_dtype(df[col]):
-            rng  = float(s.max() - s.min())
-            step = round(rng / 100, 4) if rng > 0 else 0.01
-            stats[col] = {
-                'type':   'numeric',
-                'min':    round(float(s.min()),    3),
-                'max':    round(float(s.max()),    3),
-                'mean':   round(float(s.mean()),   3),
-                'median': round(float(s.median()), 3),
-                'std':    round(float(s.std()),    3),
-                'step':   step,
-            }
-        else:
-            vc = df[col].value_counts()
-            stats[col] = {
-                'type':          'categorical',
-                'unique_values': s.astype(str).unique().tolist()[:30],
-                'most_common':   str(vc.idxmax()) if len(vc) else '',
-                'value_counts':  {str(k): int(v) for k, v in vc.head(20).items()},
-            }
-    return stats
-
-
-def _get_latest_result(session):
-    """Get most recent AnalysisResult for this session."""
-    try:
-        return session.results.latest('created_at')
-    except AnalysisResult.DoesNotExist:
-        return None
-
-
-def _get_llm():
-    return GroqLLMClient(
-        api_key=getattr(settings, 'GROQ_API_KEY', ''),
-        model=getattr(settings, 'GROQ_MODEL', 'llama-3.3-70b-versatile'),
-    )
-
-
-# ═══════════════════════════════════════════════════════════
-#  MAIN PAGE
-# ═══════════════════════════════════════════════════════════
-
+# ── MAIN ─────────────────────────────────────────────────────
+@login_required(login_url='/login/')
 def index(request):
-    _ensure_session(request)
-    return render(request, 'healthcare_app/index.html')
+    sk = _sk(request)
+    return render(request, 'healthcare_app/index.html', {
+        'data_session': DataSession.objects.filter(session_key=sk).first(),
+        'username': request.user.username,
+        'user_fullname': request.user.get_full_name() or request.user.username,
+    })
 
-
-# ═══════════════════════════════════════════════════════════
-#  UPLOAD / SQL
-# ═══════════════════════════════════════════════════════════
-
-@require_POST
+# ── UPLOAD ───────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
 def upload_file(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
     try:
         file = request.FILES.get('file')
         if not file:
-            return JsonResponse({'success': False, 'error': 'No file provided.'})
-
+            return JsonResponse({'success': False, 'error': 'No file provided'})
         df = load_excel_file(file)
-        col_info, preview = _save_session(
-            request, df,
-            source_type='excel',
-            file_name=file.name,
-        )
-        return JsonResponse({
-            'success':     True,
-            'rows':        len(df),
-            'columns':     len(df.columns),
-            'file_name':   file.name,
-            'column_info': col_info,
-            'preview':     preview,
+        summary = dataframe_summary(df)
+        _dataframe_store[sk] = df
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        col_info = e.get_column_info()
+        DataSession.objects.update_or_create(session_key=sk, defaults={
+            'source_type': 'excel', 'file_name': file.name,
+            'columns_json': json.dumps(col_info), 'row_count': summary['rows'],
+            'col_count': summary['columns'], 'preview_json': json.dumps(summary['preview']),
         })
-    except Exception as e:
-        logger.error("Upload error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'success': True, 'file_name': file.name,
+                             'rows': summary['rows'], 'columns': summary['columns'],
+                             'column_info': col_info, 'preview': summary['preview']})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
+# ── UPLOAD TEMP (dataset compare) ────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def upload_temp(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
+    try:
+        file = request.FILES.get('file')
+        if not file:
+            return JsonResponse({'success': False, 'error': 'No file'})
+        df = load_excel_file(file)
+        summary = dataframe_summary(df)
+        _temp_df_store[sk] = df
+        return JsonResponse({'success': True, 'file_name': file.name,
+                             'rows': summary['rows'], 'columns': summary['columns']})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-@require_POST
+# ── SQL ───────────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
 def connect_sql(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
     try:
-        data     = json.loads(request.body)
-        conn_str = data.get('connection_string', '').strip()
-        query    = data.get('query', '').strip()
-        if not conn_str or not query:
-            return JsonResponse({'success': False, 'error': 'connection_string and query are required.'})
-
-        df = load_from_sql(conn_str, query)
-        col_info, preview = _save_session(
-            request, df,
-            source_type='sql',
-            file_name='SQL Query',
-            sql_connection=conn_str,
-            sql_query=query,
-        )
-        return JsonResponse({
-            'success':     True,
-            'rows':        len(df),
-            'columns':     len(df.columns),
-            'file_name':   'SQL Query',
-            'column_info': col_info,
-            'preview':     preview,
+        data = json.loads(request.body)
+        df = load_from_sql(data.get('connection_string',''), data.get('query',''))
+        summary = dataframe_summary(df)
+        _dataframe_store[sk] = df
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        col_info = e.get_column_info()
+        DataSession.objects.update_or_create(session_key=sk, defaults={
+            'source_type': 'sql', 'file_name': 'SQL Query',
+            'columns_json': json.dumps(col_info), 'row_count': summary['rows'],
+            'col_count': summary['columns'], 'preview_json': json.dumps(summary['preview']),
         })
-    except Exception as e:
-        logger.error("SQL error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'success': True, 'file_name': 'SQL Query',
+                             'rows': summary['rows'], 'columns': summary['columns'],
+                             'column_info': col_info, 'preview': summary['preview']})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-
-# ═══════════════════════════════════════════════════════════
-#  COLUMNS & STATS  (dynamic column selection)
-# ═══════════════════════════════════════════════════════════
-
-@require_GET
-def get_columns(request):
-    """
-    Returns all columns from current session.
-    The frontend uses this to build the dynamic column selector —
-    user clicks once = Feature, twice = Target.
-    Also auto-detects col_type (numeric/categorical) for smart UI hints.
-    """
-    try:
-        session = _get_session(request)
-        if session is None:
-            return JsonResponse({'success': False, 'columns': [], 'rows': 0})
-
-        col_info = session.get_columns()
-        preview  = session.get_preview()
-
-        return JsonResponse({
-            'success':   True,
-            'columns':   col_info,       # [{name, col_type, dtype, unique_values, null_count}]
-            'rows':      session.row_count,
-            'file_name': session.file_name,
-            'preview':   preview,
-        })
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e), 'columns': [], 'rows': 0})
-
-
-@require_GET
-def get_column_stats(request):
-    """
-    Returns per-column stats for the prediction form sliders and
-    smart filter dropdowns (min/max/mean/median for numeric,
-    unique values + counts for categorical).
-    """
-    try:
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'stats': {}})
-        return JsonResponse({'success': True, 'stats': _get_col_stats(df)})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e), 'stats': {}})
-
-
-@require_POST
-def filter_data(request):
-    """
-    Dynamic column filtering — apply range/value filters and return
-    filtered preview + updated stats for the UI.
-
-    POST body:
-    {
-        "filters": {
-            "age":     {"type": "numeric",     "min": 20, "max": 60},
-            "gender":  {"type": "categorical", "values": ["Male"]},
-            "glucose": {"type": "numeric",     "min": 80, "max": 200}
-        },
-        "page": 1,
-        "page_size": 25
-    }
-    """
-    try:
-        data     = json.loads(request.body)
-        filters  = data.get('filters', {})
-        page     = max(1, int(data.get('page', 1)))
-        pagesize = min(200, int(data.get('page_size', 25)))
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        filtered = df.copy()
-        for col, rule in filters.items():
-            if col not in filtered.columns:
-                continue
-            if rule.get('type') == 'numeric':
-                lo, hi = rule.get('min'), rule.get('max')
-                if lo is not None:
-                    filtered = filtered[pd.to_numeric(filtered[col], errors='coerce') >= float(lo)]
-                if hi is not None:
-                    filtered = filtered[pd.to_numeric(filtered[col], errors='coerce') <= float(hi)]
-            elif rule.get('type') == 'categorical':
-                vals = [str(v) for v in rule.get('values', [])]
-                if vals:
-                    filtered = filtered[filtered[col].astype(str).isin(vals)]
-
-        total   = len(filtered)
-        start   = (page - 1) * pagesize
-        page_df = filtered.iloc[start:start + pagesize]
-
-        return JsonResponse({
-            'success':       True,
-            'total_rows':    total,
-            'page':          page,
-            'page_size':     pagesize,
-            'preview':       page_df.fillna('').to_dict(orient='records'),
-            'stats':         _get_col_stats(filtered),
-        })
-    except Exception as e:
-        logger.error("Filter error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def clear_session(request):
-    try:
-        session = _get_session(request)
-        if session:
-            session.delete()
-        ChatMessage.objects.filter(session_key=request.session.session_key).delete()
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-# ═══════════════════════════════════════════════════════════
-#  ML ANALYSIS
-#  Auto-selects task type based on target column type:
-#    numeric target   → Regression
-#    categorical tgt  → Classification
-#    no target        → Clustering
-# ═══════════════════════════════════════════════════════════
-
-@require_POST
+# ── RUN ANALYSIS ─────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
 def run_analysis(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
     try:
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        target_col   = data.get('target_column', '')
-        task_type    = data.get('task_type', 'auto')
-        model_type   = data.get('model_type', 'random_forest')
-        n_clusters   = int(data.get('n_clusters', 3))
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded. Please upload a file or connect SQL.'})
-        if not feature_cols:
-            return JsonResponse({'success': False, 'error': 'Select at least one feature column.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-
-        # ── Auto-select task ──
-        if task_type == 'clustering' or not target_col:
-            task_type = 'clustering'
-            result    = engine.run_clustering(feature_cols, n_clusters=n_clusters)
-        else:
-            if task_type == 'auto':
-                task_type = engine.auto_detect_task(target_col)
-            if task_type == 'regression':
-                result = engine.run_regression(feature_cols, target_col, model_type)
-            else:
-                result = engine.run_classification(feature_cols, target_col, model_type)
-
-        # ── Normalise for frontend chart ──
-        if result.get('task') in ('regression', 'classification'):
-            preds   = result.pop('predictions', [])
-            actuals = result.pop('actuals', [])
-            result['sample_predictions'] = [
-                {'actual': a, 'predicted': p}
-                for a, p in zip(actuals[:50], preds[:50])
-            ]
-            result['total_rows'] = len(df)
-            result['features']   = feature_cols
-            result['target']     = target_col
-            m = result['metrics']
-            if result['task'] == 'regression':
-                m['r2_percent'] = round(m.get('r2', 0) * 100, 1)
-            else:
-                m['accuracy_percent'] = round(m.get('accuracy', 0) * 100, 1)
-        else:
-            result['total_rows'] = len(df)
-            result['features']   = feature_cols
-            result['cluster_distribution'] = [
-                {'cluster': f"Cluster {cs['cluster']}", 'count': cs['size']}
-                for cs in result.get('cluster_stats', [])
-            ]
-
-        # ── Save result linked to session FK ──
-        session = _get_session(request)
-        if session:
-            AnalysisResult.objects.create(
-                session=session,
-                task_type=result.get('task', task_type),
-                feature_columns=','.join(feature_cols),
-                target_column=target_col,
-                model_type=model_type,
-                result_json=json.dumps(result),
-            )
-
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Analysis error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def predict(request):
-    try:
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        target_col   = data.get('target_column', '')
-        input_values = data.get('input_values', {})
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-        prediction = engine.predict_new_input(feature_cols, target_col, input_values)
-        return JsonResponse({'success': True, 'prediction': prediction})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-# ═══════════════════════════════════════════════════════════
-#  LLM CHAT
-#  Supports natural language queries like:
-#  "What is the risk of diabetes for a 45-year-old with high BP?"
-#  The LLM gets full dataset context + latest ML result.
-#  Works with Groq (default), Ollama (local), Hugging Face.
-# ═══════════════════════════════════════════════════════════
-
-@require_POST
-def chat(request):
-    try:
-        data    = json.loads(request.body)
-        message = data.get('message', '').strip()
-        if not message:
-            return JsonResponse({'success': False, 'error': 'Empty message.'})
-
-        session = _get_session(request)
-        dataset_context = None
-        ml_result       = None
-
-        # Build dataset context from stored JSON (no need to reload file)
-        if session:
-            col_info = session.get_columns()
-            preview  = json.loads(session.preview_json or '[]')[:5]
-            dataset_context = {
-                'file_name':   session.file_name,
-                'rows':        session.row_count,
-                'columns':     [c['name'] for c in col_info],
-                'column_types': {c['name']: c['col_type'] for c in col_info},
-                'preview':     preview,
-            }
-            # Latest ML result for context
-            ar = _get_latest_result(session)
-            if ar:
-                ml_result = ar.get_result()
-
-        llm    = _get_llm()
-        result = llm.ask(message, dataset_context=dataset_context, ml_result=ml_result)
-
-        # Save to chat history
-        key = request.session.session_key
-        ChatMessage.objects.create(session_key=key, role='user',  message=message, context_type='dataset' if dataset_context else 'general')
-        if result.get('success'):
-            ChatMessage.objects.create(session_key=key, role='ai', message=result['message'], context_type='llm')
-
-        return JsonResponse(result)
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-# ═══════════════════════════════════════════════════════════
-#  MEDICAL IMAGING
-# ═══════════════════════════════════════════════════════════
-
-@require_POST
-def analyze_image(request):
-    try:
-        data      = json.loads(request.body)
-        image_b64 = data.get('image_base64', '')
-        prompt    = data.get('prompt', '')
-        mime_type = data.get('mime_type', 'image/jpeg')
-
-        if not image_b64:
-            return JsonResponse({'success': False, 'error': 'No image data.'})
-
-        api_key = getattr(settings, 'GROQ_API_KEY', '')
-        if not api_key:
-            return JsonResponse({'success': False, 'error': 'GROQ_API_KEY not set in settings.py.'})
-
-        import requests as req
-        models_list = [
-            'meta-llama/llama-4-scout-17b-16e-instruct',
-            'llama-3.2-11b-vision-preview',
-            'llama-3.2-90b-vision-preview',
-        ]
-        payload = {
-            'messages': [{
-                'role': 'user',
-                'content': [
-                    {'type': 'image_url', 'image_url': {'url': f'data:{mime_type};base64,{image_b64}'}},
-                    {'type': 'text', 'text': prompt},
-                ],
-            }],
-            'max_tokens': 1024,
-            'temperature': 0.3,
-        }
-        last_error = 'Vision model unavailable.'
-        for model in models_list:
-            payload['model'] = model
-            try:
-                r = req.post(
-                    'https://api.groq.com/openai/v1/chat/completions',
-                    headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-                    json=payload, timeout=45,
-                )
-                if r.status_code == 200:
-                    return JsonResponse({'success': True, 'result': r.json()['choices'][0]['message']['content']})
-                elif r.status_code != 429:
-                    last_error = r.json().get('error', {}).get('message', f'HTTP {r.status_code}')
-            except Exception as e:
-                last_error = str(e)
-        return JsonResponse({'success': False, 'error': last_error})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-# ═══════════════════════════════════════════════════════════
-#  4 NEW AI ENDPOINTS
-# ═══════════════════════════════════════════════════════════
-
-@require_POST
-def run_explainability(request):
-    """🧠 XAI — LIME-style per-feature contribution + global importance."""
-    try:
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        target_col   = data.get('target_column', '')
-        sample_index = int(data.get('sample_index', 0))
-        model_type   = data.get('model_type', 'random_forest')
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not feature_cols or not target_col:
-            return JsonResponse({'success': False, 'error': 'Select feature columns and a target column first.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-        result = engine.run_explainability(
-            feature_cols=feature_cols,
-            target_col=target_col,
-            model_type=model_type,
-            sample_index=sample_index,
-        )
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("XAI error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def run_risk_engine(request):
-    """⚠️ Threshold alerts, anomaly detection, sudden change detection."""
-    try:
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        target_col   = data.get('target_column', '') or None
-        thresholds   = data.get('thresholds', None)
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not feature_cols:
-            return JsonResponse({'success': False, 'error': 'Select feature columns first.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-        result = engine.run_risk_engine(
-            feature_cols=feature_cols,
-            target_col=target_col,
-            thresholds=thresholds,
-        )
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Risk error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def run_trend_analysis(request):
-    """📈 Linear trends, moving averages, forecasting, correlation matrix."""
-    try:
-        data           = json.loads(request.body)
-        feature_cols   = data.get('feature_columns', [])
-        time_col       = data.get('time_col', None)
-        target_col     = data.get('target_column', None)
-        forecast_steps = int(data.get('forecast_steps', 10))
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not feature_cols:
-            return JsonResponse({'success': False, 'error': 'Select feature columns first.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-        result = engine.run_trend_analysis(
-            feature_cols=feature_cols,
-            time_col=time_col,
-            target_col=target_col,
-            forecast_steps=forecast_steps,
-        )
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Trends error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def run_patient_similarity(request):
-    """👥 K-Nearest Neighbours patient similarity with cohort comparison."""
-    try:
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        query_index  = int(data.get('query_index', 0))
-        query_values = data.get('query_values', None)
-        n_similar    = int(data.get('n_similar', 5))
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not feature_cols:
-            return JsonResponse({'success': False, 'error': 'Select feature columns first.'})
-
-        engine = HealthcareMLEngine()
-        engine.load_dataframe(df)
-        result = engine.run_patient_similarity(
-            feature_cols=feature_cols,
-            query_index=query_index,
-            query_values=query_values,
-            n_similar=n_similar,
-        )
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Similarity error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-# ═══════════════════════════════════════════════════════════
-#  NEW FEATURE ENDPOINTS
-#  1. Clinical Insights   /api/clinical-insights/
-#  2. Data Quality        /api/data-quality/
-#  3. Generate Report     /api/generate-report/
-#  4. Privacy Check       /api/privacy-check/
-#  4b. Anonymise          /api/anonymise/
-# ═══════════════════════════════════════════════════════════
-
-from ml_engine.engine_extensions import (
-    ClinicalInsightsEngine,
-    DataQualityEngine,
-    ReportGenerator,
-    PrivacyEngine,
-)
-
-
-@require_POST
-def clinical_insights(request):
-    """
-    🤖 Auto Clinical Insights — LLM narrative summary + chart interpretation.
-    POST body: { "feature_columns": [...], "target_column": "col" }
-    Uses the latest ML result from session. Falls back to rule-based if no LLM key.
-    """
-    try:
-        session = _get_session(request)
-        if session is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        ar = _get_latest_result(session)
-        if ar is None:
-            return JsonResponse({'success': False, 'error': 'Run an ML analysis first (Analytics tab).'})
-
-        ml_result = ar.get_result()
-        col_info  = session.get_columns()
-
-        engine  = ClinicalInsightsEngine()
-        llm     = _get_llm()
-        insights = engine.generate_narrative(ml_result, col_info, llm_client=llm)
-
-        return JsonResponse({'success': True, 'insights': insights})
-    except Exception as e:
-        logger.error("Insights error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_GET
-def data_quality(request):
-    """
-    🧪 Data Quality & Bias Detection.
-    GET — no body needed, runs on current session dataset.
-    Returns missing data report, outlier detection, class imbalance, overall score.
-    """
-    try:
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        engine = DataQualityEngine()
-        result = engine.run_quality_check(df)
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Quality error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def generate_report(request):
-    """
-    📄 Generate HTML Clinical Report (printable as PDF from browser).
-    POST body: {} — uses current session data + latest ML result automatically.
-    Returns { success, html } — the frontend opens in a new tab for print/save.
-    """
-    try:
-        session = _get_session(request)
-        if session is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        ar = _get_latest_result(session)
-        if ar is None:
-            return JsonResponse({'success': False, 'error': 'Run an ML analysis first to generate a report.'})
-
-        ml_result = ar.get_result()
-        col_info  = session.get_columns()
-        df        = _get_df(request)
-
-        # Generate insights (rule-based fallback if no LLM)
-        insights_engine = ClinicalInsightsEngine()
-        llm      = _get_llm()
-        insights = insights_engine.generate_narrative(ml_result, col_info, llm_client=llm)
-
-        # Run quality check
-        quality = DataQualityEngine().run_quality_check(df) if df is not None else {
-            'overall_score': 0, 'grade': '?', 'issues': [], 'warnings': [],
-            'recommendation': 'No data available for quality check.',
-        }
-
-        # Generate HTML report
-        session_info = {
-            'file_name': session.file_name,
-            'row_count': session.row_count,
-            'col_count': session.col_count,
-        }
-        reporter = ReportGenerator()
-        html     = reporter.generate_html_report(session_info, ml_result, insights, quality)
-
-        return JsonResponse({'success': True, 'html': html})
-    except Exception as e:
-        logger.error("Report error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_GET
-def privacy_check(request):
-    """
-    🔒 Privacy & PHI Detection.
-    GET — scans current dataset for PHI columns, returns compliance score + recommendations.
-    """
-    try:
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        engine = PrivacyEngine()
-        result = engine.run_privacy_check(df)
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Privacy check error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def anonymise_data(request):
-    """
-    🔐 Anonymise PHI columns and re-save the session dataset.
-    POST body: {
-        "columns":  ["name", "email"],   -- columns to anonymise
-        "method":   "hash"               -- hash | mask | drop | pseudonymise
-    }
-    After anonymisation the session dataset is updated so all subsequent
-    analysis uses the clean anonymised data.
-    """
-    try:
-        data    = json.loads(request.body)
-        columns = data.get('columns', [])
-        method  = data.get('method', 'hash')
-
-        if method not in ('hash', 'mask', 'drop', 'pseudonymise'):
-            return JsonResponse({'success': False, 'error': f'Unknown method: {method}. Use hash/mask/drop/pseudonymise.'})
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not columns:
-            return JsonResponse({'success': False, 'error': 'Specify at least one column to anonymise.'})
-
-        engine          = PrivacyEngine()
-        anon_df, audit  = engine.anonymise(df, columns, method=method)
-
-        # Re-save anonymised dataset back into session
-        session = _get_session(request)
-        _save_session(
-            request, anon_df,
-            source_type=session.source_type if session else 'excel',
-            file_name=(session.file_name if session else 'dataset') + ' [anonymised]',
-        )
-
-        return JsonResponse({
-            'success':       True,
-            'audit_log':     audit,
-            'columns_after': list(anon_df.columns),
-            'rows':          len(anon_df),
-            'message':       f"{len(audit)} column(s) anonymised using '{method}' method. Dataset updated.",
-        })
-    except Exception as e:
-        logger.error("Anonymise error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-@require_POST
-def patient_dashboard(request):
-    """
-    📊 Unified Patient Dashboard
-    POST body: {
-        "row_index": 0,
-        "feature_columns": [...],
-        "target_column": "col"   # optional
-    }
-    """
-    try:
-        from ml_engine.engine_features2 import PatientDashboardEngine
-        from ml_engine import HealthcareMLEngine
-
-        data         = json.loads(request.body)
-        row_index    = int(data.get('row_index', 0))
-        feature_cols = data.get('feature_columns', [])
-        target_col   = data.get('target_column', '') or None
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        ml_engine = None
-        if target_col and feature_cols:
-            ml_engine = HealthcareMLEngine()
-            ml_engine.load_dataframe(df)
-
-        engine = PatientDashboardEngine()
-        result = engine.get_patient_profile(
-            df, row_index, feature_cols, target_col, ml_engine
-        )
-        if 'error' in result:
-            return JsonResponse({'success': False, 'error': result['error']})
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Patient dashboard error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def multi_target_compare(request):
-    """
-    🎯 Multi-Target Prediction Comparator
-    POST body: {
-        "feature_columns": [...],
-        "target_columns":  ["col1", "col2", "col3"],
-        "model_type": "random_forest"
-    }
-    """
-    try:
-        from ml_engine.engine_features2 import MultiTargetComparator
-
-        data         = json.loads(request.body)
-        feature_cols = data.get('feature_columns', [])
-        target_cols  = data.get('target_columns', [])
-        model_type   = data.get('model_type', 'random_forest')
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-        if not feature_cols:
-            return JsonResponse({'success': False, 'error': 'Select feature columns.'})
-        if len(target_cols) < 2:
-            return JsonResponse({'success': False, 'error': 'Select at least 2 target columns to compare.'})
-
-        engine = MultiTargetComparator()
-        result = engine.compare_targets(df, feature_cols, target_cols, model_type)
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Multi-target error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def survival_analysis(request):
-    """
-    📈 Kaplan-Meier Survival Analysis
-    POST body: {
-        "duration_col": "days_to_event",
-        "event_col":    "died",
-        "group_col":    "treatment_group"  # optional
-    }
-    """
-    try:
-        from ml_engine.engine_features2 import SurvivalAnalysisEngine
-
-        data         = json.loads(request.body)
-        duration_col = data.get('duration_col', '')
-        event_col    = data.get('event_col', '')
-        group_col    = data.get('group_col', None)
-
-        if not duration_col or not event_col:
-            return JsonResponse({'success': False, 'error': 'duration_col and event_col are required.'})
-
-        df = _get_df(request)
-        if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        engine = SurvivalAnalysisEngine()
-        result = engine.run_kaplan_meier(df, duration_col, event_col, group_col)
-        if 'error' in result:
-            return JsonResponse({'success': False, 'error': result['error']})
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Survival error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
-def evaluate_alert_rules(request):
-    """
-    🔔 Evaluate custom clinical alert rules
-    POST body: {
-        "rules": [
-            {"name":"High Glucose","column":"glucose","operator":">","value":140,"severity":"critical","action":"Review now"},
-            ...
-        ]
-    }
-    """
-    try:
-        from ml_engine.engine_features2 import AlertRulesEngine
-
         data  = json.loads(request.body)
-        rules = data.get('rules', [])
-
-        df = _get_df(request)
+        feats = data.get('feature_columns', [])
+        tgt   = data.get('target_column', '')
+        task  = data.get('task_type', 'auto')
+        model = data.get('model_type', 'random_forest')
+        k     = int(data.get('n_clusters', 3))
+        df = _df(request)
         if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
-
-        engine = AlertRulesEngine()
-        result = engine.evaluate_rules(df, rules)
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        if not feats:
+            return JsonResponse({'success': False, 'error': 'Select at least one feature column'})
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        if task == 'auto' and tgt:
+            task = e.auto_detect_task(tgt)
+        if task == 'clustering' or not tgt:
+            result = e.run_clustering(feats, n_clusters=k)
+        elif task == 'regression':
+            result = e.run_regression(feats, tgt, model)
+        elif task == 'classification':
+            result = e.run_classification(feats, tgt, model)
+        else:
+            result = e.run_regression(feats, tgt, model)
+        db_s = DataSession.objects.filter(session_key=sk).first()
+        if db_s:
+            AnalysisResult.objects.create(session=db_s, task_type=task,
+                feature_columns=','.join(feats), target_column=tgt or '',
+                model_type=model, result_json=json.dumps(result))
         return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Alert rules error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
+# ── PREDICT ───────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def predict_input(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        e, err = _engine(request)
+        if err: return err
+        result = e.predict_new_input(data.get('feature_columns',[]),
+                                     data.get('target_column',''),
+                                     data.get('input_values',{}),
+                                     data.get('model_type','random_forest'))
+        return JsonResponse({'success': True, 'prediction': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-@require_GET
+# ── XAI EXPLAINABILITY ────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def run_explainability(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        e, err = _engine(request)
+        if err: return err
+        result = e.explain_prediction(data.get('feature_columns',[]),
+                                      data.get('target_column',''),
+                                      data.get('input_values',{}))
+        return JsonResponse({'success': True, 'explanation': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── PATIENT DASHBOARD ─────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def patient_dashboard(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data  = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        eng = PatientDashboardEngine()
+        result = eng.get_patient_profile(
+            df,
+            row_index   = int(data.get('row_index', 0)),
+            feature_cols= data.get('feature_columns', []),
+            target_col  = data.get('target_column','') or None,
+            ml_engine   = e,
+        )
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── MULTI-TARGET COMPARE ──────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def multi_target_compare(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data  = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = MultiTargetComparator()
+        result = eng.compare_targets(df,
+                                     feature_cols  = data.get('feature_columns',[]),
+                                     target_cols   = data.get('target_columns',[]),
+                                     model_type    = data.get('model_type','random_forest'))
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── SURVIVAL ANALYSIS ─────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def survival_analysis(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = SurvivalAnalysisEngine()
+        result = eng.run_kaplan_meier(df,
+                                      duration_col  = data.get('duration_col',''),
+                                      event_col     = data.get('event_col',''),
+                                      group_col     = data.get('group_col') or None)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── ALERT RULES ───────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def evaluate_alert_rules(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = AlertRulesEngine()
+        result = eng.evaluate_rules(df, rules=data.get('rules',[]))
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+@csrf_exempt
+@login_required(login_url='/login/')
 def suggest_alert_rules(request):
-    """
-    🔔 Auto-suggest alert rules based on column names.
-    GET — no body needed.
-    """
     try:
-        from ml_engine.engine_features2 import AlertRulesEngine
-
-        df = _get_df(request)
+        df = _df(request)
         if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = AlertRulesEngine()
+        rules = eng.suggest_rules(df)
+        return JsonResponse({'success': True, 'rules': rules})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-        engine  = AlertRulesEngine()
-        rules   = engine.suggest_rules(df)
-        return JsonResponse({'success': True, 'suggestions': rules})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-@require_POST
+# ── DATASET COMPARE ───────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
 def compare_datasets(request):
-    """
-    🌐 Dataset Comparator (before/after, control/treatment)
-    POST body: {
-        "data_b": [...],      # second dataset as list of row dicts
-        "name_a": "Before",
-        "name_b": "After"
-    }
-    Note: Dataset A is always the current session dataset.
-    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
     try:
-        import pandas as pd
-        from ml_engine.engine_features2 import DatasetComparator
-
-        data   = json.loads(request.body)
-        name_a = data.get('name_a', 'Dataset A')
-        name_b = data.get('name_b', 'Dataset B')
-        rows_b = data.get('data_b', [])
-
-        df_a = _get_df(request)
-        if df_a is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded for Dataset A.'})
-        if not rows_b:
-            return JsonResponse({'success': False, 'error': 'data_b is empty — provide second dataset rows.'})
-
-        df_b = pd.DataFrame(rows_b)
-        engine = DatasetComparator()
-        result = engine.compare(df_a, df_b, name_a, name_b)
-        if 'error' in result:
-            return JsonResponse({'success': False, 'error': result['error']})
+        data = json.loads(request.body)
+        df_a = _dataframe_store.get(sk)
+        df_b = _temp_df_store.get(sk)
+        if df_a is None or df_b is None:
+            return JsonResponse({'success': False, 'error': 'Upload both datasets first'})
+        eng = DatasetComparator()
+        result = eng.compare(df_a, df_b,
+                             feature_cols=data.get('feature_columns',[]),
+                             label='Dataset A vs Dataset B')
         return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Dataset compare error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-
-@require_GET
-def clinical_coding(request):
-    """
-    💊 Clinical Coding Assistant — ICD-10 detection + drug interaction flags.
-    GET — scans current session dataset.
-    Optional query param: ?row_index=0 to include specific patient context.
-    """
+# ── PATIENT SIMILARITY ────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def run_patient_similarity(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
     try:
-        from ml_engine.engine_features2 import ClinicalCodingAssistant
+        data = json.loads(request.body)
+        e, err = _engine(request)
+        if err: return err
+        result = e.find_similar_patients(
+            data.get('feature_columns',[]),
+            data.get('query_values',{}),
+            data.get('n_similar', 5))
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-        df      = _get_df(request)
-        session = _get_session(request)
+# ── RISK ENGINE ───────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def run_risk_engine(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        e, err = _engine(request)
+        if err: return err
+        result = e.run_risk_analysis(data.get('feature_columns',[]))
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── TREND ANALYSIS ────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def run_trend_analysis(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        e, err = _engine(request)
+        if err: return err
+        result = e.run_trend_analysis(data.get('value_col',''),
+                                      data.get('forecast_periods', 10))
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── CLINICAL INSIGHTS ─────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def clinical_insights(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
+    try:
+        data = json.loads(request.body)
+        df = _df(request)
         if df is None:
-            return JsonResponse({'success': False, 'error': 'No dataset loaded.'})
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        col_info = e.get_column_info()
+        latest = AnalysisResult.objects.filter(
+            session__session_key=sk).order_by('-created_at').first()
+        ml_result = latest.get_result() if latest else None
+        llm = GroqLLMClient(api_key=settings.GROQ_API_KEY, model=settings.GROQ_MODEL)
+        eng = ClinicalInsightsEngine()
+        result = eng.generate_narrative(ml_result or {}, col_info, llm_client=llm)
+        return JsonResponse({'success': True, 'insights': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-        col_info = session.get_columns() if session else []
+# ── DATA QUALITY ──────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def data_quality(request):
+    try:
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = DataQualityEngine()
+        result = eng.run_quality_check(df)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-        # Optional: get a specific patient row for context
-        row_index = request.GET.get('row_index')
-        patient_row = None
-        if row_index is not None:
+# ── PRIVACY CHECK ─────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def privacy_check(request):
+    try:
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = PrivacyEngine()
+        result = eng.run_privacy_check(df)
+        return JsonResponse({'success': True, 'result': result})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── ANONYMISE ─────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def anonymise(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
+    try:
+        data = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        eng = PrivacyEngine()
+        df_anon, summary = eng.anonymise(df,
+                                         phi_columns=data.get('columns',[]),
+                                         method=data.get('method','mask'))
+        _dataframe_store[sk] = df_anon
+        e2 = HealthcareMLEngine(); e2.load_dataframe(df_anon)
+        col_info = e2.get_column_info()
+        s = dataframe_summary(df_anon)
+        DataSession.objects.filter(session_key=sk).update(
+            columns_json=json.dumps(col_info),
+            preview_json=json.dumps(s['preview']))
+        return JsonResponse({'success': True, 'masked_columns': summary,
+                             'rows': len(df_anon), 'column_info': col_info,
+                             'preview': s['preview'][:20]})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── CLINICAL CODING ───────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def clinical_coding(request):
+    try:
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        e = HealthcareMLEngine(); e.load_dataframe(df)
+        col_info = e.get_column_info()
+        llm = GroqLLMClient(api_key=settings.GROQ_API_KEY, model=settings.GROQ_MODEL)
+        eng = ClinicalCodingAssistant()
+        icd  = eng.detect_icd_codes(df)
+        drug = eng.check_drug_interactions(df)
+        advice = eng.get_llm_coding_advice(df, col_info, llm)
+        return JsonResponse({'success': True, 'icd_codes': icd,
+                             'drug_interactions': drug, 'llm_advice': advice})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── PDF REPORT ────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def generate_report(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
+    try:
+        df = _df(request)
+        db_s = DataSession.objects.filter(session_key=sk).first()
+        latest = AnalysisResult.objects.filter(
+            session__session_key=sk).order_by('-created_at').first()
+        ml_result = latest.get_result() if latest else {}
+        session_info = {
+            'file_name': db_s.file_name if db_s else 'Unknown',
+            'rows': db_s.row_count if db_s else 0,
+            'username': request.user.username,
+            'generated_at': __import__('datetime').datetime.now().strftime('%d %b %Y %H:%M'),
+        }
+        eng = ReportGenerator()
+        e = HealthcareMLEngine()
+        if df is not None:
+            e.load_dataframe(df)
+        col_info = e.get_column_info() if df is not None else []
+        html = eng.generate_html_report(session_info, ml_result, col_info, df)
+        # Try PDF via reportlab
+        try:
+            import subprocess, sys
+            from reportlab.lib.pagesizes import A4
+            buf = io.BytesIO()
+            # Simple fallback: return HTML as downloadable if PDF too complex
+            response = HttpResponse(html, content_type='text/html')
+            response['Content-Disposition'] = 'attachment; filename="HealthAI_Report.html"'
+            return response
+        except ImportError:
+            response = HttpResponse(html, content_type='text/html')
+            response['Content-Disposition'] = 'attachment; filename="HealthAI_Report.html"'
+            return response
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── CHAT ─────────────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def chat(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    sk = _sk(request)
+    try:
+        data = json.loads(request.body)
+        msg  = data.get('message','').strip()
+        if not msg:
+            return JsonResponse({'success': False, 'error': 'Empty message'})
+        ChatMessage.objects.create(session_key=sk, role='user', message=msg)
+        dataset_context = None
+        ml_result = None
+        if data.get('include_dataset'):
+            db_s = DataSession.objects.filter(session_key=sk).first()
+            if db_s:
+                dataset_context = {'file': db_s.file_name, 'rows': db_s.row_count,
+                                   'columns': db_s.get_columns()[:20]}
+            latest = AnalysisResult.objects.filter(
+                session__session_key=sk).order_by('-created_at').first()
+            if latest:
+                ml_result = latest.get_result()
+        llm = GroqLLMClient(api_key=settings.GROQ_API_KEY, model=settings.GROQ_MODEL)
+        resp = llm.ask(msg, dataset_context, ml_result)
+        ChatMessage.objects.create(session_key=sk, role='ai', message=resp['message'])
+        return JsonResponse({'success': True, 'message': resp['message'],
+                             'tokens': resp.get('tokens_used', 0)})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── IMAGE ANALYSIS ────────────────────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def analyze_image(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        import requests as req
+        data = json.loads(request.body)
+        key  = settings.GROQ_API_KEY
+        if not key or key == 'your-groq-api-key-here':
+            return JsonResponse({'success': False, 'error': 'Groq API key not configured'})
+        vision_models = ['meta-llama/llama-4-scout-17b-16e-instruct',
+                         'llama-3.2-11b-vision-preview',
+                         'llama-3.2-90b-vision-preview']
+        headers   = {'Authorization': f'Bearer {key}', 'Content-Type': 'application/json'}
+        last_err  = None
+        for model in vision_models:
+            payload = {'model': model, 'max_tokens': 1500, 'temperature': 0.3,
+                       'messages': [{'role': 'user', 'content': [
+                           {'type': 'image_url', 'image_url': {
+                               'url': f"data:{data.get('mime_type','image/jpeg')};base64,{data.get('image_base64','')}"}},
+                           {'type': 'text', 'text': data.get('prompt','Analyze this medical image.')},
+                       ]}]}
             try:
-                idx = int(row_index)
-                if 0 <= idx < len(df):
-                    patient_row = df.iloc[idx].fillna('').to_dict()
+                r = req.post('https://api.groq.com/openai/v1/chat/completions',
+                             headers=headers, json=payload, timeout=60)
+                if not r.ok:
+                    try: last_err = r.json().get('error',{}).get('message', r.text)
+                    except: last_err = r.text
+                    continue
+                return JsonResponse({'success': True,
+                                     'result': r.json()['choices'][0]['message']['content'],
+                                     'model_used': model})
+            except Exception as ex:
+                last_err = str(ex); continue
+        return JsonResponse({'success': False, 'error': f'All vision models failed. {last_err}'})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
+
+# ── SESSION HELPERS ───────────────────────────────────────────
+@csrf_exempt
+def get_columns(request):
+    sk = _sk(request)
+    db_s = DataSession.objects.filter(session_key=sk).first()
+    if not db_s:
+        return JsonResponse({'success': False, 'columns': []})
+    return JsonResponse({'success': True, 'columns': db_s.get_columns(),
+                         'preview': db_s.get_preview(), 'rows': db_s.row_count})
+
+@csrf_exempt
+def get_column_stats_view(request):
+    df = _df(request)
+    if df is None:
+        return JsonResponse({'success': False, 'stats': {}})
+    try:
+        return JsonResponse({'success': True, 'stats': get_column_stats(df)})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'stats': {}, 'error': str(ex)})
+
+@csrf_exempt
+def clear_session(request):
+    sk = _sk(request)
+    _dataframe_store.pop(sk, None)
+    _temp_df_store.pop(sk, None)
+    DataSession.objects.filter(session_key=sk).delete()
+    return JsonResponse({'success': True})
+
+# ── FILTER DATA (basic row filter) ────────────────────────────
+@csrf_exempt
+@login_required(login_url='/login/')
+def filter_data(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data  = json.loads(request.body)
+        df = _df(request)
+        if df is None:
+            return JsonResponse({'success': False, 'error': 'No dataset loaded'})
+        filters = data.get('filters', [])  # [{col, op, value}]
+        df_f = df.copy()
+        for f in filters:
+            col, op, val = f.get('col'), f.get('op'), f.get('value')
+            if col not in df_f.columns:
+                continue
+            try:
+                if op == '==':   df_f = df_f[df_f[col].astype(str) == str(val)]
+                elif op == '!=': df_f = df_f[df_f[col].astype(str) != str(val)]
+                elif op == '>':  df_f = df_f[df_f[col] > float(val)]
+                elif op == '<':  df_f = df_f[df_f[col] < float(val)]
+                elif op == '>=': df_f = df_f[df_f[col] >= float(val)]
+                elif op == '<=': df_f = df_f[df_f[col] <= float(val)]
+                elif op == 'contains': df_f = df_f[df_f[col].astype(str).str.contains(str(val), na=False)]
             except Exception:
                 pass
+        preview = df_f.head(500).fillna('').to_dict(orient='records')
+        return JsonResponse({'success': True, 'rows': len(df_f),
+                             'preview': preview, 'filtered': True})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 
-        engine = ClinicalCodingAssistant()
-        llm    = _get_llm()
-        result = engine.get_llm_coding_advice(df, col_info, llm_client=llm,
-                                               patient_row=patient_row)
-        return JsonResponse({'success': True, 'result': result})
-    except Exception as e:
-        logger.error("Clinical coding error: %s", e)
-        return JsonResponse({'success': False, 'error': str(e)})
+# ── DEBUG / TEST ─────────────────────────────────────────────
+@csrf_exempt
+def test_llm(request):
+    key = settings.GROQ_API_KEY
+    if not key or key == 'your-groq-api-key-here':
+        return JsonResponse({'api_key_set': False, 'message': 'KEY NOT SET'})
+    llm = GroqLLMClient(api_key=key)
+    r   = llm.ask("Say hello in one sentence.")
+    return JsonResponse({'api_key_set': True, 'api_key_preview': key[:8]+'...'+key[-4:],
+                         'llm_success': r['success'], 'llm_message': r['message'],
+                         'model_used': r.get('model_used','—')})
+
+@csrf_exempt
+def debug_key(request):
+    key = settings.GROQ_API_KEY
+    ph  = (key == 'your-groq-api-key-here' or not key)
+    return JsonResponse({'key_preview': (key[:8]+'...'+key[-4:]) if key and len(key)>12 else key or 'EMPTY',
+                         'is_placeholder': ph, 'key_length': len(key) if key else 0,
+                         'starts_with_gsk': key.startswith('gsk_') if key else False})
