@@ -75,4 +75,5 @@ urlpatterns = [
     # ── Debug ────────────────────────────────────────────────
     path('api/test-llm/',             views.test_llm,             name='test_llm'),
     path('api/debug-key/',            views.debug_key,            name='debug_key'),
+    path('api/login/',                views.api_login,            name='api_login'),
 ]

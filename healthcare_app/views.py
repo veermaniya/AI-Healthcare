@@ -26,8 +26,20 @@ def _sk(request):
         request.session['healthcare_session'] = str(uuid.uuid4())
     return request.session['healthcare_session']
 
+# def _df(request):
+# #     return _dataframe_store.get(_sk(request))
 def _df(request):
-    return _dataframe_store.get(_sk(request))
+    sk = _sk(request)
+    if sk in _dataframe_store:
+        return _dataframe_store[sk]
+    # Session rotated or server restarted — recover from DB
+    db_s = DataSession.objects.filter(session_key=sk).first()
+    if db_s:
+        df = db_s.get_dataframe()
+        if df is not None:
+            _dataframe_store[sk] = df
+            return df
+    return None
 
 def _engine(request):
     df = _df(request)
@@ -49,12 +61,27 @@ def login_view(request):
             login(request, u); return redirect('index')
         error = 'Invalid username or password'
     return render(request, 'healthcare_app/login.html', {'error': error})
-
+@csrf_exempt
+def api_login(request):
+    """JSON login endpoint for the frontend fetch() call."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    try:
+        data = json.loads(request.body)
+        u = authenticate(request,
+                         username=data.get('username', ''),
+                         password=data.get('password', ''))
+        if u:
+            login(request, u)
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Invalid username or password'})
+    except Exception as ex:
+        return JsonResponse({'success': False, 'error': str(ex)})
 def logout_view(request):
     logout(request); return redirect('login')
 
 # ── MAIN ─────────────────────────────────────────────────────
-@login_required(login_url='/login/')
+ 
 def index(request):
     sk = _sk(request)
     return render(request, 'healthcare_app/index.html', {
@@ -65,7 +92,7 @@ def index(request):
 
 # ── UPLOAD ───────────────────────────────────────────────────
 @csrf_exempt
-@login_required(login_url='/login/')
+
 def upload_file(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
@@ -83,6 +110,7 @@ def upload_file(request):
             'source_type': 'excel', 'file_name': file.name,
             'columns_json': json.dumps(col_info), 'row_count': summary['rows'],
             'col_count': summary['columns'], 'preview_json': json.dumps(summary['preview']),
+            'data_json': df.to_json(orient='records'),
         })
         return JsonResponse({'success': True, 'file_name': file.name,
                              'rows': summary['rows'], 'columns': summary['columns'],
@@ -185,15 +213,14 @@ def predict_input(request):
         if err: return err
         result = e.predict_new_input(data.get('feature_columns',[]),
                                      data.get('target_column',''),
-                                     data.get('input_values',{}),
-                                     data.get('model_type','random_forest'))
+                                     data.get('input_values',{}))
+                                    #  data.get('model_type','random_forest'))
         return JsonResponse({'success': True, 'prediction': result})
     except Exception as ex:
         return JsonResponse({'success': False, 'error': str(ex)})
 
 # ── XAI EXPLAINABILITY ────────────────────────────────────────
 @csrf_exempt
-@login_required(login_url='/login/')
 def run_explainability(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'})
@@ -201,10 +228,14 @@ def run_explainability(request):
         data = json.loads(request.body)
         e, err = _engine(request)
         if err: return err
-        result = e.explain_prediction(data.get('feature_columns',[]),
-                                      data.get('target_column',''),
-                                      data.get('input_values',{}))
-        return JsonResponse({'success': True, 'explanation': result})
+        result = e.run_explainability(
+            feature_cols=data.get('feature_columns', []),
+            target_col=data.get('target_column', ''),
+            model_type=data.get('model_type', 'random_forest'),
+            sample_index=data.get('sample_index', 0),
+            input_values=data.get('input_values', {})
+        )
+        return JsonResponse({'success': True, 'result': result})
     except Exception as ex:
         return JsonResponse({'success': False, 'error': str(ex)})
 
@@ -351,7 +382,7 @@ def run_risk_engine(request):
         data = json.loads(request.body)
         e, err = _engine(request)
         if err: return err
-        result = e.run_risk_analysis(data.get('feature_columns',[]))
+        result = e.run_risk_engine(data.get('feature_columns',[]))
         return JsonResponse({'success': True, 'result': result})
     except Exception as ex:
         return JsonResponse({'success': False, 'error': str(ex)})
@@ -366,8 +397,8 @@ def run_trend_analysis(request):
         data = json.loads(request.body)
         e, err = _engine(request)
         if err: return err
-        result = e.run_trend_analysis(data.get('value_col',''),
-                                      data.get('forecast_periods', 10))
+        result = e.run_trend_analysis(data.get('feature_columns',[]),
+                                      forecast_steps=data.get('forecast_steps', 10))
         return JsonResponse({'success': True, 'result': result})
     except Exception as ex:
         return JsonResponse({'success': False, 'error': str(ex)})

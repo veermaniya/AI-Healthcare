@@ -55,10 +55,21 @@ class HealthcareMLEngine:
         return info
 
     def auto_detect_task(self, target_col):
-        if self.df[target_col].dtype in [np.float64, np.float32]:
+        col = self.df[target_col]
+        # Float columns are always regression
+        if col.dtype in [np.float64, np.float32]:
             return 'regression'
-        unique_ratio = self.df[target_col].nunique() / len(self.df)
-        if unique_ratio < 0.05 or self.df[target_col].dtype == object:
+        # Text/object columns are always classification
+        if col.dtype == object:
+            return 'classification'
+        # Integer columns: check unique count
+        n_unique = col.nunique()
+        # If more than 20 unique integer values → treat as regression
+        if n_unique > 20:
+            return 'regression'
+        # If very few unique values → classification
+        unique_ratio = n_unique / len(self.df)
+        if unique_ratio < 0.05 or n_unique <= 10:
             return 'classification'
         return 'regression'
 
@@ -95,6 +106,19 @@ class HealthcareMLEngine:
                 return GradientBoostingClassifier(n_estimators=100, random_state=42)
             return RandomForestClassifier(n_estimators=100, random_state=42)
 
+    def _get_importances(self, model, cols):
+        """Extract feature importances for any model type."""
+        if hasattr(model, 'feature_importances_'):
+            raw = model.feature_importances_
+            return [{'feature': c, 'importance': round(float(v), 4)}
+                    for c, v in sorted(zip(cols, raw), key=lambda x: -x[1])]
+        elif hasattr(model, 'coef_'):
+            raw = np.abs(model.coef_[0]) if model.coef_.ndim > 1 else np.abs(model.coef_)
+            total = raw.sum() or 1.0
+            return [{'feature': c, 'importance': round(float(v / total), 4)}
+                    for c, v in sorted(zip(cols, raw), key=lambda x: -x[1])]
+        return []
+
     # ─────────────────────────────────────────────
     # STANDARD: Regression
     # ─────────────────────────────────────────────
@@ -107,18 +131,20 @@ class HealthcareMLEngine:
 
         mse = float(mean_squared_error(y_test, y_pred))
         r2 = float(r2_score(y_test, y_pred))
-
-        importances = []
-        if hasattr(model, 'feature_importances_'):
-            raw = model.feature_importances_
-            importances = [{'feature': c, 'importance': round(float(v), 4)}
-                           for c, v in sorted(zip(cols, raw), key=lambda x: -x[1])]
+        importances = self._get_importances(model, cols)
 
         return {
             'task': 'regression',
             'model': model_type,
             'target': target_col,
-            'metrics': {'mse': round(mse, 4), 'rmse': round(float(np.sqrt(mse)), 4), 'r2': round(r2, 4)},
+            'features': cols,
+            'total_rows': len(self.df),
+            'metrics': {
+                'mse': round(mse, 4),
+                'rmse': round(float(np.sqrt(mse)), 4),
+                'r2': round(r2, 4),
+                'r2_percent': round(r2 * 100, 1),
+            },
             'feature_importance': importances,
             'predictions': [round(float(v), 3) for v in y_pred[:50].tolist()],
             'actuals': [round(float(v), 3) for v in y_test[:50].tolist()],
@@ -136,12 +162,7 @@ class HealthcareMLEngine:
 
         accuracy = float(accuracy_score(y_test, y_pred))
         report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
-
-        importances = []
-        if hasattr(model, 'feature_importances_'):
-            raw = model.feature_importances_
-            importances = [{'feature': c, 'importance': round(float(v), 4)}
-                           for c, v in sorted(zip(cols, raw), key=lambda x: -x[1])]
+        importances = self._get_importances(model, cols)
 
         classes = []
         if target_col in self.label_encoders:
@@ -151,7 +172,12 @@ class HealthcareMLEngine:
             'task': 'classification',
             'model': model_type,
             'target': target_col,
-            'metrics': {'accuracy': round(accuracy, 4)},
+            'features': cols,
+            'total_rows': len(self.df),
+            'metrics': {
+                'accuracy': round(accuracy, 4),
+                'accuracy_percent': round(accuracy * 100, 1),
+            },
             'feature_importance': importances,
             'classes': classes,
             'report': {str(k): v for k, v in report.items() if k not in ['accuracy']},
@@ -179,7 +205,6 @@ class HealthcareMLEngine:
                 'means': {col: round(float(grp[col].mean()), 3) for col in cols}
             })
 
-        # PCA 2D for visualization
         from sklearn.decomposition import PCA
         pca = PCA(n_components=2, random_state=42)
         coords = pca.fit_transform(X_scaled)
@@ -202,17 +227,12 @@ class HealthcareMLEngine:
     # ─────────────────────────────────────────────
     def run_explainability(self, feature_cols, target_col, model_type='random_forest',
                            sample_index=0, input_values=None):
-        """
-        Returns: feature importance, permutation importance (SHAP-style),
-                 per-feature contribution for a specific prediction,
-                 'why this prediction' narrative.
-        """
         X, y, cols = self.preprocess(feature_cols, target_col)
         task = self.auto_detect_task(target_col)
         model = self._get_model(task, model_type)
         model.fit(X, y)
 
-        # --- Global: feature importances ---
+        # Global feature importances
         global_importance = []
         if hasattr(model, 'feature_importances_'):
             raw = model.feature_importances_
@@ -223,8 +243,17 @@ class HealthcareMLEngine:
                     'importance': round(float(v), 4),
                     'percent': round(float(v / total * 100), 1)
                 })
+        elif hasattr(model, 'coef_'):
+            raw = np.abs(model.coef_[0]) if model.coef_.ndim > 1 else np.abs(model.coef_)
+            total = raw.sum() or 1.0
+            for c, v in sorted(zip(cols, raw), key=lambda x: -x[1]):
+                global_importance.append({
+                    'feature': c,
+                    'importance': round(float(v / total), 4),
+                    'percent': round(float(v / total * 100), 1)
+                })
 
-        # --- Local: LIME-style perturbation for one sample ---
+        # Local: LIME-style perturbation for one sample
         if input_values:
             sample = []
             for col in cols:
@@ -243,7 +272,6 @@ class HealthcareMLEngine:
         base_pred = float(model.predict(sample_arr)[0])
         baseline = float(model.predict(np.mean(X, axis=0, keepdims=True))[0])
 
-        # Compute contribution via perturbation
         contributions = []
         for i, col in enumerate(cols):
             perturbed = sample_arr.copy()
@@ -260,7 +288,6 @@ class HealthcareMLEngine:
 
         contributions.sort(key=lambda x: -abs(x['contribution']))
 
-        # Build "Why this prediction" narrative
         top3 = contributions[:3]
         why_parts = []
         for c in top3:
@@ -301,124 +328,83 @@ class HealthcareMLEngine:
     # ② CLINICAL RISK & ALERT ENGINE
     # ─────────────────────────────────────────────
     def run_risk_engine(self, feature_cols, target_col=None, thresholds=None):
-        """
-        Threshold alerts, sudden risk change detection, anomaly detection.
-        thresholds: dict of {col: {'low': val, 'high': val, 'critical_high': val}}
-        """
         if self.df is None:
             return {'error': 'No data loaded'}
 
-        numeric_cols = [c for c in feature_cols if self.df[c].dtype in [np.float64, np.int64, np.float32, np.int32]]
+        numeric_cols = [c for c in feature_cols
+                        if self.df[c].dtype in [np.float64, np.int64, np.float32, np.int32]]
         if not numeric_cols:
-            numeric_cols = feature_cols[:min(len(feature_cols), 8)]
+            return {'error': 'No numeric columns selected'}
 
-        df_work = self.df[numeric_cols].dropna()
+        df_work = self.df[numeric_cols].dropna().copy()
 
-        # Auto-suggest thresholds if not provided
+        # Auto thresholds (mean ± 2std)
         auto_thresholds = {}
         for col in numeric_cols:
-            q25 = float(df_work[col].quantile(0.05))
-            q75 = float(df_work[col].quantile(0.95))
             mean_v = float(df_work[col].mean())
-            std_v = float(df_work[col].std())
+            std_v = float(df_work[col].std()) or 1.0
             auto_thresholds[col] = {
-                'low': round(mean_v - 2 * std_v, 2),
-                'high': round(mean_v + 2 * std_v, 2),
-                'critical_high': round(mean_v + 3 * std_v, 2),
-                'mean': round(mean_v, 2),
-                'std': round(std_v, 2),
+                'mean': round(mean_v, 3),
+                'std': round(std_v, 3),
+                'high': round(mean_v + 2 * std_v, 3),
+                'critical_high': round(mean_v + 3 * std_v, 3),
+                'low': round(mean_v - 2 * std_v, 3),
             }
 
-        used_thresholds = thresholds or auto_thresholds
-
-        # --- Threshold alerts ---
         alerts = []
         for col in numeric_cols:
-            thresh = used_thresholds.get(col, auto_thresholds.get(col, {}))
-            col_vals = df_work[col]
-            n_total = len(col_vals)
+            thresh = auto_thresholds[col]
+            above_critical = int((df_work[col] > thresh['critical_high']).sum())
+            above_high = int((df_work[col] > thresh['high']).sum())
+            below_low = int((df_work[col] < thresh['low']).sum())
+            if above_critical > 0:
+                alerts.append({'column': col, 'level': 'CRITICAL',
+                                'message': f"{above_critical} patients have critically high {col}",
+                                'count': above_critical})
+            elif above_high > 0:
+                alerts.append({'column': col, 'level': 'WARNING',
+                                'message': f"{above_high} patients have high {col}",
+                                'count': above_high})
+            if below_low > 0:
+                alerts.append({'column': col, 'level': 'LOW',
+                                'message': f"{below_low} patients have low {col}",
+                                'count': below_low})
 
-            if thresh:
-                if 'critical_high' in thresh:
-                    n_critical = int((col_vals > thresh['critical_high']).sum())
-                    if n_critical > 0:
-                        alerts.append({
-                            'column': col,
-                            'level': 'CRITICAL',
-                            'color': '#ff4d6d',
-                            'count': n_critical,
-                            'percent': round(n_critical / n_total * 100, 1),
-                            'threshold': thresh['critical_high'],
-                            'message': f"{n_critical} patients ({round(n_critical/n_total*100,1)}%) above critical threshold {thresh['critical_high']}"
-                        })
-                if 'high' in thresh:
-                    n_high = int(((col_vals > thresh['high']) & (col_vals <= thresh.get('critical_high', float('inf')))).sum())
-                    if n_high > 0:
-                        alerts.append({
-                            'column': col,
-                            'level': 'WARNING',
-                            'color': '#ffd166',
-                            'count': n_high,
-                            'percent': round(n_high / n_total * 100, 1),
-                            'threshold': thresh['high'],
-                            'message': f"{n_high} patients ({round(n_high/n_total*100,1)}%) above warning threshold {thresh['high']}"
-                        })
-                if 'low' in thresh:
-                    n_low = int((col_vals < thresh['low']).sum())
-                    if n_low > 0:
-                        alerts.append({
-                            'column': col,
-                            'level': 'LOW',
-                            'color': '#00b4ff',
-                            'count': n_low,
-                            'percent': round(n_low / n_total * 100, 1),
-                            'threshold': thresh['low'],
-                            'message': f"{n_low} patients ({round(n_low/n_total*100,1)}%) below low threshold {thresh['low']}"
-                        })
+        # Anomaly detection
+        try:
+            iso = IsolationForest(contamination=0.1, random_state=42)
+            anomaly_labels = iso.fit_predict(df_work[numeric_cols].values)
+            n_anomalies = int((anomaly_labels == -1).sum())
+            anomaly_rows = df_work[anomaly_labels == -1].head(5).to_dict('records')
+            anomaly_rows = [{k: round(float(v), 3) if isinstance(v, (int, float)) else v
+                             for k, v in row.items()} for row in anomaly_rows]
+        except Exception:
+            n_anomalies = 0
+            anomaly_rows = []
 
-        # --- Anomaly detection (IsolationForest) ---
-        X_scaled = StandardScaler().fit_transform(df_work[numeric_cols])
-        iso = IsolationForest(contamination=0.05, random_state=42)
-        anomaly_labels = iso.fit_predict(X_scaled)
-        anomaly_scores = iso.score_samples(X_scaled)
-
-        n_anomalies = int((anomaly_labels == -1).sum())
-        anomaly_indices = np.where(anomaly_labels == -1)[0].tolist()[:20]
-
-        anomaly_rows = []
-        for idx in anomaly_indices[:10]:
-            row = {c: round(float(df_work[c].iloc[idx]), 3) for c in numeric_cols[:6]}
-            row['anomaly_score'] = round(float(anomaly_scores[idx]), 4)
-            row['row_index'] = int(idx)
-            anomaly_rows.append(row)
-
-        # --- Sudden change detection (variance over rolling windows) ---
+        # Change alerts
         change_alerts = []
-        for col in numeric_cols[:6]:
-            col_vals = df_work[col].values
-            if len(col_vals) > 20:
-                window = max(10, len(col_vals) // 10)
-                rolling_std = pd.Series(col_vals).rolling(window).std().dropna()
-                overall_std = float(col_vals.std())
-                if overall_std > 0:
-                    max_local_std = float(rolling_std.max())
-                    change_ratio = max_local_std / overall_std
-                    if change_ratio > 1.8:
-                        peak_window = int(rolling_std.idxmax())
+        for col in numeric_cols[:4]:
+            series = df_work[col].values
+            if len(series) > 10:
+                recent = float(np.mean(series[-10:]))
+                overall = float(np.mean(series))
+                if overall != 0:
+                    change_pct = abs((recent - overall) / overall * 100)
+                    if change_pct > 20:
                         change_alerts.append({
                             'column': col,
-                            'change_ratio': round(change_ratio, 2),
-                            'peak_window_index': peak_window,
-                            'message': f"{col}: sudden volatility spike detected (×{change_ratio:.1f} normal variance)"
+                            'change_percent': round(change_pct, 1),
+                            'direction': 'increasing' if recent > overall else 'decreasing',
                         })
 
-        # Risk score per row (composite)
+        # Risk scores
         risk_scores = []
-        for i in range(min(len(df_work), 200)):
+        for i in range(len(df_work)):
             score = 0
             for col in numeric_cols:
-                thresh = auto_thresholds.get(col, {})
                 val = float(df_work[col].iloc[i])
+                thresh = auto_thresholds[col]
                 mean_v = thresh.get('mean', val)
                 std_v = thresh.get('std', 1) or 1
                 z = abs((val - mean_v) / std_v)
@@ -457,21 +443,15 @@ class HealthcareMLEngine:
     # ③ TIME-SERIES / TREND ANALYSIS
     # ─────────────────────────────────────────────
     def run_trend_analysis(self, feature_cols, time_col=None, target_col=None, forecast_steps=10):
-        """
-        Trend analysis, progression tracking, simple forecasting.
-        If time_col provided, uses it as index. Otherwise uses row order.
-        """
         if self.df is None:
             return {'error': 'No data loaded'}
 
         numeric_cols = [c for c in feature_cols
                         if self.df[c].dtype in [np.float64, np.int64, np.float32, np.int32]]
-
         if not numeric_cols:
             return {'error': 'No numeric columns selected for trend analysis'}
 
-        df_work = self.df[numeric_cols + ([time_col] if time_col and time_col in self.df.columns else [])].copy()
-        df_work = df_work.dropna().reset_index(drop=True)
+        df_work = self.df[numeric_cols].dropna().reset_index(drop=True)
 
         trends = {}
         forecasts = {}
@@ -480,21 +460,16 @@ class HealthcareMLEngine:
             n = len(series)
             x = np.arange(n)
 
-            # Linear trend
             coeffs = np.polyfit(x, series, 1)
             slope = float(coeffs[0])
-            intercept = float(coeffs[1])
             trend_line = (coeffs[0] * x + coeffs[1]).tolist()
 
-            # Moving average
             window = max(3, n // 10)
-            ma = pd.Series(series).rolling(window, center=True).mean().fillna(method='bfill').fillna(method='ffill').tolist()
+            ma = pd.Series(series).rolling(window, center=True).mean().bfill().ffill().tolist()
 
-            # Simple linear forecast
             x_future = np.arange(n, n + forecast_steps)
             forecast_vals = (coeffs[0] * x_future + coeffs[1]).tolist()
 
-            # Trend direction & strength
             r2 = float(r2_score(series, trend_line))
             if slope > 0:
                 trend_dir = 'increasing'
@@ -506,7 +481,6 @@ class HealthcareMLEngine:
                 trend_dir = 'stable'
                 trend_color = '#ffd166'
 
-            # Change rate
             if abs(float(series[0])) > 0.001:
                 change_pct = round((float(series[-1]) - float(series[0])) / abs(float(series[0])) * 100, 2)
             else:
@@ -527,125 +501,55 @@ class HealthcareMLEngine:
             forecasts[col] = {
                 'steps': forecast_steps,
                 'values': [round(float(v), 3) for v in forecast_vals],
-                'start_index': n,
-                'confidence_upper': [round(float(v) + float(series.std()), 3) for v in forecast_vals],
-                'confidence_lower': [round(float(v) - float(series.std()), 3) for v in forecast_vals],
             }
-
-        # Correlation matrix for selected columns
-        corr_data = []
-        if len(numeric_cols) > 1:
-            corr_matrix = df_work[numeric_cols[:8]].corr()
-            for r in corr_matrix.index:
-                for c in corr_matrix.columns:
-                    corr_data.append({'row': r, 'col': c, 'value': round(float(corr_matrix.loc[r, c]), 3)})
 
         return {
             'task': 'trend_analysis',
-            'n_rows': len(df_work),
+            'columns': numeric_cols[:6],
             'trends': trends,
             'forecasts': forecasts,
-            'correlation_matrix': corr_data,
-            'columns': numeric_cols[:6],
+            'total_rows': len(df_work),
         }
 
     # ─────────────────────────────────────────────
-    # ④ PATIENT SIMILARITY ENGINE
+    # ④ PATIENT SIMILARITY
     # ─────────────────────────────────────────────
-    def run_patient_similarity(self, feature_cols, query_index=0,
-                                query_values=None, n_similar=5):
-        """
-        Find similar patients using KNN.
-        query_values: dict of {col: val} for a new patient (optional).
-        """
+    def find_similar_patients(self, feature_cols, query_values, n_similar=5):
         if self.df is None:
             return {'error': 'No data loaded'}
 
         numeric_cols = [c for c in feature_cols
                         if self.df[c].dtype in [np.float64, np.int64, np.float32, np.int32]]
-
         if not numeric_cols:
-            # Try to encode categorical
-            numeric_cols = feature_cols[:min(len(feature_cols), 6)]
+            return {'error': 'No numeric columns for similarity'}
 
-        df_work = self.df[numeric_cols].copy()
-        for col in numeric_cols:
-            if df_work[col].dtype == object:
-                le = LabelEncoder()
-                df_work[col] = le.fit_transform(df_work[col].astype(str))
-                self.label_encoders[col] = le
+        df_work = self.df[numeric_cols].dropna().reset_index(drop=True)
+        X = self.scaler.fit_transform(df_work.values)
 
-        df_work = df_work.dropna().reset_index(drop=True)
-        X = df_work.values.astype(float)
-        X_scaled = StandardScaler().fit_transform(X)
+        query_row = np.array([[float(query_values.get(col, df_work[col].mean()))
+                               for col in numeric_cols]])
+        q_arr = self.scaler.transform(query_row)
 
-        # Determine query vector
-        if query_values:
-            q = []
-            for col in numeric_cols:
-                val = query_values.get(col, float(np.mean(X[:, numeric_cols.index(col)])))
-                if col in self.label_encoders:
-                    try:
-                        val = float(self.label_encoders[col].transform([str(val)])[0])
-                    except:
-                        val = 0.0
-                q.append(float(val))
-            q_arr = np.array([q])
-            scaler2 = StandardScaler()
-            scaler2.fit(X)
-            q_scaled = scaler2.transform(q_arr)
-        else:
-            idx = min(query_index, len(X_scaled) - 1)
-            q_scaled = X_scaled[idx:idx+1]
-            q_arr = X[idx:idx+1]
-
-        # KNN
-        k = min(n_similar + 1, len(X_scaled))
-        knn = NearestNeighbors(n_neighbors=k, metric='euclidean')
-        knn.fit(X_scaled)
-        distances, indices = knn.kneighbors(q_scaled)
+        nn = NearestNeighbors(n_neighbors=min(n_similar + 1, len(X)))
+        nn.fit(X)
+        distances, indices = nn.kneighbors(q_arr)
 
         similar_patients = []
-        indices_list = indices[0].tolist()
-        distances_list = distances[0].tolist()
-
-        # Remove query itself if present
-        pairs = [(i, d) for i, d in zip(indices_list, distances_list) if i != query_index][:n_similar]
-
-        for rank, (idx, dist) in enumerate(pairs):
+        for rank, (idx, dist) in enumerate(zip(indices[0], distances[0])):
             patient = {'rank': rank + 1, 'index': int(idx), 'distance': round(float(dist), 4)}
             for col in numeric_cols[:8]:
-                patient[col] = round(float(X[idx, numeric_cols.index(col)]), 3)
+                patient[col] = round(float(df_work[col].iloc[idx]), 3)
             patient['similarity_pct'] = round(max(0, 100 - float(dist) * 15), 1)
             similar_patients.append(patient)
 
-        # Query patient info
-        query_patient = {}
-        for col in numeric_cols[:8]:
-            c_idx = numeric_cols.index(col)
-            query_patient[col] = round(float(q_arr[0, c_idx]), 3)
-
-        # Cohort stats: compare similar group vs full population
-        sim_indices = [p['index'] for p in similar_patients]
-        cohort_comparison = []
-        full_df = pd.DataFrame(X, columns=numeric_cols)
-        cohort_df = full_df.iloc[sim_indices]
-
-        for col in numeric_cols[:6]:
-            cohort_comparison.append({
-                'feature': col,
-                'cohort_mean': round(float(cohort_df[col].mean()), 3),
-                'population_mean': round(float(full_df[col].mean()), 3),
-                'query_value': round(float(query_patient.get(col, 0)), 3),
-                'cohort_std': round(float(cohort_df[col].std()), 3),
-            })
+        query_patient = {col: round(float(query_values.get(col, df_work[col].mean())), 3)
+                         for col in numeric_cols[:8]}
 
         return {
             'task': 'patient_similarity',
             'query_patient': query_patient,
-            'similar_patients': similar_patients,
-            'cohort_comparison': cohort_comparison,
-            'n_similar': len(similar_patients),
+            'similar_patients': similar_patients[:n_similar],
+            'n_similar': len(similar_patients[:n_similar]),
             'feature_cols': numeric_cols[:8],
             'total_patients': len(X),
         }
@@ -653,13 +557,10 @@ class HealthcareMLEngine:
     # ─────────────────────────────────────────────
     # PREDICT NEW INPUT
     # ─────────────────────────────────────────────
-    def predict_new_input(self, feature_cols, target_col, input_values):
+    def predict_new_input(self, feature_cols, target_col, input_values, model_type='random_forest'):
         X, y, cols = self.preprocess(feature_cols, target_col)
         task = self.auto_detect_task(target_col)
-        if task == 'regression':
-            model = RandomForestRegressor(n_estimators=100, random_state=42)
-        else:
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model = self._get_model(task, model_type)
         model.fit(X, y)
 
         input_encoded = []
@@ -673,12 +574,19 @@ class HealthcareMLEngine:
             input_encoded.append(float(val))
 
         prediction = model.predict([input_encoded])[0]
-        result = {'prediction': float(prediction), 'task': task}
+        result = {'prediction': float(prediction), 'task': task, 'model': model_type}
+
         if task == 'classification' and hasattr(model, 'predict_proba'):
             proba = model.predict_proba([input_encoded])[0]
             result['confidence'] = round(float(max(proba)) * 100, 1)
             if target_col in self.label_encoders:
-                result['prediction_label'] = str(self.label_encoders[target_col].inverse_transform([int(prediction)])[0])
+                try:
+                    result['prediction_label'] = str(
+                        self.label_encoders[target_col].inverse_transform([int(prediction)])[0]
+                    )
+                except:
+                    result['prediction_label'] = str(prediction)
+
         return result
 
 
@@ -719,38 +627,39 @@ class GroqLLMClient:
 
         context_parts = []
         if dataset_context:
-            ctx = self._trim_context(json.dumps(dataset_context, indent=2))
-            context_parts.append(f"Dataset context:\n{ctx}")
+            context_parts.append(f"Dataset context:\n{self._trim_context(str(dataset_context))}")
         if ml_result:
-            ctx = self._trim_context(json.dumps(ml_result, indent=2))
-            context_parts.append(f"ML result:\n{ctx}")
+            context_parts.append(f"ML result:\n{self._trim_context(json.dumps(ml_result))}")
 
-        messages = []
+        full_message = user_message
         if context_parts:
-            messages.append({'role': 'system', 'content': system_prompt + '\n\nContext:\n' + '\n\n'.join(context_parts)})
-        else:
-            messages.append({'role': 'system', 'content': system_prompt})
-        messages.append({'role': 'user', 'content': user_message})
+            full_message = "\n\n".join(context_parts) + "\n\nUser question: " + user_message
+
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json',
+        }
 
         for model in self.MODELS:
+            payload = {
+                'model': model,
+                'messages': [
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': full_message},
+                ],
+                'max_tokens': 1024,
+                'temperature': 0.7,
+            }
             try:
-                resp = requests.post(
-                    self.base_url,
-                    headers={'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'},
-                    json={'model': model, 'messages': messages, 'max_tokens': 600, 'temperature': 0.7},
-                    timeout=30
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
+                r = requests.post(self.base_url, headers=headers, json=payload, timeout=60)
+                if r.ok:
                     return {
                         'success': True,
-                        'message': data['choices'][0]['message']['content'],
-                        'tokens_used': data.get('usage', {}).get('total_tokens', 0),
-                        'model': model
+                        'message': r.json()['choices'][0]['message']['content'],
+                        'model_used': model,
+                        'tokens_used': r.json().get('usage', {}).get('total_tokens', 0),
                     }
-                elif resp.status_code == 429:
-                    continue
             except Exception:
                 continue
 
-        return {'success': False, 'message': 'LLM service unavailable. Please try again.', 'tokens_used': 0}
+        return {'success': False, 'message': 'All LLM models failed.', 'tokens_used': 0}

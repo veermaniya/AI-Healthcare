@@ -575,8 +575,8 @@
       }
     } catch(e) {
       // Dev mode: bypass to main app
-      showAlert('Dev mode — redirecting to dashboard…', 'success');
-      setTimeout(() => { window.location.href = '/'; }, 800);
+       showAlert('Connection error. Please try again.', 'error');
+      btn.classList.remove('loading');
     }
   }
 
