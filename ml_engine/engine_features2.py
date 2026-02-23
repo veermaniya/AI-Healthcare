@@ -24,7 +24,22 @@ warnings.filterwarnings('ignore')
 # ═══════════════════════════════════════════════════════════════════
 
 class PatientDashboardEngine:
-
+    def _clean(self, obj):
+        """Recursively convert numpy types to native Python for JSON serialization."""
+        import numpy as np
+        if isinstance(obj, dict):
+            return {k: self._clean(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._clean(i) for i in obj]
+        elif isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return [self._clean(i) for i in obj.tolist()]
+        elif isinstance(obj, float) and (obj != obj):  # NaN check
+            return None
+        return obj
     def get_patient_profile(self, df: pd.DataFrame, row_index: int,
                              feature_cols: list, target_col: str = None,
                              ml_engine=None) -> dict:
@@ -143,7 +158,7 @@ class PatientDashboardEngine:
                 'percentile': round(float((col_vals < float(val)).sum() / len(col_vals) * 100), 1),
             }
 
-        return {
+        return self._clean({
             'task': 'patient_dashboard',
             'row_index': row_index,
             'total_patients': total,
@@ -157,7 +172,7 @@ class PatientDashboardEngine:
             'similar_patients': similar,
             'population_stats': population_stats,
             'missing_count': sum(1 for e in profile_values if e['is_missing']),
-        }
+        })
 
 
 # ═══════════════════════════════════════════════════════════════════

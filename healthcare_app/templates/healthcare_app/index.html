@@ -2468,76 +2468,125 @@ function populateMultiTargetSelector(){
 // 1. PATIENT DASHBOARD
 // ══════════════════════════════════════════
 async function runPatientDashboard(){
-  const rowIdx=parseInt(document.getElementById('patientRowIdx').value)||0;
-  const feats=[...selFeatures];
-  if(!feats.length){notif('Select feature columns first','error');return;}
+  const rowIdx = parseInt(document.getElementById('patientRowIdx').value) || 0;
+
+  // ✅ Auto-use all available columns if none manually selected
+  let feats = [...selFeatures];
+  if(!feats.length && colInfo && colInfo.length){
+    feats = colInfo.filter(c => c.col_type === 'numeric').map(c => c.name);
+  }
+  if(!feats.length){
+    notif('Please upload a dataset first','error');
+    return;
+  }
+
   showLoad('Loading Patient Profile...','Calculating risk score and similar patients');
-  const d=await post('/api/patient-dashboard/',{
-    row_index:rowIdx,
-    feature_columns:feats,
-    target_column:selTarget||''
+  const d = await post('/api/patient-dashboard/', {
+    row_index:       rowIdx,
+    feature_columns: feats,
+    target_column:   selTarget || ''
   });
   hideLoad();
-  if(!d.success){notif(d.error,'error');return;}
-  const r=d.result;
-  document.getElementById('patient-empty').style.display='none';
-  document.getElementById('patient-result').style.display='block';
 
-  // Risk ring
-  const ring=document.getElementById('patient-risk-ring');
-  ring.className='risk-ring '+r.risk_level;
-  document.getElementById('patient-risk-score').textContent=r.risk_score+'%';
-  document.getElementById('patient-risk-label').innerHTML=
-    `<span style="color:${r.risk_level==='HIGH'?'var(--danger)':r.risk_level==='MEDIUM'?'var(--warn)':'var(--accent2)'}">${r.risk_level} RISK</span> — Patient #${r.row_index} of ${r.total_patients}`;
-  document.getElementById('patient-anomaly').textContent=r.anomaly_flag?('⚠️ '+r.anomaly_reason):'✅ No anomalies detected';
-  document.getElementById('patient-missing').textContent=r.missing_count>0?`${r.missing_count} missing values`:'';
+  if(!d.success){
+    notif(d.error || 'Patient profile failed','error');
+    return;
+  }
+  const r = d.result;
+  if(r.error){
+    notif(r.error,'error');
+    return;
+  }
 
-  // Prediction box
-  const pbox=document.getElementById('patient-prediction-box');
-  if(r.prediction&&r.prediction.prediction!==undefined){
-    pbox.style.display='block';
-    document.getElementById('patient-pred-val').textContent=
-      typeof r.prediction.prediction==='number'?r.prediction.prediction.toFixed(3):r.prediction.prediction;
-  } else pbox.style.display='none';
+  document.getElementById('patient-empty').style.display  = 'none';
+  document.getElementById('patient-result').style.display = 'block';
 
-  // Values grid
-  const grid=document.getElementById('patient-values-grid');grid.innerHTML='';
-  r.profile_values.forEach(v=>{
-    const cls=v.is_outlier?'outlier':v.is_target?'tgt':v.is_feature?'feat':'';
-    const pct=v.percentile!==undefined?v.percentile:null;
-    const dir=v.direction||'normal';
-    const barColor=dir==='high'?'hi':dir==='low'?'lo':'';
-    const missing=v.is_missing?'<span style="font-size:9px;color:var(--warn)">MISSING</span>':'';
-    grid.innerHTML+=`<div class="pv-card ${cls}">
-      <div class="pv-label">${v.column}${v.is_outlier?' ⚠️':''}</div>
-      <div class="pv-value">${v.is_missing?'—':typeof v.value==='number'?v.value.toFixed?v.value.toFixed(2):v.value:String(v.value).slice(0,18)}${missing}</div>
-      ${pct!==null?`<div class="pv-pct">${pct}th percentile · z=${v.z_score}</div><div class="pv-bar"><div class="pv-bar-fill ${barColor}" style="width:${pct}%"></div></div>`:''}
-    </div>`;
+  // ── Risk ring ──
+  const ring = document.getElementById('patient-risk-ring');
+  ring.className = 'risk-ring ' + (r.risk_level||'LOW').toLowerCase();
+  document.getElementById('patient-risk-score').textContent  = (r.risk_score||0) + '%';
+  document.getElementById('patient-risk-label').innerHTML =
+    `<span style="color:${r.risk_level==='HIGH'?'var(--danger)':r.risk_level==='MEDIUM'?'var(--warn)':'var(--accent2)'}">
+      ${r.risk_level||'LOW'} RISK
+    </span> — Patient #${r.row_index} of ${r.total_patients}`;
+  document.getElementById('patient-anomaly').textContent =
+    r.anomaly_flag ? ('⚠️ ' + r.anomaly_reason) : '✅ No anomalies detected';
+  document.getElementById('patient-missing').textContent =
+    r.missing_count > 0 ? `${r.missing_count} missing values` : '';
+
+  // ── Prediction box ──
+  const pbox = document.getElementById('patient-prediction-box');
+  if(r.prediction && r.prediction.prediction !== undefined){
+    pbox.style.display = 'block';
+    document.getElementById('patient-pred-val').textContent =
+      typeof r.prediction.prediction === 'number'
+        ? r.prediction.prediction.toFixed(3)
+        : r.prediction.prediction;
+  } else {
+    pbox.style.display = 'none';
+  }
+
+  // ── Values grid ──
+  const grid = document.getElementById('patient-values-grid');
+  grid.innerHTML = '';
+  (r.profile_values || []).forEach(v => {
+    const cls     = v.is_outlier ? 'outlier' : v.is_target ? 'tgt' : v.is_feature ? 'feat' : '';
+    const pct     = v.percentile !== undefined ? v.percentile : null;
+    const dir     = v.direction || 'normal';
+    const barColor = dir === 'high' ? 'hi' : dir === 'low' ? 'lo' : '';
+    const dispVal  = v.is_missing ? '—'
+      : typeof v.value === 'number'
+        ? (v.value % 1 !== 0 ? Number(v.value).toFixed(2) : v.value)
+        : String(v.value).slice(0, 18);
+    grid.innerHTML += `
+      <div class="pv-card ${cls}">
+        <div class="pv-label">${v.column}${v.is_outlier ? ' ⚠️' : ''}</div>
+        <div class="pv-value">${dispVal}${v.is_missing ? ' <span style="font-size:9px;color:var(--warn)">MISSING</span>' : ''}</div>
+        ${pct !== null
+          ? `<div class="pv-pct">${pct}th pct · z=${v.z_score ?? '—'}</div>
+             <div class="pv-bar"><div class="pv-bar-fill ${barColor}" style="width:${pct}%"></div></div>`
+          : ''}
+      </div>`;
   });
 
-  // Population comparison bars
-  const popDiv=document.getElementById('patient-pop-bars');popDiv.innerHTML='';
-  Object.entries(r.population_stats||{}).slice(0,7).forEach(([col,s])=>{
-    const diff=((s.patient_value-s.population_mean)/Math.max(Math.abs(s.population_mean),0.001)*100).toFixed(1);
-    const col_good=diff>0?'var(--accent4)':'var(--accent2)';
-    popDiv.innerHTML+=`<div class="feat-row" style="margin-bottom:8px">
-      <div class="feat-lbl" title="${col}">${col}</div>
-      <div class="feat-track"><div class="feat-fill" style="width:${s.percentile}%;background:${col_good}"></div></div>
-      <div class="feat-pct" style="color:${col_good}">${diff>0?'+':''}${diff}%</div>
-    </div>`;
+  // ── Population comparison bars ──
+  const popDiv = document.getElementById('patient-pop-bars');
+  popDiv.innerHTML = '';
+  Object.entries(r.population_stats || {}).slice(0, 7).forEach(([col, s]) => {
+    const base = Math.abs(s.population_mean) || 0.001;
+    const diff = ((s.patient_value - s.population_mean) / base * 100).toFixed(1);
+    const col_good = diff > 0 ? 'var(--accent4)' : 'var(--accent2)';
+    popDiv.innerHTML += `
+      <div class="feat-row" style="margin-bottom:8px">
+        <div class="feat-lbl" title="${col}">${col.length>12 ? col.slice(0,12)+'…' : col}</div>
+        <div class="feat-track">
+          <div class="feat-fill" style="width:${s.percentile}%;background:${col_good}"></div>
+        </div>
+        <div class="feat-pct" style="color:${col_good}">${diff > 0 ? '+' : ''}${diff}%</div>
+      </div>`;
   });
 
-  // Similar patients
-  const simDiv=document.getElementById('patient-similar-table');
-  if(r.similar_patients&&r.similar_patients.length){
-    let rows=r.similar_patients.map(s=>{
-      const vals=Object.entries(s.values).slice(0,3).map(([k,v])=>`${k}:${v}`).join(', ');
-      return `<tr><td>Row #${s.row_index}</td><td style="color:var(--accent2);font-weight:600">${s.similarity_pct}%</td><td style="font-size:9px;color:var(--text3)">${vals}</td></tr>`;
+  // ── Similar patients ──
+  const simDiv = document.getElementById('patient-similar-table');
+  if(r.similar_patients && r.similar_patients.length){
+    const rows = r.similar_patients.map(s => {
+      const vals = Object.entries(s.values || {}).slice(0, 3).map(([k,v]) => `${k}:${v}`).join(', ');
+      return `<tr>
+        <td>Row #${s.row_index}</td>
+        <td style="color:var(--accent2);font-weight:600">${s.similarity_pct}%</td>
+        <td style="font-size:9px;color:var(--text3)">${vals || '—'}</td>
+      </tr>`;
     }).join('');
-    simDiv.innerHTML=`<table class="sim-mini-table"><thead><tr><th>Patient</th><th>Similarity</th><th>Key Values</th></tr></thead><tbody>${rows}</tbody></table>`;
-  } else simDiv.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">Not enough numeric features for similarity.</div>';
+    simDiv.innerHTML = `
+      <table class="sim-mini-table">
+        <thead><tr><th>Patient</th><th>Similarity</th><th>Key Values</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } else {
+    simDiv.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:8px">Not enough numeric features for similarity.</div>';
+  }
 
-  notif(`Patient #${rowIdx} profile loaded`);
+  notif(`Patient #${rowIdx} profile loaded ✅`);
 }
 
 // ══════════════════════════════════════════

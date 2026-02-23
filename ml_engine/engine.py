@@ -570,6 +570,26 @@ class HealthcareMLEngine:
 
         query_patient = {col: round(float(query_values.get(col, df_work[col].mean())), 3)
                          for col in numeric_cols[:8]}
+        cohort_indices = [p['index'] for p in similar_patients[:n_similar]]
+        cohort_comparison = []
+        for col in numeric_cols[:8]:
+            pop_mean   = round(float(df_work[col].mean()), 3)
+            query_val  = round(float(query_values.get(col, pop_mean)), 3)
+            if cohort_indices:
+                cohort_vals = [float(df_work[col].iloc[i])
+                               for i in cohort_indices
+                               if i < len(df_work)]
+                cohort_mean = round(float(np.mean(cohort_vals)), 3) if cohort_vals else pop_mean
+            else:
+                cohort_mean = pop_mean
+            cohort_comparison.append({
+                'feature':          col,
+                'population_mean':  pop_mean,
+                'cohort_mean':      cohort_mean,
+                'query_value':      query_val,
+                'diff_from_pop':    round(query_val - pop_mean, 3),
+                'diff_pct':         round((query_val - pop_mean) / max(abs(pop_mean), 0.001) * 100, 1),
+            })
 
         return {
             'task': 'patient_similarity',
@@ -577,7 +597,7 @@ class HealthcareMLEngine:
             'similar_patients': similar_patients[:n_similar],
             'n_similar': len(similar_patients[:n_similar]),
             'feature_cols': numeric_cols[:8],
-            'total_patients': len(X),
+            'cohort_comparison':  cohort_comparison,
         }
 
     # ─────────────────────────────────────────────
