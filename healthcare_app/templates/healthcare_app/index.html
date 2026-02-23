@@ -2106,7 +2106,19 @@ async function runRisk(){
   // Change alerts
   const chDiv=document.getElementById('risk-changes');chDiv.innerHTML='';
   if(r.change_alerts&&r.change_alerts.length){
-    r.change_alerts.forEach(ca=>{chDiv.innerHTML+=`<div class="risk-alert warning"><div class="risk-alert-icon">📉</div><div class="risk-alert-body"><div class="risk-alert-lbl">Sudden Change — ${ca.column}</div><div class="risk-alert-msg">${ca.message}</div></div><div class="risk-alert-pct">×${ca.change_ratio}</div></div>`;});
+    r.change_alerts.forEach(ca=>{
+  const dir = ca.direction === 'increasing' ? '📈' : '📉';
+  const pct = ca.change_percent || 0;
+  const msg = ca.message || `${ca.direction} by ${pct}% vs overall average`;
+  chDiv.innerHTML+=`<div class="risk-alert warning">
+    <div class="risk-alert-icon">${dir}</div>
+    <div class="risk-alert-body">
+      <div class="risk-alert-lbl">Sudden Change — ${ca.column}</div>
+      <div class="risk-alert-msg">${msg}</div>
+    </div>
+    <div class="risk-alert-pct">${pct}%</div>
+  </div>`;
+});
   } else {chDiv.innerHTML='<div style="color:var(--accent2);font-size:12px;padding:8px">✅ No sudden changes detected.</div>';}
   notif('Risk analysis complete!');
 }

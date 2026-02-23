@@ -1,43 +1,48 @@
 #!/bin/bash
-# HealthcareAI Platform - Quick Start Script
-# Run this script to set up and launch the application
+# =========================================================
+#  Healthcare AI Platform — Linux/Mac Setup & Run Script
+#  Run this ONCE after cloning or deploying the project.
+# =========================================================
 
+echo ""
 echo "=========================================="
-echo "  HealthAI Platform - Setup & Launch"
+echo "  Healthcare AI — Setup & Launch"
 echo "=========================================="
 
 # Step 1: Install dependencies
 echo ""
 echo "[1/4] Installing Python dependencies..."
-pip install Django pandas numpy scikit-learn openpyxl xlrd requests sqlalchemy --break-system-packages 2>/dev/null || \
-pip install Django pandas numpy scikit-learn openpyxl xlrd requests sqlalchemy
+pip install -r requirements.txt --break-system-packages 2>/dev/null || \
+pip install -r requirements.txt
 
 # Step 2: Run migrations
 echo ""
 echo "[2/4] Setting up database..."
 cd "$(dirname "$0")"
-python manage.py makemigrations healthcare_app
+python manage.py makemigrations
 python manage.py migrate
 
-# Step 3: Create superuser (optional)
+# Step 3: Create default users
 echo ""
-echo "[3/4] Ready to launch..."
+echo "[3/4] Creating default users in database..."
+python manage.py create_default_users
 
-# Step 4: Run server
+# Step 4: Launch
 echo ""
-echo "[4/4] Starting Django development server..."
+echo "[4/4] Starting server..."
 echo ""
 echo "  ✅ Open your browser at: http://127.0.0.1:8000"
 echo ""
-echo "  📋 IMPORTANT: Set your FREE Groq API key for LLM chat:"
-echo "     1. Go to https://console.groq.com (free signup)"
-echo "     2. Create an API key"
-echo "     3. Edit healthcare_ai/settings.py"
-echo "     4. Replace 'your-groq-api-key-here' with your key"
-echo "     OR set environment variable: export GROQ_API_KEY=your_key_here"
+echo "  Default Login Credentials:"
+echo "  ------------------------------------------"
+echo "   Admin      : admin      / Admin@1234"
+echo "   Doctor     : doctor     / Doctor@1234"
+echo "   Analyst    : analyst    / Analyst@1234"
+echo "   Researcher : researcher / Research@1234"
+echo "  ------------------------------------------"
 echo ""
-echo "  📊 Sample dataset included: sample_healthcare_data.csv"
-echo "     Upload it to test all features immediately!"
+echo "  📋 Set your Groq API key in healthcare_ai/settings.py"
+echo "  📊 Upload sample_healthcare_data.csv to test features"
 echo ""
 echo "=========================================="
 

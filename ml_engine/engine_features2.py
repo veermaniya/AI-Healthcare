@@ -272,13 +272,23 @@ class MultiTargetComparator:
 
 class SurvivalAnalysisEngine:
 
+    def _to_python(self, obj):
+        """Recursively convert numpy types to native Python for JSON serialization."""
+        import numpy as np
+        if isinstance(obj, dict):
+            return {k: self._to_python(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._to_python(i) for i in obj]
+        elif isinstance(obj, (np.integer,)):
+            return int(obj)
+        elif isinstance(obj, (np.floating,)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return [self._to_python(i) for i in obj.tolist()]
+        return obj
+
     def run_kaplan_meier(self, df: pd.DataFrame, duration_col: str,
                           event_col: str, group_col: str = None) -> dict:
-        """
-        duration_col : numeric column — time until event or censoring
-        event_col    : binary column — 1=event occurred, 0=censored
-        group_col    : optional categorical column to stratify curves
-        """
         if duration_col not in df.columns:
             return {'error': f"Duration column '{duration_col}' not found."}
         if event_col not in df.columns:
@@ -308,55 +318,55 @@ class SurvivalAnalysisEngine:
                 df_work[event_col].values,
             )
 
-        # Median survival per group
         medians = {}
         for grp, curve in groups.items():
-            below = [(t, s) for t, s in zip(curve['times'], curve['survival'])
-                     if s <= 0.5]
-            medians[grp] = round(below[0][0], 2) if below else None
+            below = [(t, s) for t, s in zip(curve['times'], curve['survival']) if s <= 0.5]
+            medians[grp] = round(float(below[0][0]), 2) if below else None
 
-        n_events  = int(df_work[event_col].sum())
+        n_events   = int(df_work[event_col].sum())
         n_censored = int((df_work[event_col] == 0).sum())
+        n_total    = int(len(df_work))
 
-        return {
-            'task':          'survival_analysis',
-            'duration_col':  duration_col,
-            'event_col':     event_col,
-            'group_col':     group_col,
-            'n_total':       len(df_work),
-            'n_events':      n_events,
-            'n_censored':    n_censored,
-            'event_rate':    round(n_events / len(df_work) * 100, 1),
-            'groups':        groups,
-            'median_survival': medians,
-            'interpretation': self._interpret(medians, n_events, len(df_work), event_col),
+        result = {
+            'task':             'survival_analysis',
+            'duration_col':     duration_col,
+            'event_col':        event_col,
+            'group_col':        group_col,
+            'n_total':          n_total,
+            'n_events':         n_events,
+            'n_censored':       n_censored,
+            'event_rate':       round(n_events / n_total * 100, 1),
+            'groups':           groups,
+            'median_survival':  medians,
+            'interpretation':   self._interpret(medians, n_events, n_total, event_col),
         }
+        # ✅ Sanitize ALL numpy types before returning
+        return self._to_python(result)
 
     def _km_curve(self, durations: np.ndarray, events: np.ndarray) -> dict:
-        order   = np.argsort(durations)
+        order    = np.argsort(durations)
         t_sorted = durations[order]
         e_sorted = events[order]
 
         unique_times = np.unique(t_sorted[e_sorted == 1])
         survival = 1.0
-        times    = [0.0]
+        times     = [0.0]
         surv_vals = [1.0]
         ci_upper  = [1.0]
         ci_lower  = [1.0]
-        n_risk    = len(durations)
 
         for t in unique_times:
-            mask   = t_sorted == t
-            n_die  = int(e_sorted[mask].sum())
+            mask     = t_sorted == t
+            n_die    = int(e_sorted[mask].sum())
             n_risk_t = int((t_sorted >= t).sum())
             if n_risk_t == 0:
                 continue
             survival *= (1 - n_die / n_risk_t)
-            se = np.sqrt(survival * (1 - survival) / max(n_risk_t, 1))
+            se = float(np.sqrt(survival * (1 - survival) / max(n_risk_t, 1)))
             times.append(round(float(t), 3))
-            surv_vals.append(round(survival, 4))
-            ci_upper.append(round(min(survival + 1.96 * se, 1.0), 4))
-            ci_lower.append(round(max(survival - 1.96 * se, 0.0), 4))
+            surv_vals.append(round(float(survival), 4))
+            ci_upper.append(round(min(float(survival) + 1.96 * se, 1.0), 4))
+            ci_lower.append(round(max(float(survival) - 1.96 * se, 0.0), 4))
 
         return {
             'times':    times,

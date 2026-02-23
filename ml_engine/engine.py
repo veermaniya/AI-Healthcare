@@ -351,33 +351,49 @@ class HealthcareMLEngine:
                 'low': round(mean_v - 2 * std_v, 3),
             }
 
-        alerts = []
-        for col in numeric_cols:
-            thresh = auto_thresholds[col]
-            above_critical = int((df_work[col] > thresh['critical_high']).sum())
-            above_high = int((df_work[col] > thresh['high']).sum())
-            below_low = int((df_work[col] < thresh['low']).sum())
-            if above_critical > 0:
-                alerts.append({'column': col, 'level': 'CRITICAL',
-                                'message': f"{above_critical} patients have critically high {col}",
-                                'count': above_critical})
-            elif above_high > 0:
-                alerts.append({'column': col, 'level': 'WARNING',
-                                'message': f"{above_high} patients have high {col}",
-                                'count': above_high})
-            if below_low > 0:
-                alerts.append({'column': col, 'level': 'LOW',
-                                'message': f"{below_low} patients have low {col}",
-                                'count': below_low})
-
+alerts = []
+total_rows = len(df_work)
+for col in numeric_cols:
+    thresh = auto_thresholds[col]
+    above_critical = int((df_work[col] > thresh['critical_high']).sum())
+    above_high     = int((df_work[col] > thresh['high']).sum())
+    below_low      = int((df_work[col] < thresh['low']).sum())
+    if above_critical > 0:
+        alerts.append({
+            'column':  col, 'level': 'CRITICAL',
+            'message': f"{above_critical} patients have critically high {col}",
+            'count':   above_critical,
+            'percent': round(above_critical / total_rows * 100, 1),
+        })
+    elif above_high > 0:
+        alerts.append({
+            'column':  col, 'level': 'WARNING',
+            'message': f"{above_high} patients have high {col}",
+            'count':   above_high,
+            'percent': round(above_high / total_rows * 100, 1),
+        })
+    if below_low > 0:
+        alerts.append({
+            'column':  col, 'level': 'LOW',
+            'message': f"{below_low} patients have low {col}",
+            'count':   below_low,
+            'percent': round(below_low / total_rows * 100, 1),
+        })
         # Anomaly detection
         try:
             iso = IsolationForest(contamination=0.1, random_state=42)
             anomaly_labels = iso.fit_predict(df_work[numeric_cols].values)
             n_anomalies = int((anomaly_labels == -1).sum())
-            anomaly_rows = df_work[anomaly_labels == -1].head(5).to_dict('records')
-            anomaly_rows = [{k: round(float(v), 3) if isinstance(v, (int, float)) else v
-                             for k, v in row.items()} for row in anomaly_rows]
+            anomaly_df = df_work[anomaly_labels == -1].head(10).copy()
+            anomaly_rows = []
+            for idx, row in anomaly_df.iterrows():
+                    row_dict = {'row_index': int(idx)}
+                    for k, v in row.items():
+                        try:
+                            row_dict[k] = round(float(v), 3)
+                        except (ValueError, TypeError):
+                            row_dict[k] = str(v)
+                    anomaly_rows.append(row_dict)
         except Exception:
             n_anomalies = 0
             anomaly_rows = []
@@ -393,9 +409,13 @@ class HealthcareMLEngine:
                     change_pct = abs((recent - overall) / overall * 100)
                     if change_pct > 20:
                         change_alerts.append({
-                            'column': col,
+                            'column':         col,
                             'change_percent': round(change_pct, 1),
-                            'direction': 'increasing' if recent > overall else 'decreasing',
+                            'change_ratio':   round(change_pct / 100, 2),   # frontend reads this
+                            'direction':      'increasing' if recent > overall else 'decreasing',
+                            'message':        f"Recent avg ({recent:.2f}) is {change_pct:.1f}% {'above' if recent > overall else 'below'} overall avg ({overall:.2f})",
+                            'recent_avg':     round(recent, 3),
+                            'overall_avg':    round(overall, 3),
                         })
 
         # Risk scores
@@ -437,7 +457,7 @@ class HealthcareMLEngine:
                 'high_threshold': auto_thresholds[col]['high'],
                 'critical_threshold': auto_thresholds[col]['critical_high'],
             } for col in numeric_cols[:8]},
-        }
+     }
 
     # ─────────────────────────────────────────────
     # ③ TIME-SERIES / TREND ANALYSIS

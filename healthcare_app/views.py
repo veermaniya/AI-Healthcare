@@ -1,4 +1,7 @@
 import json, uuid, io
+import numpy as np
+import json
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +19,16 @@ from ml_engine import (
     load_excel_file, load_from_sql, dataframe_summary, get_column_stats,
 )
 from .models import DataSession, ChatMessage, AnalysisResult
-
+class NumpyEncoder(json.JSONEncoder):
+    """Converts numpy types so Django JsonResponse never crashes."""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 _dataframe_store = {}   # session_key → DataFrame
 _temp_df_store   = {}   # session_key → temp DataFrame (dataset compare)
 
@@ -81,7 +93,7 @@ def logout_view(request):
     logout(request); return redirect('login')
 
 # ── MAIN ─────────────────────────────────────────────────────
- 
+@login_required(login_url='/login/')
 def index(request):
     sk = _sk(request)
     return render(request, 'healthcare_app/index.html', {
@@ -296,10 +308,14 @@ def survival_analysis(request):
             return JsonResponse({'success': False, 'error': 'No dataset loaded'})
         eng = SurvivalAnalysisEngine()
         result = eng.run_kaplan_meier(df,
-                                      duration_col  = data.get('duration_col',''),
-                                      event_col     = data.get('event_col',''),
-                                      group_col     = data.get('group_col') or None)
-        return JsonResponse({'success': True, 'result': result})
+                                      duration_col = data.get('duration_col',''),
+                                      event_col    = data.get('event_col',''),
+                                      group_col    = data.get('group_col') or None)
+        # ✅ Use NumpyEncoder
+        return HttpResponse(
+            json.dumps({'success': True, 'result': result}, cls=NumpyEncoder),
+            content_type='application/json'
+        )
     except Exception as ex:
         return JsonResponse({'success': False, 'error': str(ex)})
 
