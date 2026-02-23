@@ -2089,11 +2089,37 @@ async function runRisk(){
   // Anomaly
   const aDiv=document.getElementById('risk-anomaly');
   aDiv.innerHTML=`<div style="padding:10px;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:var(--radius);margin-bottom:10px"><div style="font-size:22px;font-family:'DM Mono',monospace;color:var(--accent4);font-weight:500">${ano.n_anomalies||0}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">anomalies out of ${kd.total||0} patients (${ano.anomaly_percent||0}%)</div></div>`;
-  if(ano.top_anomalies&&ano.top_anomalies.length){
-    const cols=Object.keys(ano.top_anomalies[0]).filter(k=>k!=='anomaly_score'&&k!=='row_index').slice(0,4);
-    let th='<tr><th class="rn">#</th>'+cols.map(c=>`<th>${c}</th>`).join('')+'<th>Score</th></tr>';
-    let tb=ano.top_anomalies.slice(0,6).map((row,i)=>`<tr><td class="rn">${row.row_index}</td>${cols.map(c=>`<td>${row[c]}</td>`).join('')}<td style="color:var(--accent4)">${row.anomaly_score}</td></tr>`).join('');
-    aDiv.innerHTML+=`<div style="overflow-x:auto"><table class="prev-table"><thead>${th}</thead><tbody>${tb}</tbody></table></div>`;
+  if(ano.top_anomalies && ano.top_anomalies.length){
+    // Get all column keys except row_index, take first 5
+    const allKeys = Object.keys(ano.top_anomalies[0]);
+    const cols = allKeys.filter(k => k !== 'row_index').slice(0, 5);
+
+    // Table header
+      let th = '<tr><th style="min-width:40px">#</th>'
+        + cols.map(c => `<th style="min-width:80px;max-width:120px;overflow:hidden;text-overflow:ellipsis" title="${c}">${c.length>10?c.slice(0,10)+'…':c}</th>`).join('')
+        + '</tr>';
+
+      // Table body
+      let tb = ano.top_anomalies.slice(0, 8).map(row => {
+        const rowIdx = row.row_index !== undefined ? row.row_index : '—';
+        const cells = cols.map(c => {
+          const val = row[c];
+          const display = (val === undefined || val === null) ? '—' : val;
+          return `<td style="font-family:'DM Mono',monospace;font-size:11px">${display}</td>`;
+        }).join('');
+        return `<tr>
+          <td style="font-weight:600;color:var(--accent4);font-size:11px">${rowIdx}</td>
+          ${cells}
+        </tr>`;
+      }).join('');
+
+      aDiv.innerHTML += `
+        <div style="overflow-x:auto;margin-top:8px">
+          <table class="prev-table" style="font-size:11px;width:100%">
+            <thead>${th}</thead>
+            <tbody>${tb}</tbody>
+          </table>
+        </div>`;
   }
   // Top risk patients
   const trDiv=document.getElementById('risk-top-patients');trDiv.innerHTML='';

@@ -327,6 +327,9 @@ class HealthcareMLEngine:
     # ─────────────────────────────────────────────
     # ② CLINICAL RISK & ALERT ENGINE
     # ─────────────────────────────────────────────
+    # ─────────────────────────────────────────────
+    # ② CLINICAL RISK & ALERT ENGINE
+    # ─────────────────────────────────────────────
     def run_risk_engine(self, feature_cols, target_col=None, thresholds=None):
         if self.df is None:
             return {'error': 'No data loaded'}
@@ -337,6 +340,7 @@ class HealthcareMLEngine:
             return {'error': 'No numeric columns selected'}
 
         df_work = self.df[numeric_cols].dropna().copy()
+        total_rows = len(df_work)
 
         # Auto thresholds (mean ± 2std)
         auto_thresholds = {}
@@ -344,42 +348,46 @@ class HealthcareMLEngine:
             mean_v = float(df_work[col].mean())
             std_v = float(df_work[col].std()) or 1.0
             auto_thresholds[col] = {
-                'mean': round(mean_v, 3),
-                'std': round(std_v, 3),
-                'high': round(mean_v + 2 * std_v, 3),
+                'mean':          round(mean_v, 3),
+                'std':           round(std_v, 3),
+                'high':          round(mean_v + 2 * std_v, 3),
                 'critical_high': round(mean_v + 3 * std_v, 3),
-                'low': round(mean_v - 2 * std_v, 3),
+                'low':           round(mean_v - 2 * std_v, 3),
             }
 
-alerts = []
-total_rows = len(df_work)
-for col in numeric_cols:
-    thresh = auto_thresholds[col]
-    above_critical = int((df_work[col] > thresh['critical_high']).sum())
-    above_high     = int((df_work[col] > thresh['high']).sum())
-    below_low      = int((df_work[col] < thresh['low']).sum())
-    if above_critical > 0:
-        alerts.append({
-            'column':  col, 'level': 'CRITICAL',
-            'message': f"{above_critical} patients have critically high {col}",
-            'count':   above_critical,
-            'percent': round(above_critical / total_rows * 100, 1),
-        })
-    elif above_high > 0:
-        alerts.append({
-            'column':  col, 'level': 'WARNING',
-            'message': f"{above_high} patients have high {col}",
-            'count':   above_high,
-            'percent': round(above_high / total_rows * 100, 1),
-        })
-    if below_low > 0:
-        alerts.append({
-            'column':  col, 'level': 'LOW',
-            'message': f"{below_low} patients have low {col}",
-            'count':   below_low,
-            'percent': round(below_low / total_rows * 100, 1),
-        })
-        # Anomaly detection
+        # ── Threshold alerts ──
+        alerts = []
+        for col in numeric_cols:
+            thresh = auto_thresholds[col]
+            above_critical = int((df_work[col] > thresh['critical_high']).sum())
+            above_high     = int((df_work[col] > thresh['high']).sum())
+            below_low      = int((df_work[col] < thresh['low']).sum())
+            if above_critical > 0:
+                alerts.append({
+                    'column':  col,
+                    'level':   'CRITICAL',
+                    'message': f"{above_critical} patients have critically high {col}",
+                    'count':   above_critical,
+                    'percent': round(above_critical / total_rows * 100, 1),
+                })
+            elif above_high > 0:
+                alerts.append({
+                    'column':  col,
+                    'level':   'WARNING',
+                    'message': f"{above_high} patients have high {col}",
+                    'count':   above_high,
+                    'percent': round(above_high / total_rows * 100, 1),
+                })
+            if below_low > 0:
+                alerts.append({
+                    'column':  col,
+                    'level':   'LOW',
+                    'message': f"{below_low} patients have low {col}",
+                    'count':   below_low,
+                    'percent': round(below_low / total_rows * 100, 1),
+                })
+
+        # ── Anomaly detection ──
         try:
             iso = IsolationForest(contamination=0.1, random_state=42)
             anomaly_labels = iso.fit_predict(df_work[numeric_cols].values)
@@ -387,23 +395,23 @@ for col in numeric_cols:
             anomaly_df = df_work[anomaly_labels == -1].head(10).copy()
             anomaly_rows = []
             for idx, row in anomaly_df.iterrows():
-                    row_dict = {'row_index': int(idx)}
-                    for k, v in row.items():
-                        try:
-                            row_dict[k] = round(float(v), 3)
-                        except (ValueError, TypeError):
-                            row_dict[k] = str(v)
-                    anomaly_rows.append(row_dict)
+                row_dict = {'row_index': int(idx)}
+                for k, v in row.items():
+                    try:
+                        row_dict[k] = round(float(v), 3)
+                    except (ValueError, TypeError):
+                        row_dict[k] = str(v)
+                anomaly_rows.append(row_dict)
         except Exception:
             n_anomalies = 0
             anomaly_rows = []
 
-        # Change alerts
+        # ── Change alerts ──
         change_alerts = []
         for col in numeric_cols[:4]:
             series = df_work[col].values
             if len(series) > 10:
-                recent = float(np.mean(series[-10:]))
+                recent  = float(np.mean(series[-10:]))
                 overall = float(np.mean(series))
                 if overall != 0:
                     change_pct = abs((recent - overall) / overall * 100)
@@ -411,22 +419,22 @@ for col in numeric_cols:
                         change_alerts.append({
                             'column':         col,
                             'change_percent': round(change_pct, 1),
-                            'change_ratio':   round(change_pct / 100, 2),   # frontend reads this
+                            'change_ratio':   round(change_pct / 100, 2),
                             'direction':      'increasing' if recent > overall else 'decreasing',
                             'message':        f"Recent avg ({recent:.2f}) is {change_pct:.1f}% {'above' if recent > overall else 'below'} overall avg ({overall:.2f})",
                             'recent_avg':     round(recent, 3),
                             'overall_avg':    round(overall, 3),
                         })
 
-        # Risk scores
+        # ── Risk scores ──
         risk_scores = []
         for i in range(len(df_work)):
             score = 0
             for col in numeric_cols:
-                val = float(df_work[col].iloc[i])
+                val    = float(df_work[col].iloc[i])
                 thresh = auto_thresholds[col]
                 mean_v = thresh.get('mean', val)
-                std_v = thresh.get('std', 1) or 1
+                std_v  = thresh.get('std', 1) or 1
                 z = abs((val - mean_v) / std_v)
                 score += min(z, 3)
             normalized = min(round(score / max(len(numeric_cols), 1) / 3 * 100, 1), 100)
@@ -439,26 +447,24 @@ for col in numeric_cols:
             'task': 'risk_engine',
             'alerts': alerts,
             'anomaly_detection': {
-                'n_anomalies': n_anomalies,
-                'anomaly_percent': round(n_anomalies / len(df_work) * 100, 1),
-                'top_anomalies': anomaly_rows,
+                'n_anomalies':    n_anomalies,
+                'anomaly_percent': round(n_anomalies / max(total_rows, 1) * 100, 1),
+                'top_anomalies':  anomaly_rows,
             },
             'change_alerts': change_alerts,
             'risk_distribution': {
-                'high_risk_count': high_risk_count,
-                'total': len(risk_scores),
-                'high_risk_percent': round(high_risk_count / max(len(risk_scores), 1) * 100, 1),
+                'high_risk_count':    high_risk_count,
+                'total':              len(risk_scores),
+                'high_risk_percent':  round(high_risk_count / max(len(risk_scores), 1) * 100, 1),
             },
             'top_risk_patients': risk_scores[:10],
             'thresholds_used': {k: v for k, v in list(auto_thresholds.items())[:8]},
             'column_stats': {col: {
-                'mean': auto_thresholds[col]['mean'],
-                'std': auto_thresholds[col]['std'],
+                'mean':           auto_thresholds[col]['mean'],
+                'std':            auto_thresholds[col]['std'],
                 'high_threshold': auto_thresholds[col]['high'],
-                'critical_threshold': auto_thresholds[col]['critical_high'],
-            } for col in numeric_cols[:8]},
-     }
-
+            } for col in numeric_cols},
+        }
     # ─────────────────────────────────────────────
     # ③ TIME-SERIES / TREND ANALYSIS
     # ─────────────────────────────────────────────
