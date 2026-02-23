@@ -1,11 +1,30 @@
+# ════════════════════════════════════════════════
+#  HealthAI — Healthcare Intelligence Platform
+#  Requirements File
+#  Install: pip install -r requirements.txt
+# ════════════════════════════════════════════════
+
+# ── Web Framework ─────────────────────────────
 Django>=4.2,<5.0
+
+# ── Data Processing ───────────────────────────
 pandas>=2.0.0
 numpy>=1.24.0
-scikit-learn>=1.3.0
-openpyxl>=3.1.0
-xlrd>=2.0.1
-requests>=2.31.0
-sqlalchemy>=2.0.0
-pyodbc>=4.0.0          # For SQL Server
-pymysql>=1.1.0         # For MySQL (optional)
-psycopg2-binary>=2.9.0 # For PostgreSQL (optional)
+openpyxl>=3.1.0          # Excel .xlsx read/write
+xlrd>=2.0.1              # Excel .xls legacy support
+
+# ── Machine Learning ──────────────────────────
+scikit-learn>=1.3.0       # RandomForest, KMeans, IsolationForest, KNN, etc.
+
+# ── HTTP / API Calls ──────────────────────────
+requests>=2.31.0          # Groq LLM API calls + medical image analysis
+
+# ── Database (optional, for SQL connections) ──
+sqlalchemy>=2.0.0         # SQL Server / PostgreSQL / MySQL connector
+# pyodbc>=4.0.39          # SQL Server ODBC (uncomment if using SQL Server)
+# psycopg2-binary>=2.9.9  # PostgreSQL (uncomment if using PostgreSQL)
+# pymysql>=1.1.0          # MySQL (uncomment if using MySQL)
+
+# ── Production (optional) ─────────────────────
+# gunicorn>=21.2.0        # WSGI server for production deployment
+# whitenoise>=6.6.0       # Static files serving in production

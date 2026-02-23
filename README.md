@@ -1,93 +1,100 @@
-# 🏥 HealthAI — Free Healthcare Intelligence Platform
+# 🏥 HealthAI — Healthcare Intelligence Platform
 
-> AI-Powered Healthcare Analytics | Free for Charity | LLM + ML + Predictions
+> **AI-Powered Clinical Analytics | Django + scikit-learn + Groq LLM**  
+> Built for hospitals, researchers, and healthcare professionals
 
----
-
-## 🌟 Features
-
-| Feature | Description |
-|---|---|
-| 📊 **Excel / CSV Upload** | Upload any `.xlsx`, `.xls`, or `.csv` healthcare dataset |
-| 🗄 **SQL Server Connect** | Connect directly to SQL Server, PostgreSQL, MySQL |
-| 🎛 **Dynamic Column Selector** | Click any column to select as Feature or Target |
-| 📈 **Regression** | Predict continuous values (blood pressure, glucose, BMI) |
-| 🏷 **Classification** | Predict categories (diagnosis, risk level, disease type) |
-| 🔵 **Clustering** | Group patients by similarity (K-Means) |
-| 🎯 **Single Patient Prediction** | Enter values manually and get instant prediction |
-| 🤖 **AI Chat Assistant** | Ask natural language questions about your data |
-| 📉 **Feature Importance** | See which columns most influence predictions |
-| 👁 **Data Preview** | See your dataset before analysis |
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![Django](https://img.shields.io/badge/Django-4.x-green) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Cost](https://img.shields.io/badge/Cost-Free-brightgreen)
 
 ---
 
-## ⚡ Quick Start (3 Steps)
+## 🌟 What Is This?
 
-### Step 1: Install & Run
+HealthAI is a **full-stack web application** that turns any healthcare dataset (Excel/CSV/SQL) into actionable clinical intelligence — with zero cost. Upload your data, and instantly get ML predictions, risk alerts, survival curves, patient similarity matching, anomaly detection, and AI-generated clinical narratives.
+
+---
+
+## ✨ Features (16 AI Modules)
+
+| # | Module | Description |
+|---|---|---|
+| 1 | 📊 **ML Analytics** | Regression, Classification, Clustering with auto-detect |
+| 2 | 🧠 **XAI Explainability** | SHAP-style feature contributions & why-narrative |
+| 3 | ⚠️ **Risk Engine** | Auto threshold alerts, anomaly detection, risk scores |
+| 4 | 📈 **Trend Analysis** | Time-series forecasting with correlation matrix |
+| 5 | 👥 **Patient Similarity** | KNN-based similar patient finder + cohort comparison |
+| 6 | 🧑‍⚕️ **Patient Dashboard** | Full profile: percentile ranks, risk ring, predictions |
+| 7 | 📉 **Survival Analysis** | Kaplan-Meier curves with group stratification |
+| 8 | 🎯 **Multi-Target Compare** | Simultaneous predictions across multiple targets |
+| 9 | 🔔 **Alert Rules Engine** | Custom clinical threshold rules builder |
+| 10 | ⚖️ **Dataset Comparator** | Statistical A/B comparison with Cohen's d |
+| 11 | 💡 **Clinical Insights** | LLM-generated narrative summaries (Groq LLaMA) |
+| 12 | 🧪 **Data Quality** | Missing data, bias, outlier & class imbalance checks |
+| 13 | 🔒 **Privacy & PHI** | PHI detection, masking, anonymisation |
+| 14 | 💊 **ICD Coding Assistant** | ICD-10 mapping + drug interaction flags |
+| 15 | 📄 **Report Generator** | HTML clinical report export |
+| 16 | 🔬 **Medical Imaging** | AI image analysis via Groq vision models |
+
+---
+
+## ⚡ Quick Start
+
+### Option A — One-Click (Windows)
 ```bash
-cd healthcare_ai
-chmod +x run.sh
-./run.sh
+setup_and_run.bat
 ```
-Or manually:
+
+### Option B — One-Click (Linux/Mac)
 ```bash
+chmod +x run.sh && ./run.sh
+```
+
+### Option C — Manual
+```bash
+# 1. Clone / extract project
+cd healthcare_ai
+
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Setup database
 python manage.py makemigrations healthcare_app
 python manage.py migrate
+
+# 4. Create default users
+python manage.py create_default_users
+
+# 5. Start server
 python manage.py runserver
 ```
 
-### Step 2: Get Free LLM API Key
-1. Go to **https://console.groq.com** (completely free)
-2. Sign up and create an API key
+Then open **http://127.0.0.1:8000**
+
+---
+
+## 🔑 Setup: Groq API Key (Free LLM)
+
+1. Go to **https://console.groq.com** — sign up (free)
+2. Create an API key (starts with `gsk_...`)
 3. Open `healthcare_ai/settings.py`
-4. Replace `'your-groq-api-key-here'` with your key
+4. Replace the empty string:
 
-### Step 3: Open Browser
+```python
+GROQ_API_KEY = 'gsk_your_key_here'   # ← paste here
 ```
-http://127.0.0.1:8000
-```
+
+> **Free tier:** 14,400 API requests/day — more than enough for clinical use.  
+> The platform works without the key, but AI Insights and ICD Coding features need it.
 
 ---
 
-## 📊 How To Use
+## 👤 Default Login Accounts
 
-### Using the Column Selector
-- **Click once** on a column = Add as **Feature** (blue ✓)
-- **Click twice** on same column = Make it the **Target** (pink ★)
-- **Click three times** = Deselect
-- You can select **multiple feature columns**
-
-### Analysis Types
-| Task | When to Use | Target Column |
+| Username | Password | Role |
 |---|---|---|
-| **Auto Detect** | Let AI decide | Required |
-| **Regression** | Predict a number (glucose level) | Required - numeric |
-| **Classification** | Predict a category (disease type) | Required - categorical |
-| **Clustering** | Group similar patients | Not needed |
-
-### SQL Server Connection String Examples
-```
-# SQL Server
-mssql+pyodbc://username:password@server_name/database_name?driver=ODBC+Driver+17+for+SQL+Server
-
-# PostgreSQL
-postgresql://username:password@localhost:5432/healthcare_db
-
-# MySQL
-mysql+pymysql://username:password@localhost/healthcare_db
-```
-
----
-
-## 🤖 LLM Chat Examples
-
-You can ask the AI assistant:
-- *"Explain the regression results in simple terms"*
-- *"Which patients are at highest risk based on these features?"*
-- *"What does the R² score of 0.87 mean?"*
-- *"How can I improve my prediction model?"*
-- *"What health patterns do you see in this clustering result?"*
+| `admin` | `Admin@1234` | Superuser |
+| `doctor` | `Doctor@1234` | Staff |
+| `analyst` | `Analyst@1234` | Staff |
+| `researcher` | `Research@1234` | Staff |
 
 ---
 
@@ -95,98 +102,221 @@ You can ask the AI assistant:
 
 ```
 healthcare_ai/
-├── healthcare_ai/          # Django project config
-│   ├── settings.py         # ← Set GROQ_API_KEY here
+├── healthcare_ai/                  # Django project config
+│   ├── settings.py                 # ← GROQ_API_KEY goes here
 │   └── urls.py
-├── healthcare_app/         # Main Django app
-│   ├── models.py           # DataSession, AnalysisResult, ChatMessage
-│   ├── views.py            # All API endpoints
-│   ├── urls.py             # URL routing
+│
+├── healthcare_app/                 # Main Django app
+│   ├── models.py                   # DataSession, AnalysisResult, ChatMessage
+│   ├── views.py                    # All 30+ API endpoints (NumpyEncoder safe)
+│   ├── urls.py                     # URL routing
+│   ├── management/
+│   │   └── commands/
+│   │       └── create_default_users.py
 │   └── templates/
 │       └── healthcare_app/
-│           └── index.html  # Full UI (single file)
-├── ml_engine/              # AI/ML Engine
-│   ├── engine.py           # HealthcareMLEngine + GroqLLMClient
-│   └── data_loader.py      # Excel/CSV/SQL loaders
+│           └── index.html          # Full single-page UI
+│
+├── ml_engine/                      # AI/ML Engine (pure Python)
+│   ├── __init__.py                 # Exports all engines
+│   ├── engine.py                   # HealthcareMLEngine, GroqLLMClient
+│   ├── engine_features2.py         # PatientDashboard, Survival, Comparator, etc.
+│   ├── engine_extensions.py        # ClinicalInsights, DataQuality, Privacy, Report
+│   └── data_loader.py              # Excel/CSV/SQL loaders
+│
 ├── requirements.txt
 ├── manage.py
-├── run.sh                  # One-click launcher
-└── sample_healthcare_data.csv  # Test dataset
+├── setup_and_run.bat               # Windows one-click
+└── run.sh                          # Linux/Mac one-click
 ```
 
 ---
 
-## 🔌 API Endpoints
+## 🔌 API Endpoints Reference
 
+### Data Loading
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/upload/` | POST | Upload Excel/CSV file |
+| `/api/upload/` | POST | Upload Excel / CSV file |
+| `/api/upload-temp/` | POST | Upload Dataset B for comparison |
 | `/api/connect-sql/` | POST | Connect to SQL database |
-| `/api/columns/` | GET | Get current session columns |
-| `/api/run-analysis/` | POST | Run ML analysis |
-| `/api/predict/` | POST | Single-row prediction |
-| `/api/chat/` | POST | LLM chat message |
+| `/api/columns/` | GET | Get session column info |
+| `/api/column-stats/` | GET | Min/max/mean per column |
 | `/api/clear/` | POST | Clear current session |
 
+### Core ML
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/run-analysis/` | POST | Run regression / classification / clustering |
+| `/api/predict/` | POST | Single-row manual prediction |
+| `/api/run-explainability/` | POST | XAI feature contributions |
+
+### Clinical Features
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/patient-dashboard/` | POST | Full patient profile + risk score |
+| `/api/run-risk-engine/` | POST | Threshold alerts + anomaly detection |
+| `/api/survival-analysis/` | POST | Kaplan-Meier survival curves |
+| `/api/run-trend-analysis/` | POST | Trend + forecasting |
+| `/api/run-patient-similarity/` | POST | KNN similar patients + cohort |
+| `/api/multi-target-compare/` | POST | Compare multiple target columns |
+| `/api/evaluate-alert-rules/` | POST | Evaluate custom clinical rules |
+| `/api/suggest-alert-rules/` | POST | Auto-suggest rules from data |
+| `/api/compare-datasets/` | POST | Statistical A/B dataset comparison |
+| `/api/clinical-insights/` | POST | LLM clinical narrative |
+| `/api/data-quality/` | POST | Data quality audit |
+| `/api/privacy-check/` | POST | PHI detection scan |
+| `/api/anonymise/` | POST | Mask/anonymise PHI columns |
+| `/api/clinical-coding/` | POST | ICD-10 + drug interaction flags |
+| `/api/generate-report/` | POST | Export HTML clinical report |
+| `/api/analyze-image/` | POST | Medical image AI analysis |
+| `/api/filter/` | POST | Row-level data filtering |
+| `/api/chat/` | POST | LLM chat assistant |
+
 ---
 
-## 🔬 ML Models Included
+## 🔬 ML Models
 
-### Regression Models
-- **Random Forest Regressor** (default, best for healthcare data)
-- **Linear Regression** (fast, interpretable)
-- **Gradient Boosting** (highest accuracy)
+### Regression
+- **Random Forest Regressor** — Best for healthcare tabular data
+- **Linear Regression** — Fast, interpretable baseline
+- **Gradient Boosting** — Highest accuracy for complex patterns
 
-### Classification Models
-- **Random Forest Classifier** (default)
-- **Logistic Regression** (interpretable, fast)
+### Classification
+- **Random Forest Classifier** — Handles mixed data well
+- **Logistic Regression** — Interpretable, clinical-grade
+- **Gradient Boosting Classifier** — Best accuracy
 
-### Clustering
-- **K-Means** (configurable clusters 2-10)
+### Unsupervised
+- **K-Means Clustering** — Patient subgroup discovery (2-10 clusters)
+- **Isolation Forest** — Anomaly / outlier detection
+
+### Distance-based
+- **KNN (NearestNeighbors)** — Patient similarity matching
 
 ---
 
-## 💰 Cost Breakdown (All Free!)
+## 📊 How To Use
+
+### Step 1 — Upload Data
+Click **Upload Excel/CSV** and select your file, or use **Connect SQL** with a connection string.
+
+### Step 2 — Select Columns
+- **Click once** → Feature column (blue ✓)
+- **Click twice** → Target column (gold ★)
+- **Click again** → Deselect
+
+### Step 3 — Run Any Module
+Click any tab: Analytics, Risk Engine, Patient Dashboard, Survival Analysis, etc.
+
+### SQL Connection String Formats
+```
+# SQL Server
+mssql+pyodbc://user:pass@server/db?driver=ODBC+Driver+17+for+SQL+Server
+
+# PostgreSQL
+postgresql://user:pass@localhost:5432/healthcare_db
+
+# MySQL
+mysql+pymysql://user:pass@localhost/healthcare_db
+
+# SQLite
+sqlite:///path/to/db.sqlite3
+```
+
+---
+
+## 💰 Cost Breakdown
 
 | Component | Cost |
 |---|---|
-| Django + Python | Free (open source) |
-| scikit-learn ML | Free (open source) |
-| Groq API (LLM) | Free tier: 14,400 requests/day |
-| SQLite Database | Free (included) |
-| Hosting (local) | Free |
+| Python + Django | Free (open source) |
+| scikit-learn | Free (open source) |
+| Groq LLM API | Free (14,400 req/day) |
+| SQLite database | Free (built-in) |
+| Local hosting | Free |
+| **Total** | **$0** |
 
-**Total Cost: $0 — Perfect for healthcare !**
-
-For production/cloud hosting:
-- **Railway.app** — Free tier available
-- **Render.com** — Free tier available
-- **PythonAnywhere** — Free tier available
+### Cloud Hosting Options (also free tier)
+- **Railway.app** — `railway up`
+- **Render.com** — Connect GitHub repo
+- **PythonAnywhere** — Upload and configure WSGI
 
 ---
 
-## 🔒 Security Notes for Production
-
-1. Change `SECRET_KEY` in settings.py
-2. Set `DEBUG = False`
-3. Configure proper `ALLOWED_HOSTS`
-4. Use environment variables for all sensitive keys
-5. Enable HTTPS
+## 🔒 Production Security Checklist
 
 ```python
-# Production settings
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-DEBUG = False
+# healthcare_ai/settings.py — production changes:
+import os
+
+SECRET_KEY  = os.environ['DJANGO_SECRET_KEY']   # Never hardcode
+DEBUG       = False
 GROQ_API_KEY = os.environ['GROQ_API_KEY']
+
+ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
+
+# Add to INSTALLED_APPS for static files in production:
+# 'whitenoise.middleware.WhiteNoiseMiddleware'
+```
+
+Also:
+- Enable HTTPS / SSL certificate
+- Set `SESSION_COOKIE_SECURE = True`
+- Set `CSRF_COOKIE_SECURE = True`
+- Use PostgreSQL instead of SQLite for production
+
+---
+
+## 🧪 Testing the Setup
+
+```bash
+# Test LLM connection
+curl http://127.0.0.1:8000/api/test-llm/
+
+# Test API key
+curl http://127.0.0.1:8000/api/debug-key/
 ```
 
 ---
 
-## 📞 Support & Contribution
+## 📦 Tech Stack
 
-This is a **free charity project** aimed at promoting global healthcare access.
-Feel free to contribute, report issues, and share with healthcare organisations!
+| Layer | Technology |
+|---|---|
+| Backend | Django 4.x (Python 3.10+) |
+| ML Engine | scikit-learn, pandas, numpy |
+| LLM | Groq API (LLaMA 3.3 70B) |
+| Database | SQLite (dev) / PostgreSQL (prod) |
+| Frontend | Vanilla JS, Chart.js, CSS variables |
+| Auth | Django built-in authentication |
+| Serialization | Custom NumpyEncoder (int64-safe) |
 
 ---
 
-*Built with ❤️ for healthcare.*
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit: `git commit -m "Add clinical feature X"`
+4. Push: `git push origin feature/my-feature`
+5. Open a Pull Request
+
+---
+
+## ⚠️ Medical Disclaimer
+
+> This platform is for **clinical decision support and research only**.  
+> It does **not** constitute a medical diagnosis.  
+> Always consult a qualified healthcare professional before acting on AI-generated insights.
+
+---
+
+## 📄 License
+
+MIT License — Free for personal, academic, and healthcare charity use.
+
+---
+
+*Built with ❤️ for healthcare professionals and researchers.*  
+*IIT Roorkee Project — Healthcare AI Intelligence Platform*
