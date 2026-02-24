@@ -401,11 +401,242 @@
   .alert-bar.error { background: rgba(255,77,109,0.15); border-bottom: 1px solid rgba(255,77,109,0.3); color: #ff8fa3; }
   .alert-bar.success { background: rgba(0,229,160,0.1); border-bottom: 1px solid rgba(0,229,160,0.2); color: var(--accent2); }
 
-  /* Responsive */
-  @media (max-width: 900px) {
-    .left { display: none; }
-    .right { width: 100%; }
+/* Responsive handled by theme system above */
+/* ═══════════════════════════════════════════════════════
+   THEME SYSTEM — Dark / Light + Color Palettes
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --deep: #050d1a;
+  --navy: #0a1628;
+  --panel: #0f1f35;
+  --border: rgba(0,180,255,0.12);
+  --accent: #00b4ff;
+  --accent2: #00e5a0;
+  --accent3: #ff4d6d;
+  --text: #e8f4ff;
+  --muted: #6b8cae;
+  --gold: #ffd166;
+  --surface-card: rgba(255,255,255,0.04);
+  --font-scale: 1;
+}
+
+/* LIGHT MODE */
+[data-theme="light"] {
+  --deep: #f0f4f8;
+  --navy: #ffffff;
+  --panel: #f8fafc;
+  --border: rgba(0,120,200,0.15);
+  --accent: #0070cc;
+  --accent2: #00a86b;
+  --accent3: #e03050;
+  --text: #1a2740;
+  --muted: #4a6080;
+  --gold: #c89000;
+  --surface-card: rgba(0,0,0,0.04);
+}
+
+/* THEME PALETTES */
+[data-palette="teal"] { --accent:#00c9a7; --accent2:#00e5cc; }
+[data-palette="purple"] { --accent:#a855f7; --accent2:#c084fc; }
+[data-palette="orange"] { --accent:#f97316; --accent2:#fb923c; }
+[data-palette="rose"] { --accent:#f43f5e; --accent2:#fb7185; }
+[data-palette="emerald"] { --accent:#10b981; --accent2:#34d399; }
+[data-palette="amber"] { --accent:#f59e0b; --accent2:#fbbf24; }
+
+/* THEME SWITCHER UI */
+.theme-switcher {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--navy);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.theme-toggle-btn:hover { transform: scale(1.1); border-color: var(--accent); }
+
+.theme-panel {
+  background: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: fadeInDown 0.2s ease;
+}
+.theme-panel.open { display: flex; }
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.theme-panel-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.mode-row {
+  display: flex;
+  gap: 6px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.mode-btn.active {
+  border-color: var(--accent);
+  background: rgba(0,180,255,0.1);
+  color: var(--accent);
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+}
+
+.pal-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.pal-dot:hover { transform: scale(1.15); }
+.pal-dot.active { border-color: var(--text); transform: scale(1.1); }
+
+/* Font size control */
+.font-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.font-ctrl-label {
+  font-size: 10px;
+  color: var(--muted);
+  flex: 1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.font-ctrl-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.font-ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+.font-size-label { font-size: 11px; color: var(--accent); font-family: 'DM Mono', monospace; min-width: 28px; text-align: center; }
+
+/* ═══ RESPONSIVE ═══ */
+
+/* Mobile first — small phones */
+@media (max-width: 480px) {
+  body { overflow-y: auto; flex-direction: column; }
+  .left { display: none !important; }
+  .right {
+    width: 100% !important;
+    padding: 24px 18px;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: 70px;
   }
+  .login-box { max-width: 100%; }
+  .login-title { font-size: 22px; }
+  .role-selector { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+  .role-btn { padding: 9px 5px; font-size: 10px; }
+  .sso-grid { grid-template-columns: 1fr; }
+  .security-bar { flex-direction: column; gap: 10px; }
+  .hero-title { font-size: 28px !important; }
+}
+
+/* Medium phones */
+@media (min-width: 481px) and (max-width: 767px) {
+  body { overflow-y: auto; flex-direction: column; }
+  .left { display: none !important; }
+  .right {
+    width: 100% !important;
+    padding: 32px 28px;
+    min-height: 100vh;
+    padding-top: 70px;
+  }
+  .login-box { max-width: 440px; margin: 0 auto; }
+}
+
+/* Tablet portrait */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .left { width: 42%; padding: 32px; }
+  .right { width: 58%; padding: 32px; }
+  .hero-title { font-size: clamp(26px, 3.5vw, 40px) !important; }
+  .brand-name { font-size: 22px; }
+  .hero-sub { font-size: 14px; }
+  .login-title { font-size: 24px; }
+  .feature-pills { display: none; } /* save space on tablet */
+}
+
+/* Tablet landscape & small desktop */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .left { width: 48%; padding: 40px; }
+  .right { width: 52%; padding: 36px; }
+  .hero-title { font-size: clamp(32px, 3vw, 44px) !important; }
+}
+
+/* Desktop+ */
+@media (min-width: 1280px) {
+  .left { padding: 60px; }
+  .right { padding: 48px; }
+}
+
+/* ECG responsive hide */
+@media (max-height: 600px) {
+  .ecg-wrap { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -589,6 +820,90 @@
     let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
     return v ? v[2] : '';
   }
+
+  // ═══ THEME SYSTEM ═══
+  let fontScale = 100;
+  let currentMode = 'dark';
+  let currentPalette = 'default';
+
+  function toggleThemePanel() {
+    const p = document.getElementById('themePanel');
+    p.classList.toggle('open');
+  }
+
+  // Close panel on outside click
+  document.addEventListener('click', function(e) {
+    const sw = document.querySelector('.theme-switcher');
+    if (sw && !sw.contains(e.target)) {
+      document.getElementById('themePanel').classList.remove('open');
+    }
+  });
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.documentElement.setAttribute('data-theme', mode === 'light' ? 'light' : '');
+    document.getElementById('modeDark').classList.toggle('active', mode === 'dark');
+    document.getElementById('modeLight').classList.toggle('active', mode === 'light');
+    localStorage.setItem('hai-mode', mode);
+  }
+
+  function setPalette(pal, el) {
+    document.querySelectorAll('.pal-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    currentPalette = pal;
+    document.documentElement.setAttribute('data-palette', pal);
+    localStorage.setItem('hai-palette', pal);
+  }
+
+  function adjustFont(dir) {
+    fontScale = Math.max(80, Math.min(130, fontScale + dir * 5));
+    document.documentElement.style.fontSize = (fontScale / 100) + 'rem';
+    document.getElementById('fontSizeLbl').textContent = fontScale + '%';
+    localStorage.setItem('hai-fontscale', fontScale);
+  }
+
+  // Restore saved preferences
+  (function() {
+    const savedMode = localStorage.getItem('hai-mode') || 'dark';
+    const savedPalette = localStorage.getItem('hai-palette') || 'default';
+    const savedFont = parseInt(localStorage.getItem('hai-fontscale')) || 100;
+    if (savedMode === 'light') setMode('light');
+    if (savedPalette !== 'default') {
+      const pd = document.querySelector('[data-pal="' + savedPalette + '"]');
+      if (pd) setPalette(savedPalette, pd);
+    }
+    if (savedFont !== 100) { fontScale = savedFont; document.documentElement.style.fontSize = (fontScale/100)+'rem'; document.getElementById('fontSizeLbl').textContent = fontScale+'%'; }
+  })();
+
 </script>
+
+<!-- ═══ THEME SWITCHER ═══ -->
+<div class="theme-switcher">
+  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemePanel()" title="Themes & Settings">🎨</button>
+  <div class="theme-panel" id="themePanel">
+    <div class="theme-panel-title">Mode</div>
+    <div class="mode-row">
+      <button class="mode-btn active" id="modeDark" onclick="setMode('dark')">🌙 Dark</button>
+      <button class="mode-btn" id="modeLight" onclick="setMode('light')">☀️ Light</button>
+    </div>
+    <div class="theme-panel-title">Accent Color</div>
+    <div class="palette-grid">
+      <div class="pal-dot active" data-pal="default" style="background:#00b4ff" onclick="setPalette('default',this)" title="Cyan Blue"></div>
+      <div class="pal-dot" data-pal="teal" style="background:#00c9a7" onclick="setPalette('teal',this)" title="Teal"></div>
+      <div class="pal-dot" data-pal="purple" style="background:#a855f7" onclick="setPalette('purple',this)" title="Purple"></div>
+      <div class="pal-dot" data-pal="orange" style="background:#f97316" onclick="setPalette('orange',this)" title="Orange"></div>
+      <div class="pal-dot" data-pal="rose" style="background:#f43f5e" onclick="setPalette('rose',this)" title="Rose"></div>
+      <div class="pal-dot" data-pal="emerald" style="background:#10b981" onclick="setPalette('emerald',this)" title="Emerald"></div>
+    </div>
+    <div class="theme-panel-title">Font Size</div>
+    <div class="font-ctrl">
+      <span class="font-ctrl-label">Text</span>
+      <button class="font-ctrl-btn" onclick="adjustFont(-1)">−</button>
+      <span class="font-size-label" id="fontSizeLbl">100%</span>
+      <button class="font-ctrl-btn" onclick="adjustFont(1)">+</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

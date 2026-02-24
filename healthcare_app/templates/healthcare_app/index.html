@@ -7,19 +7,12 @@
 <meta name="csrf-token" content="{{ csrf_token }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HealthAI — Healthcare Intelligence Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{
-  --bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--surface3:#1f2d42;
-  --border:rgba(99,179,237,0.12);--accent:#38bdf8;--accent2:#34d399;
-  --accent3:#f472b6;--accent4:#fb923c;
-  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
-  --danger:#f87171;--warn:#fbbf24;
-  --radius:12px;--radius-lg:20px;--shadow:0 4px 24px rgba(0,0,0,0.4);
-}
+/* :root defined in theme system above */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
+html,body{height:100dvh;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 
@@ -36,7 +29,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* LAYOUT */
-.layout{flex:1;display:grid;grid-template-columns:290px 1fr 330px;overflow:hidden;position:relative;z-index:1}
+.layout{flex:1;display:grid;grid-template-columns:var(--sidebar-w,270px) 1fr var(--chat-w,300px);overflow:hidden;position:relative;z-index:1}
 
 /* LEFT SIDEBAR */
 .sidebar-left{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
@@ -525,9 +518,369 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .qp-chip{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;display:flex;flex-direction:column;gap:2px;min-width:100px}
 .qp-chip-lbl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
 .qp-chip-val{font-size:13px;color:var(--accent);font-family:'DM Mono',monospace;font-weight:600}
+
+/* ════════════════════════════════════════════════════════
+   THEME SYSTEM — Light / Dark + Color Palettes
+   ════════════════════════════════════════════════════════ */
+
+/* DEFAULT = DARK */
+:root {
+  --bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--surface3:#1f2d42;
+  --border:rgba(99,179,237,0.12);--accent:#38bdf8;--accent2:#34d399;
+  --accent3:#f472b6;--accent4:#fb923c;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --danger:#f87171;--warn:#fbbf24;
+  --radius:12px;--radius-lg:20px;--shadow:0 4px 24px rgba(0,0,0,0.4);
+  --sidebar-w:270px;--chat-w:300px;
+  --font-base: 14px;
+}
+
+/* LIGHT MODE */
+[data-theme="light"] {
+  --bg:#f0f4f8;
+  --surface:#ffffff;
+  --surface2:#f1f5f9;
+  --surface3:#e2e8f0;
+  --border:rgba(100,150,200,0.18);
+  --accent:#0284c7;
+  --accent2:#059669;
+  --accent3:#db2777;
+  --accent4:#ea580c;
+  --text:#0f172a;
+  --text2:#334155;
+  --text3:#64748b;
+  --danger:#dc2626;
+  --warn:#d97706;
+  --shadow:0 4px 24px rgba(0,0,0,0.1);
+}
+[data-theme="light"] body::before { background-image:linear-gradient(rgba(2,132,199,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(2,132,199,.04) 1px,transparent 1px) !important; }
+[data-theme="light"] .header { background:rgba(255,255,255,0.95) !important; }
+[data-theme="light"] .logo-text { background:linear-gradient(135deg,var(--accent),var(--accent2)) !important; -webkit-background-clip:text !important; -webkit-text-fill-color:transparent !important; }
+[data-theme="light"] .msg-user .msg-bubble { color:#fff !important; }
+[data-theme="light"] .prev-table-wrap { background:#fff; }
+
+/* PALETTE OVERRIDES */
+[data-palette="teal"]    { --accent:#0d9488; --accent2:#14b8a6; }
+[data-palette="purple"]  { --accent:#7c3aed; --accent2:#9333ea; }
+[data-palette="orange"]  { --accent:#ea580c; --accent2:#f97316; }
+[data-palette="rose"]    { --accent:#e11d48; --accent2:#f43f5e; }
+[data-palette="emerald"] { --accent:#059669; --accent2:#10b981; }
+[data-palette="amber"]   { --accent:#b45309; --accent2:#d97706; }
+
+/* ════ FONT SIZE SCALE ════ */
+html { font-size: var(--font-base, 14px); }
+body { font-size: 1rem; }
+.panel-title { font-size: 0.85rem; font-weight: 700; }
+.mtab { font-size: 0.78rem; font-weight: 600; }
+.btn { font-size: 0.82rem; font-weight: 700; }
+.input-field { font-size: 0.78rem; }
+.result-title { font-size: 1rem; font-weight: 700; }
+.msg-bubble { font-size: 0.85rem; }
+.section-title { font-size: 0.72rem; font-weight: 700; }
+.logo-text { font-size: 1.2rem; }
+.welcome-title { font-size: 1.4rem; }
+.welcome-desc { font-size: 0.9rem; }
+
+/* ════ THEME SWITCHER ════ */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+.theme-toggle-btn {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.theme-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.theme-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 210px;
+  box-shadow: var(--shadow);
+  z-index: 999;
+  animation: fadeInDown 0.2s ease;
+}
+.theme-panel.open { display: flex; }
+@keyframes fadeInDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.tp-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); }
+.mode-row { display: flex; gap: 5px; }
+.mode-btn {
+  flex:1; padding:7px 5px;
+  border-radius:8px; border:1.5px solid var(--border);
+  background:transparent; color:var(--text3);
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600;
+  cursor:pointer; transition:all .2s; text-align:center;
+}
+.mode-btn.active { border-color:var(--accent); background:rgba(56,189,248,.1); color:var(--accent); }
+.palette-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; }
+.pal-dot { width:22px; height:22px; border-radius:50%; border:2.5px solid transparent; cursor:pointer; transition:transform .15s; }
+.pal-dot:hover { transform:scale(1.15); }
+.pal-dot.active { border-color:var(--text); transform:scale(1.1); }
+.font-ctrl { display:flex; align-items:center; gap:7px; }
+.font-ctrl-label { font-size:10px; color:var(--text3); flex:1; }
+.font-ctrl-btn { width:24px; height:24px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.font-ctrl-btn:hover { border-color:var(--accent); color:var(--accent); }
+.font-size-lbl { font-size:10px; color:var(--accent); font-family:'DM Mono',monospace; min-width:30px; text-align:center; }
+
+/* ════ MOBILE HAMBURGER ════ */
+.hamburger-btn {
+  display: none;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 18px;
+  align-items: center; justify-content: center;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.hamburger-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 98;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active { display: block; }
+
+/* Mobile chat toggle */
+.chat-toggle-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px; right: 20px;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,var(--accent),#0ea5e9);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 97;
+  box-shadow: 0 4px 20px rgba(56,189,248,.4);
+  display: none; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.chat-toggle-btn:hover { transform: scale(1.05); }
+
+/* ════ TAB IMPROVEMENTS ════ */
+.mtab { height: 42px; padding: 0 13px; font-size: 0.78rem; font-weight: 600; }
+.mtab .mtab-icon { font-size: 14px; }
+.mtab .mtab-label { white-space: nowrap; }
+
+/* Tab priority group — highlight active group */
+.tabs-scroll { gap: 1px; }
+
+/* ════ RESPONSIVE BREAKPOINTS ════ */
+
+/* ─── LARGE DESKTOP (1440px+) ─── */
+@media (min-width: 1440px) {
+  :root { --sidebar-w: 300px; --chat-w: 340px; --font-base: 15px; }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w); }
+  .tpanel { padding: 24px 28px; }
+  .result-card { padding: 22px; }
+  .welcome-card { padding: 40px; }
+}
+
+/* ─── STANDARD DESKTOP (1280–1439px) ─── */
+@media (min-width: 1280px) and (max-width: 1439px) {
+  :root { --sidebar-w: 285px; --chat-w: 320px; --font-base: 14px; }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w); }
+}
+
+/* ─── LAPTOP / SMALL DESKTOP (1024–1279px) ─── */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  :root { --sidebar-w: 250px; --chat-w: 280px; --font-base: 13.5px; }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w); }
+  .tpanel { padding: 16px 18px; }
+  .mtab { padding: 0 10px; font-size: 0.75rem; }
+  [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ─── TABLET LANDSCAPE (768–1023px) ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root { --sidebar-w: 240px; --font-base: 13px; }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr; overflow-x: hidden; }
+  .sidebar-right {
+    display: none !important;
+    position: fixed !important;
+    top: 60px; right: 0; bottom: 0;
+    width: 300px !important;
+    z-index: 99;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+    transform: translateX(100%);
+  }
+  .sidebar-right.mobile-open {
+    display: flex !important;
+    transform: translateX(0);
+  }
+  .chat-toggle-btn { display: flex !important; }
+  .header { padding: 0 16px; }
+  .tpanel { padding: 14px 16px; }
+  .mtab { padding: 0 9px; font-size: 0.72rem; height: 38px; }
+  [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr;"] { grid-template-columns: 1fr !important; }
+}
+
+/* ─── TABLET PORTRAIT & LARGE PHONES (600–767px) ─── */
+@media (min-width: 600px) and (max-width: 767px) {
+  :root { --font-base: 13px; }
+  .layout { grid-template-columns: 1fr; }
+  .sidebar-left {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 280px !important;
+    height: 100dvh !important;
+    z-index: 100 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-left.mobile-open { transform: translateX(0) !important; }
+  .sidebar-right {
+    display: none !important;
+    position: fixed !important;
+    top: 60px; right: 0; bottom: 0;
+    width: 290px !important;
+    z-index: 99;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+  }
+  .sidebar-right.mobile-open { display: flex !important; transform: translateX(0); }
+  .hamburger-btn { display: flex !important; }
+  .chat-toggle-btn { display: flex !important; }
+  .header { padding: 0 12px; }
+  .logo-sub { display: none; }
+  .badge-free { display: none; }
+  .tpanel { padding: 12px 14px; }
+  .mtab { padding: 0 8px; font-size: 0.7rem; height: 36px; }
+  .mtab .mtab-label { display: none; }
+  .tab-group-sep { display: none; }
+  [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr;"] { grid-template-columns: 1fr !important; }
+  .predict-inputs { grid-template-columns: 1fr !important; }
+  .welcome-card { padding: 20px 16px; }
+  .welcome-title { font-size: 1.1rem; }
+}
+
+/* ─── MOBILE PHONES (< 600px) ─── */
+@media (max-width: 599px) {
+  :root { --font-base: 13px; }
+  html, body { overflow: hidden; height: 100%; }
+  .layout { grid-template-columns: 1fr; height: calc(100vh - 56px); }
+  .header { height: 56px; padding: 0 10px; }
+  .logo-sub { display: none; }
+  .badge-free { display: none; }
+  .status-dot span { display: none; }
+  .sidebar-left {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 285px !important;
+    height: 100dvh !important;
+    z-index: 200 !important;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar-left.mobile-open { transform: translateX(0) !important; }
+  .sidebar-right {
+    display: none !important;
+    position: fixed !important;
+    top: 56px; right: 0; bottom: 0;
+    width: 88vw !important;
+    max-width: 320px;
+    z-index: 150 !important;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-right.mobile-open { display: flex !important; transform: translateX(0) !important; }
+  .hamburger-btn { display: flex !important; }
+  .chat-toggle-btn { display: flex !important; }
+  .main-tabs { padding: 0; }
+  .mtab { padding: 0 7px; font-size: 0.68rem; height: 36px; gap: 3px; }
+  .mtab .mtab-icon { font-size: 13px; }
+  .mtab .mtab-label { display: none; }
+  .tab-group-sep { display: none; }
+  .tab-arrow { width: 24px; font-size: 13px; }
+  .tpanel { padding: 10px 12px; }
+  .result-card { padding: 14px; border-radius: 12px; }
+  .welcome-card { padding: 16px 12px; }
+  .welcome-title { font-size: 1rem; }
+  .welcome-desc { font-size: 0.8rem; }
+  .feature-pills { gap: 5px; }
+  .pill { padding: 4px 9px; font-size: 0.7rem; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .metric-val { font-size: 1.1rem; }
+  [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr;"] { grid-template-columns: 1fr !important; }
+  .predict-inputs { grid-template-columns: 1fr !important; }
+  .anon-method-grid { grid-template-columns: 1fr !important; }
+  .img-work.on { grid-template-columns: 1fr !important; }
+  .corr-table { font-size: 9px; }
+  .compare-col-row { grid-template-columns: 100px 1fr 1fr 70px !important; }
+}
+
+/* ─── VERY SMALL PHONES (< 380px) ─── */
+@media (max-width: 379px) {
+  :root { --font-base: 12px; }
+  .header { padding: 0 8px; }
+  .logo-text { font-size: 1rem; }
+  .logo-icon { width: 28px; height: 28px; font-size: 14px; }
+  .tpanel { padding: 8px 10px; }
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Sidebar close button (mobile) */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 14px;
+  align-items: center; justify-content: center;
+  z-index: 201;
+  transition: all .15s;
+}
+@media (max-width: 767px) {
+  .sidebar-close-btn { display: flex; }
+  .sidebar-left { padding-top: 48px; position: relative; }
+}
+
 </style>
 </head>
 <body>
+
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<!-- Mobile chat overlay -->
+<div class="sidebar-overlay" id="chatOverlay" onclick="closeMobileChat()"></div>
+<!-- Mobile chat toggle button -->
+<button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleMobileChat()" title="AI Chat">💬</button>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-card">
@@ -544,15 +897,48 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div><div class="logo-text">HealthAI</div><div class="logo-sub">Intelligent Healthcare Analytics</div></div>
   </div>
   <div class="header-right">
-    <span class="badge-free">❤ VIRENKUAMR MANIYA</span>
+    <span class="badge-free">❤ VIRENKUMAR MANIYA</span>
     <div class="status-dot"><div class="dot"></div><span>AI Ready</span></div>
+
+    <!-- Theme Switcher -->
+    <div class="theme-switcher">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemePanel()" title="Themes">🎨</button>
+      <div class="theme-panel" id="themePanel">
+        <div class="tp-title">Display Mode</div>
+        <div class="mode-row">
+          <button class="mode-btn active" id="modeDark" onclick="setMode('dark')">🌙 Dark</button>
+          <button class="mode-btn" id="modeLight" onclick="setMode('light')">☀️ Light</button>
+        </div>
+        <div class="tp-title" style="margin-top:4px">Accent Colour</div>
+        <div class="palette-grid">
+          <div class="pal-dot active" data-pal="default" style="background:#38bdf8" onclick="setPalette('default',this)" title="Sky Blue"></div>
+          <div class="pal-dot" data-pal="teal" style="background:#0d9488" onclick="setPalette('teal',this)" title="Teal"></div>
+          <div class="pal-dot" data-pal="purple" style="background:#7c3aed" onclick="setPalette('purple',this)" title="Purple"></div>
+          <div class="pal-dot" data-pal="orange" style="background:#ea580c" onclick="setPalette('orange',this)" title="Orange"></div>
+          <div class="pal-dot" data-pal="rose" style="background:#e11d48" onclick="setPalette('rose',this)" title="Rose"></div>
+          <div class="pal-dot" data-pal="emerald" style="background:#059669" onclick="setPalette('emerald',this)" title="Emerald"></div>
+          <div class="pal-dot" data-pal="amber" style="background:#b45309" onclick="setPalette('amber',this)" title="Amber"></div>
+        </div>
+        <div class="tp-title" style="margin-top:4px">Font Size</div>
+        <div class="font-ctrl">
+          <span class="font-ctrl-label">Text Scale</span>
+          <button class="font-ctrl-btn" onclick="adjustFont(-1)">−</button>
+          <span class="font-size-lbl" id="fontSizeLbl">100%</span>
+          <button class="font-ctrl-btn" onclick="adjustFont(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile hamburger for sidebar -->
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu">☰</button>
   </div>
 </header>
 
 <div class="layout">
 
 <!-- ════ LEFT SIDEBAR ════ -->
-<aside class="sidebar-left">
+<aside class="sidebar-left" id="sidebarLeft">
+  <button class="sidebar-close-btn" onclick="closeSidebar()" title="Close sidebar">✕</button>
 
   <div class="panel">
     <div class="panel-title">📂 Data Source</div>
@@ -622,29 +1008,29 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <button class="tab-arrow" id="tabArrowLeft" onclick="scrollTabs(-1)" title="Scroll left">‹</button>
     <div class="tabs-scroll" id="tabsScroll">
       <!-- GROUP 1: Core -->
-      <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics" data-group="core">📊 Analytics</button>
-      <button class="mtab" onclick="switchTab('preview')" id="mtab-preview" data-group="core">📋 Data Preview</button>
-      <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging" data-group="core">🔬 Medical Imaging</button>
+      <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics" data-group="core"><span class="mtab-icon">📊</span><span class="mtab-label">Analytics</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('preview')" id="mtab-preview" data-group="core"><span class="mtab-icon">📋</span><span class="mtab-label">Data Preview</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging" data-group="core"><span class="mtab-icon">🔬</span><span class="mtab-label">Medical Imaging</span><span class="tab-lock" style="display:none">🔒</span></button>
       <div class="tab-group-sep" title="AI Analysis"></div>
       <!-- GROUP 2: AI Analysis -->
-      <button class="mtab" onclick="switchTab('xai')" id="mtab-xai" data-group="ai">🧠 Explainability</button>
-      <button class="mtab" onclick="switchTab('risk')" id="mtab-risk" data-group="ai">⚠️ Risk Engine</button>
-      <button class="mtab" onclick="switchTab('trends')" id="mtab-trends" data-group="ai">📈 Trends</button>
-      <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity" data-group="ai">👥 Similarity</button>
-      <button class="mtab" onclick="switchTab('insights')" id="mtab-insights" data-group="ai">💡 AI Insights</button>
+      <button class="mtab" onclick="switchTab('xai')" id="mtab-xai" data-group="ai"><span class="mtab-icon">🧠</span><span class="mtab-label">Explainability</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('risk')" id="mtab-risk" data-group="ai"><span class="mtab-icon">⚠️</span><span class="mtab-label">Risk Engine</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('trends')" id="mtab-trends" data-group="ai"><span class="mtab-icon">📈</span><span class="mtab-label">Trends</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity" data-group="ai"><span class="mtab-icon">👥</span><span class="mtab-label">Similarity</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('insights')" id="mtab-insights" data-group="ai"><span class="mtab-icon">💡</span><span class="mtab-label">AI Insights</span><span class="tab-lock" style="display:none">🔒</span></button>
       <div class="tab-group-sep" title="Clinical Tools"></div>
       <!-- GROUP 3: Clinical -->
-      <button class="mtab" onclick="switchTab('quality')" id="mtab-quality" data-group="clinical">🧪 Data Quality</button>
-      <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy" data-group="clinical">🔒 Privacy</button>
-      <button class="mtab" onclick="switchTab('patient')" id="mtab-patient" data-group="clinical">🧑‍⚕️ Patient View</button>
-      <button class="mtab" onclick="switchTab('survival')" id="mtab-survival" data-group="clinical">📉 Survival</button>
-      <button class="mtab" onclick="switchTab('coding')" id="mtab-coding" data-group="clinical">💊 ICD Coding</button>
+      <button class="mtab" onclick="switchTab('quality')" id="mtab-quality" data-group="clinical"><span class="mtab-icon">🧪</span><span class="mtab-label">Data Quality</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy" data-group="clinical"><span class="mtab-icon">🔒</span><span class="mtab-label">Privacy</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('patient')" id="mtab-patient" data-group="clinical"><span class="mtab-icon">🧑‍⚕️</span><span class="mtab-label">Patient View</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('survival')" id="mtab-survival" data-group="clinical"><span class="mtab-icon">📉</span><span class="mtab-label">Survival</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('coding')" id="mtab-coding" data-group="clinical"><span class="mtab-icon">💊</span><span class="mtab-label">ICD Coding</span><span class="tab-lock" style="display:none">🔒</span></button>
       <div class="tab-group-sep" title="Advanced"></div>
       <!-- GROUP 4: Advanced -->
-      <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget" data-group="advanced">🎯 Multi-Target</button>
-      <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts" data-group="advanced">🔔 Alert Rules</button>
-      <button class="mtab" onclick="switchTab('compare')" id="mtab-compare" data-group="advanced">⚖️ Compare</button>
-      <button class="mtab" onclick="switchTab('report')" id="mtab-report" data-group="advanced">📄 Report</button>
+      <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget" data-group="advanced"><span class="mtab-icon">🎯</span><span class="mtab-label">Multi-Target</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts" data-group="advanced"><span class="mtab-icon">🔔</span><span class="mtab-label">Alert Rules</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('compare')" id="mtab-compare" data-group="advanced"><span class="mtab-icon">⚖️</span><span class="mtab-label">Compare</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('report')" id="mtab-report" data-group="advanced"><span class="mtab-icon">📄</span><span class="mtab-label">Report</span><span class="tab-lock" style="display:none">🔒</span></button>
     </div>
     <button class="tab-arrow" id="tabArrowRight" onclick="scrollTabs(1)" title="Scroll right">›</button>
   </div>
@@ -1407,7 +1793,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 </main>
 
 <!-- ════ RIGHT SIDEBAR (CHAT) ════ -->
-<aside class="sidebar-right">
+<aside class="sidebar-right" id="sidebarRight">
   <div class="section-head">
     <span class="section-title">🤖 AI Health Assistant</span>
     <span style="font-size:9px;color:var(--text3)">Groq LLaMA</span>
@@ -2954,6 +3340,164 @@ async function runCoding(){
     fetchColStats();
   }
 })();
+
+// ════════════════════════════════════════════════════════
+// THEME SYSTEM
+// ════════════════════════════════════════════════════════
+
+let fontScale = 100;
+
+function toggleThemePanel() {
+  const p = document.getElementById('themePanel');
+  p.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const sw = document.querySelector('.theme-switcher');
+  if (sw && !sw.contains(e.target)) {
+    const panel = document.getElementById('themePanel');
+    if (panel) panel.classList.remove('open');
+  }
+});
+
+function setMode(mode) {
+  document.documentElement.setAttribute('data-theme', mode === 'light' ? 'light' : '');
+  document.getElementById('modeDark').classList.toggle('active', mode === 'dark');
+  document.getElementById('modeLight').classList.toggle('active', mode === 'light');
+  localStorage.setItem('hai-mode', mode);
+}
+
+function setPalette(pal, el) {
+  document.querySelectorAll('.pal-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  document.documentElement.setAttribute('data-palette', pal === 'default' ? '' : pal);
+  localStorage.setItem('hai-palette', pal);
+}
+
+function adjustFont(dir) {
+  fontScale = Math.max(80, Math.min(135, fontScale + dir * 5));
+  document.documentElement.style.setProperty('--font-base', (fontScale / 100 * 14) + 'px');
+  document.getElementById('fontSizeLbl').textContent = fontScale + '%';
+  localStorage.setItem('hai-fontscale', fontScale);
+}
+
+// ════ MOBILE SIDEBAR ════
+function toggleSidebar() {
+  const sl = document.getElementById('sidebarLeft');
+  const ov = document.getElementById('sidebarOverlay');
+  const isOpen = sl.classList.contains('mobile-open');
+  if (isOpen) { closeSidebar(); } 
+  else { sl.classList.add('mobile-open'); ov.classList.add('active'); document.body.style.overflow = 'hidden'; }
+}
+
+function closeSidebar() {
+  const sl = document.getElementById('sidebarLeft');
+  const ov = document.getElementById('sidebarOverlay');
+  sl.classList.remove('mobile-open');
+  ov.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function toggleMobileChat() {
+  const sr = document.getElementById('sidebarRight');
+  const ov = document.getElementById('chatOverlay');
+  const isOpen = sr.classList.contains('mobile-open');
+  if (isOpen) { closeMobileChat(); }
+  else { sr.classList.add('mobile-open'); ov.classList.add('active'); }
+}
+
+function closeMobileChat() {
+  const sr = document.getElementById('sidebarRight');
+  const ov = document.getElementById('chatOverlay');
+  sr.classList.remove('mobile-open');
+  ov.classList.remove('active');
+}
+
+// Close chat/sidebar on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeSidebar(); closeMobileChat(); }
+});
+
+// ════ TAB PRIORITY LOGIC ════
+// Priority tiers based on data state and typical workflow
+const TAB_PRIORITY = {
+  'analytics':    { tier: 1, label: 'Analytics',    needsData: false },
+  'preview':      { tier: 2, label: 'Data Preview', needsData: true  },
+  'imaging':      { tier: 2, label: 'Medical Imaging', needsData: false },
+  'xai':          { tier: 3, label: 'Explainability', needsData: true, needsModel: true },
+  'risk':         { tier: 3, label: 'Risk Engine',   needsData: true  },
+  'trends':       { tier: 3, label: 'Trends',        needsData: true  },
+  'similarity':   { tier: 3, label: 'Similarity',    needsData: true  },
+  'insights':     { tier: 4, label: 'AI Insights',   needsData: true, needsModel: true },
+  'quality':      { tier: 3, label: 'Data Quality',  needsData: true  },
+  'privacy':      { tier: 3, label: 'Privacy',       needsData: true  },
+  'patient':      { tier: 3, label: 'Patient View',  needsData: true  },
+  'survival':     { tier: 4, label: 'Survival',      needsData: true  },
+  'coding':       { tier: 4, label: 'ICD Coding',    needsData: true  },
+  'multitarget':  { tier: 4, label: 'Multi-Target',  needsData: true, needsModel: true },
+  'alerts':       { tier: 4, label: 'Alert Rules',   needsData: false },
+  'compare':      { tier: 4, label: 'Compare',       needsData: false },
+  'report':       { tier: 5, label: 'Report',        needsData: true, needsModel: true }
+};
+
+function updateTabPriority(hasData, hasModel) {
+  Object.entries(TAB_PRIORITY).forEach(([id, info]) => {
+    const btn = document.getElementById('mtab-' + id);
+    if (!btn) return;
+    const locked = (info.needsData && !hasData) || (info.needsModel && !hasModel);
+    // Visual cue — dim locked tabs
+    btn.style.opacity = locked ? '0.45' : '1';
+    btn.title = locked ? (info.needsData && !hasData ? '⚠ Upload data first' : '⚠ Run analysis first') : '';
+    // Add lock icon to locked tabs
+    const lockEl = btn.querySelector('.tab-lock');
+    if (lockEl) lockEl.style.display = locked ? 'inline' : 'none';
+  });
+}
+
+// Hook into existing data load to update tab priority
+const _origRenderCols = typeof renderCols === 'function' ? renderCols : null;
+if (window.renderCols) {
+  const _orig = window.renderCols;
+  window.renderCols = function(...args) {
+    _orig.apply(this, args);
+    updateTabPriority(true, false);
+  };
+}
+
+// Also update when analysis completes
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+
+// ════ RESTORE PREFERENCES ════
+(function restorePrefs() {
+  const savedMode = localStorage.getItem('hai-mode') || 'dark';
+  const savedPalette = localStorage.getItem('hai-palette') || 'default';
+  const savedFont = parseInt(localStorage.getItem('hai-fontscale')) || 100;
+
+  if (savedMode !== 'dark') setMode(savedMode);
+  if (savedPalette && savedPalette !== 'default') {
+    const pd = document.querySelector('[data-pal="' + savedPalette + '"]');
+    if (pd) setPalette(savedPalette, pd);
+  }
+  if (savedFont !== 100) {
+    fontScale = savedFont;
+    document.documentElement.style.setProperty('--font-base', (savedFont / 100 * 14) + 'px');
+    const lbl = document.getElementById('fontSizeLbl');
+    if (lbl) lbl.textContent = savedFont + '%';
+  }
+
+  // Initial tab priority state
+  updateTabPriority(false, false);
+})();
+
+// ════ RESPONSIVE: Auto-detect initial state ════
+function checkResponsive() {
+  const w = window.innerWidth;
+  const chatBtn = document.getElementById('chatToggleBtn');
+  if (chatBtn) chatBtn.style.display = (w < 1024) ? 'flex' : 'none';
+}
+window.addEventListener('resize', checkResponsive);
+checkResponsive();
+
 </script>
 </body>
 </html>
