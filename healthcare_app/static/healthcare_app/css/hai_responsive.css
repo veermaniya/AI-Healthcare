@@ -1,0 +1,514 @@
+/* ═══════════════════════════════════════════════════════════════════
+   HealthAI — Responsive & Font Fix Patch
+   Drop-in CSS — add AFTER your existing <style> block in both
+   index.html and login.html
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────────
+   1. ROOT FONT SCALE — fluid, clamp-based, works on all screen sizes
+   ────────────────────────────────────────────────────────────────── */
+:root {
+  /* Base font scales smoothly from 15px (mobile) → 16px (tablet) → 17px (desktop) → 18px (4K) */
+  --font-base:    clamp(15px, 1.1vw + 10px, 18px);
+  --font-xs:      clamp(11px, 0.75vw + 8px,  14px);
+  --font-sm:      clamp(12px, 0.85vw + 9px,  15px);
+  --font-md:      clamp(14px, 1vw + 10px,    17px);
+  --font-lg:      clamp(16px, 1.2vw + 11px,  20px);
+  --font-xl:      clamp(20px, 1.8vw + 12px,  28px);
+  --font-2xl:     clamp(26px, 2.5vw + 14px,  38px);
+
+  /* Sidebar/chat widths — responsive */
+  --sidebar-w:    clamp(230px, 20vw, 300px);
+  --chat-w:       clamp(260px, 22vw, 330px);
+
+  /* Spacing — scales with screen */
+  --gap-xs:       clamp(4px, 0.4vw, 8px);
+  --gap-sm:       clamp(8px, 0.7vw, 14px);
+  --gap-md:       clamp(12px, 1vw, 20px);
+  --gap-lg:       clamp(16px, 1.4vw, 28px);
+
+  /* Text colours — boosted contrast */
+  --text:   #eef2f7;   /* was #e2e8f0 — brighter */
+  --text2:  #b0bfd4;   /* was #94a3b8 — much more readable */
+  --text3:  #8898b0;   /* was #64748b — less grey */
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   2. GLOBAL FONT — bolder, bigger, more readable
+   ────────────────────────────────────────────────────────────────── */
+html { font-size: var(--font-base); }
+body { font-size: 1rem; font-weight: 450; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+/* Every text element — bump weight and size */
+p, span, div, label, li, td, th, a { font-weight: 450; }
+
+/* ──────────────────────────────────────────────────────────────────
+   3. HEADER — taller, bigger text
+   ────────────────────────────────────────────────────────────────── */
+.header {
+  height: clamp(56px, 5vh, 70px) !important;
+  padding: 0 clamp(14px, 2vw, 28px) !important;
+}
+.logo-text  { font-size: clamp(18px, 1.5vw + 10px, 24px) !important; }
+.logo-sub   { font-size: clamp(10px, 0.6vw + 7px,  13px) !important; color: var(--text2) !important; font-weight: 500 !important; }
+.logo-icon  { width: clamp(34px, 3vw, 44px) !important; height: clamp(34px, 3vw, 44px) !important; font-size: clamp(16px, 1.4vw, 22px) !important; }
+.badge-free { font-size: clamp(10px, 0.65vw + 7px, 13px) !important; padding: 4px 12px !important; font-weight: 600 !important; }
+.status-dot { font-size: clamp(11px, 0.7vw + 8px, 14px) !important; font-weight: 500 !important; }
+
+/* ──────────────────────────────────────────────────────────────────
+   4. SIDEBAR — bigger panels, labels, inputs
+   ────────────────────────────────────────────────────────────────── */
+.panel       { padding: clamp(12px, 1.2vw, 18px) clamp(14px, 1.4vw, 20px) !important; }
+.panel-title {
+  font-size:   clamp(12px, 0.85vw + 8px, 15px) !important;
+  font-weight: 700 !important;
+  color:       var(--text) !important;
+  letter-spacing: 0.02em;
+  margin-bottom: clamp(8px, 0.8vw, 14px) !important;
+}
+.section-title {
+  font-size:   clamp(10px, 0.65vw + 7px, 12px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em;
+  color:       var(--text2) !important;
+}
+
+/* Inputs — bigger, bolder */
+.input-field {
+  font-size:   clamp(12px, 0.8vw + 9px, 14px) !important;
+  font-weight: 500 !important;
+  padding:     clamp(8px, 0.7vw, 12px) clamp(10px, 0.8vw, 14px) !important;
+  color:       var(--text) !important;
+}
+.input-field::placeholder { color: var(--text3) !important; font-weight: 400 !important; }
+
+/* Tab buttons */
+.tab-btn {
+  font-size:   clamp(11px, 0.7vw + 8px, 13px) !important;
+  font-weight: 600 !important;
+  padding:     clamp(6px, 0.5vw, 9px) clamp(8px, 0.7vw, 12px) !important;
+}
+
+/* Buttons */
+.btn {
+  font-size:   clamp(12px, 0.8vw + 9px, 15px) !important;
+  font-weight: 700 !important;
+  padding:     clamp(9px, 0.8vw, 13px) clamp(14px, 1.2vw, 20px) !important;
+  letter-spacing: 0.01em;
+}
+.btn-danger { font-size: clamp(11px, 0.7vw + 8px, 13px) !important; font-weight: 600 !important; }
+
+/* Dataset stats */
+.ds-stat   { font-size: clamp(11px, 0.72vw + 8px, 13px) !important; font-weight: 500 !important; margin-bottom: 5px !important; }
+.ds-stat strong { font-weight: 700 !important; }
+
+/* Upload zone */
+.upload-zone > div:last-child { font-size: clamp(11px, 0.75vw + 8px, 13px) !important; }
+
+/* ──────────────────────────────────────────────────────────────────
+   5. MAIN TABS — bigger, bolder, more readable
+   ────────────────────────────────────────────────────────────────── */
+.mtab {
+  font-size:   clamp(11px, 0.75vw + 8px, 14px) !important;
+  font-weight: 650 !important;
+  padding:     0 clamp(10px, 1vw, 18px) !important;
+  height:      clamp(38px, 3.5vh, 46px) !important;
+  letter-spacing: 0.01em;
+}
+.tpanel { padding: clamp(14px, 1.2vw, 22px) clamp(16px, 1.4vw, 24px) !important; }
+
+/* ──────────────────────────────────────────────────────────────────
+   6. RESULT / CONTENT AREA — bigger result text
+   ────────────────────────────────────────────────────────────────── */
+.result-title {
+  font-size:   clamp(15px, 1.1vw + 9px, 19px) !important;
+  font-weight: 700 !important;
+  color:       var(--text) !important;
+}
+.metric-val {
+  font-size:   clamp(22px, 2vw + 10px, 32px) !important;
+  font-weight: 800 !important;
+}
+.metric-lbl {
+  font-size:   clamp(10px, 0.65vw + 7px, 12px) !important;
+  font-weight: 600 !important;
+  color:       var(--text2) !important;
+}
+
+/* Welcome card */
+.welcome-title {
+  font-size:   clamp(20px, 2vw + 10px, 30px) !important;
+  font-weight: 800 !important;
+  color:       var(--text) !important;
+}
+.welcome-desc {
+  font-size:   clamp(13px, 0.9vw + 9px, 16px) !important;
+  font-weight: 450 !important;
+  color:       var(--text2) !important;
+  line-height: 1.7 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   7. CHAT PANEL — bigger, easier to read
+   ────────────────────────────────────────────────────────────────── */
+.msg-bubble {
+  font-size:   clamp(12px, 0.85vw + 9px, 15px) !important;
+  font-weight: 450 !important;
+  line-height: 1.65 !important;
+}
+.chat-input-area input,
+.chat-input-area textarea,
+#chatInput {
+  font-size:   clamp(13px, 0.85vw + 9px, 15px) !important;
+  font-weight: 500 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   8. GENERAL TEXT ACROSS TABLES, CARDS, LABELS
+   ────────────────────────────────────────────────────────────────── */
+table { font-size: clamp(11px, 0.78vw + 8px, 14px) !important; }
+th    { font-size: clamp(10px, 0.68vw + 7px, 13px) !important; font-weight: 700 !important; color: var(--text2) !important; }
+td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 !important; }
+
+/* Notif bar */
+.notif { font-size: clamp(12px, 0.8vw + 9px, 14px) !important; font-weight: 600 !important; }
+
+/* Loading overlay */
+.loading-text { font-size: clamp(15px, 1.1vw + 9px, 18px) !important; font-weight: 700 !important; }
+.loading-sub  { font-size: clamp(12px, 0.8vw + 8px, 14px) !important; font-weight: 500 !important; color: var(--text2) !important; }
+
+/* Column chips/tags */
+.col-chip {
+  font-size: clamp(11px, 0.72vw + 8px, 13px) !important;
+  font-weight: 600 !important;
+  padding: clamp(4px, 0.4vw, 7px) clamp(8px, 0.7vw, 12px) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   9. RESPONSIVE BREAKPOINTS — complete device coverage
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── ULTRA-WIDE / 4K (2560px+) ─── */
+@media (min-width: 2560px) {
+  :root {
+    --sidebar-w: 360px;
+    --chat-w:    380px;
+  }
+  .header { height: 80px !important; }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w) !important; }
+}
+
+/* ─── LARGE DESKTOP (1440px–2559px) ─── */
+@media (min-width: 1440px) and (max-width: 2559px) {
+  :root {
+    --sidebar-w: 300px;
+    --chat-w:    340px;
+  }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w) !important; }
+}
+
+/* ─── STANDARD DESKTOP (1024px–1439px) ─── */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  :root {
+    --sidebar-w: 260px;
+    --chat-w:    290px;
+  }
+  .layout { grid-template-columns: var(--sidebar-w) 1fr var(--chat-w) !important; }
+}
+
+/* ─── SMALL DESKTOP / LARGE TABLET LANDSCAPE (768px–1023px) ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root { --sidebar-w: 230px; --chat-w: 260px; }
+
+  .layout { grid-template-columns: var(--sidebar-w) 1fr !important; }
+
+  /* Chat panel slides in as overlay */
+  .sidebar-right {
+    position: fixed !important;
+    top: clamp(56px, 5vh, 70px); right: 0; bottom: 0;
+    width: 300px !important;
+    z-index: 99;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-right.mobile-open {
+    transform: translateX(0) !important;
+    display: flex !important;
+  }
+  .chat-toggle-btn { display: flex !important; }
+  .header { padding: 0 16px !important; }
+  .tpanel { padding: 12px 14px !important; }
+  .mtab { font-size: clamp(10px, 1.2vw, 13px) !important; padding: 0 10px !important; }
+}
+
+/* ─── TABLET PORTRAIT (600px–767px) ─── */
+@media (min-width: 600px) and (max-width: 767px) {
+  .layout { grid-template-columns: 1fr !important; }
+  .header { height: 58px !important; padding: 0 14px !important; }
+
+  .sidebar-left {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 290px !important; height: 100dvh !important;
+    z-index: 200 !important;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-left.mobile-open  { transform: translateX(0) !important; }
+
+  .sidebar-right {
+    display: none !important;
+    position: fixed !important;
+    top: 58px; right: 0; bottom: 0;
+    width: 300px !important; z-index: 99;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+  }
+  .sidebar-right.mobile-open { display: flex !important; transform: translateX(0) !important; }
+
+  .hamburger-btn    { display: flex !important; }
+  .chat-toggle-btn  { display: flex !important; }
+  .logo-sub         { display: none; }
+  .badge-free       { display: none; }
+
+  .tpanel { padding: 12px 14px !important; }
+  .mtab   { padding: 0 8px !important; font-size: 12px !important; height: 38px !important; }
+  [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr;"]    { grid-template-columns: 1fr !important; }
+  .predict-inputs { grid-template-columns: 1fr !important; }
+}
+
+/* ─── MOBILE (< 600px) ─── */
+@media (max-width: 599px) {
+  html, body { overflow: hidden; height: 100%; }
+  .layout { grid-template-columns: 1fr !important; height: calc(100dvh - 56px); }
+  .header { height: 56px !important; padding: 0 12px !important; }
+
+  .logo-sub         { display: none; }
+  .badge-free       { display: none; }
+  .status-dot span  { display: none; }
+
+  .sidebar-left {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 290px !important; height: 100dvh !important;
+    z-index: 200 !important;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-left.mobile-open { transform: translateX(0) !important; }
+
+  .sidebar-overlay {
+    display: block !important;
+    position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.55);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .sidebar-overlay.active { opacity: 1 !important; pointer-events: all !important; }
+
+  .sidebar-right {
+    display: none !important;
+    position: fixed !important;
+    top: 56px; right: 0; bottom: 0;
+    width: 100% !important; z-index: 199;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+  }
+  .sidebar-right.mobile-open { display: flex !important; transform: translateX(0) !important; }
+
+  .chat-overlay {
+    display: block !important;
+    position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.55);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .chat-overlay.active { opacity: 1 !important; pointer-events: all !important; }
+
+  .hamburger-btn   { display: flex !important; }
+  .chat-toggle-btn { display: flex !important; }
+
+  .tpanel { padding: 10px 12px !important; }
+  .mtab   { padding: 0 8px !important; font-size: 11px !important; height: 36px !important; }
+  .mtab .mtab-label { display: none; } /* show only icon on very small screens */
+
+  /* Stack all grids to single column */
+  [style*="grid-template-columns:1fr 1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"]     { grid-template-columns: 1fr !important; }
+  .predict-inputs { grid-template-columns: 1fr !important; }
+
+  .welcome-card { padding: 20px 16px !important; }
+  .metric-card  { padding: 12px 10px !important; }
+
+  /* Tab bar — scrollable horizontally on mobile */
+  .tab-bar-wrap,
+  [class*="tab-bar"] {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+  }
+  .tab-bar-wrap::-webkit-scrollbar { display: none; }
+
+  /* Theme/language switchers — tighter on mobile */
+  .theme-switcher { gap: 4px !important; }
+  .theme-toggle-btn { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+  #hai-lang-btn { height: 32px !important; padding: 0 8px !important; font-size: 11px !important; }
+
+  /* Header right — tighter */
+  .header-right { gap: 8px !important; }
+}
+
+/* ─── VERY SMALL PHONES (< 380px) ─── */
+@media (max-width: 380px) {
+  .header { padding: 0 8px !important; }
+  .logo-text { font-size: 16px !important; }
+  .logo-icon { width: 30px !important; height: 30px !important; font-size: 15px !important; }
+  .mtab { padding: 0 6px !important; font-size: 10px !important; }
+  .btn  { padding: 8px 10px !important; font-size: 12px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   10. LOGIN PAGE — responsive
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Login title and subtitle */
+.login-title {
+  font-size:   clamp(22px, 2.5vw + 10px, 34px) !important;
+  font-weight: 800 !important;
+  color:       var(--text) !important;
+  line-height: 1.2 !important;
+}
+.login-sub {
+  font-size:   clamp(13px, 0.9vw + 8px, 16px) !important;
+  font-weight: 500 !important;
+  color:       var(--text2) !important;
+}
+
+/* Role buttons */
+.role-btn {
+  font-size:   clamp(11px, 0.75vw + 8px, 14px) !important;
+  font-weight: 600 !important;
+  padding:     clamp(10px, 1vw, 15px) clamp(8px, 0.7vw, 12px) !important;
+}
+.role-btn .role-icon { font-size: clamp(18px, 1.5vw + 10px, 24px) !important; }
+
+/* Form labels */
+.form-label {
+  font-size:   clamp(11px, 0.72vw + 8px, 13px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  color:       var(--text2) !important;
+}
+
+/* Form inputs */
+.form-input {
+  font-size:   clamp(14px, 0.95vw + 9px, 16px) !important;
+  font-weight: 500 !important;
+  padding:     clamp(12px, 1vw, 16px) clamp(14px, 1.2vw, 18px) !important;
+  color:       var(--text) !important;
+}
+.form-input::placeholder { color: var(--text3) !important; opacity: 0.7 !important; }
+
+/* Login button */
+.btn-login {
+  font-size:   clamp(14px, 1vw + 9px, 17px) !important;
+  font-weight: 700 !important;
+  padding:     clamp(13px, 1.1vw, 17px) !important;
+  letter-spacing: 0.03em;
+}
+
+/* SSO buttons */
+.sso-btn {
+  font-size:   clamp(12px, 0.8vw + 8px, 14px) !important;
+  font-weight: 600 !important;
+  padding:     clamp(11px, 0.9vw, 14px) !important;
+}
+
+/* Divider text */
+.divider {
+  font-size:   clamp(11px, 0.72vw + 8px, 13px) !important;
+  font-weight: 600 !important;
+}
+
+/* Security bar */
+.sec-item {
+  font-size:   clamp(10px, 0.65vw + 7px, 12px) !important;
+  font-weight: 600 !important;
+  color:       var(--text2) !important;
+}
+
+/* Login page layout — responsive */
+@media (max-width: 900px) {
+  /* Stack left/right panels vertically */
+  body > div.container,
+  .login-container,
+  body > .left,
+  body > .right,
+  .left + .right {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .left  {
+    width: 100% !important;
+    min-height: 180px !important;
+    padding: 24px !important;
+  }
+
+  .right {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    padding: clamp(20px, 4vw, 40px) clamp(16px, 5vw, 40px) !important;
+  }
+
+  .login-box { max-width: 100% !important; }
+  .role-selector { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 480px) {
+  .left { display: none !important; } /* hide decorative left on very small phones */
+  .right { padding: 24px 16px !important; min-height: 100dvh !important; align-items: flex-start !important; }
+  .login-box { padding-top: 20px; }
+  .role-selector { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+  .sso-grid { grid-template-columns: 1fr !important; }
+  .form-row { flex-direction: column !important; gap: 10px !important; }
+  .security-bar { gap: 12px !important; flex-wrap: wrap !important; justify-content: center !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   11. SCROLLBAR POLISH
+   ═══════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99,179,237,0.2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99,179,237,0.4); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   12. TOUCH TARGETS — minimum 44px on mobile for accessibility
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .btn, .tab-btn, .role-btn, .sso-btn, .btn-login,
+  .mode-btn, .font-ctrl-btn, .pal-dot,
+  .hamburger-btn, .chat-toggle-btn, .theme-toggle-btn {
+    min-height: 44px !important;
+    min-width:  44px !important;
+  }
+  .pal-dot { min-height: 30px !important; min-width: 30px !important; }
+  .font-ctrl-btn { min-height: 36px !important; min-width: 36px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   13. PRINT MEDIA — basic print support
+   ═══════════════════════════════════════════════════════════════════ */
+@media print {
+  .sidebar-left, .sidebar-right, .header-right, .hamburger-btn,
+  .chat-toggle-btn, .theme-switcher, #hai-lang-switcher { display: none !important; }
+  .layout { grid-template-columns: 1fr !important; }
+  body { background: white !important; color: black !important; }
+}
