@@ -520,9 +520,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .qp-chip-lbl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
 .qp-chip-val{font-size:13px;color:var(--accent);font-family:'DM Mono',monospace;font-weight:600}
 
-/* ════════════════════════════════════════════════════════
-   THEME SYSTEM — Light / Dark + Color Palettes
-   ════════════════════════════════════════════════════════ */
+/*    THEME SYSTEM — Light / Dark + Color Palettes */
 
 /* DEFAULT = DARK */
 :root {
@@ -875,13 +873,604 @@ body { font-size: 1rem; }
 </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+  <symbol id="icon-hospital" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+    <path d="M12 6v6M9 9h6" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="icon-physician" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="7" r="4"/>
+    <path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/>
+    <circle cx="17" cy="17" r="2.5"/>
+    <path d="M17 14.5v1.2M17 18v1.2M15.3 15.6l1 .6M18.7 18.4l1 .6M15.3 18.4l1-.6M18.7 15.6l1-.6"/>
+  </symbol>
+
+  <symbol id="icon-patient" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="7" r="4"/>
+    <path d="M5.5 21c0-3.59 2.91-6.5 6.5-6.5s6.5 2.91 6.5 6.5"/>
+    <path d="M10 17l2 2 4-4" stroke-width="1.8"/>
+  </symbol>
+
+  <symbol id="icon-patients" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="7" r="3.5"/>
+    <path d="M2 20c0-3.31 3.13-6 7-6"/>
+    <circle cx="16" cy="8" r="3"/>
+    <path d="M22 20c0-3.09-2.69-5.5-6-5.5a6.3 6.3 0 0 0-3.6 1.1"/>
+  </symbol>
+
+  <symbol id="icon-imaging" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 21h8M12 21v-4"/>
+    <path d="M9 3l-1 4h8l-1-4z"/>
+    <rect x="8" y="7" width="8" height="10" rx="1"/>
+    <path d="M10 11h4M10 14h4"/>
+  </symbol>
+
+  <symbol id="icon-pill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.5 4.5a6 6 0 0 0-6 6v3a6 6 0 0 0 12 0v-3a6 6 0 0 0-6-6z"/>
+    <line x1="4.5" y1="12" x2="16.5" y2="12"/>
+  </symbol>
+
+  <symbol id="icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 21C12 21 3 14.5 3 8.5a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 12.5-9 12.5z"/>
+    <polyline points="2,13 5,13 7,9 9,15 11,11 13,13 16,13"/>
+  </symbol>
+
+  <symbol id="icon-lungs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v10"/>
+    <path d="M5 8c-1.5.5-3 2-3 5 0 2.5 1.5 5 4 6l3-3V8"/>
+    <path d="M19 8c1.5.5 3 2 3 5 0 2.5-1.5 5-4 6l-3-3V8"/>
+  </symbol>
+
+  <symbol id="icon-bone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6.5" cy="5.5" r="2.5"/>
+    <circle cx="6.5" cy="18.5" r="2.5"/>
+    <circle cx="17.5" cy="5.5" r="2.5"/>
+    <circle cx="17.5" cy="18.5" r="2.5"/>
+    <line x1="6.5" y1="8" x2="6.5" y2="16"/>
+    <line x1="17.5" y1="8" x2="17.5" y2="16"/>
+  </symbol>
+
+  <symbol id="icon-bandage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="8" width="20" height="8" rx="4"/>
+    <line x1="9" y1="8" x2="9" y2="16"/>
+    <line x1="15" y1="8" x2="15" y2="16"/>
+    <circle cx="12" cy="12" r="1" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="icon-survival" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4,4 4,20 20,20"/>
+    <path d="M4 16h4v4H4zM10 11h4v9h-4zM16 7h4v13h-4z"/>
+  </symbol>
+
+  <symbol id="icon-icd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2"/>
+    <path d="M8 7h8M8 11h8M8 15h5"/>
+    <circle cx="17" cy="17" r="4" fill="none"/>
+    <path d="M17 15v2l1.5 1.5"/>
+  </symbol>
+
+  <symbol id="icon-analytics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4,4 4,20 20,20"/>
+    <rect x="7" y="12" width="3" height="8" fill="currentColor" stroke="none" opacity=".3"/>
+    <rect x="7" y="12" width="3" height="8"/>
+    <rect x="13" y="7" width="3" height="13"/>
+    <rect x="19" y="4" width="1" height="16"/>
+  </symbol>
+
+  <symbol id="icon-trends-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4,4 4,20 20,20"/>
+    <polyline points="5,15 9,10 13,13 19,6"/>
+    <polyline points="15,6 19,6 19,10"/>
+  </symbol>
+
+  <symbol id="icon-trends-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4,4 4,20 20,20"/>
+    <polyline points="5,9 9,13 13,10 19,17"/>
+    <line x1="14" y1="17" x2="20" y2="17" stroke-dasharray="2,2"/>
+  </symbol>
+
+  <symbol id="icon-xai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 3c-2.2 2-4 4.5-4 9s1.8 7 4 9M12 3c2.2 2 4 4.5 4 9s-1.8 7-4 9"/>
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+  </symbol>
+
+  <symbol id="icon-ai-model" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="18" height="13" rx="2"/>
+    <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+    <circle cx="9" cy="14" r="1.5" fill="currentColor"/>
+    <circle cx="15" cy="14" r="1.5" fill="currentColor"/>
+    <path d="M9 18h6"/>
+    <line x1="12" y1="3" x2="12" y2="5"/>
+  </symbol>
+
+  <symbol id="icon-similarity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="8" cy="8" r="3"/>
+    <circle cx="16" cy="8" r="3"/>
+    <path d="M3 20c0-2.76 2.24-5 5-5h2"/>
+    <path d="M21 20c0-2.76-2.24-5-5-5h-2"/>
+    <path d="M10 15h4" stroke-dasharray="2,2"/>
+  </symbol>
+
+  <symbol id="icon-compare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="3" x2="12" y2="21"/>
+    <path d="M5 8l-3 3 3 3"/>
+    <rect x="2" y="9" width="7" height="6" rx="1"/>
+    <path d="M19 8l3 3-3 3"/>
+    <rect x="15" y="9" width="7" height="6" rx="1"/>
+  </symbol>
+
+  <symbol id="icon-quality" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 3h6v8l4 10H5L9 11z"/>
+    <line x1="9" y1="3" x2="9" y2="11"/>
+    <line x1="15" y1="3" x2="15" y2="11"/>
+    <path d="M7 17h3M14 15h3"/>
+  </symbol>
+
+  <symbol id="icon-insights" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18h6M10 21h4"/>
+    <path d="M12 2a7 7 0 0 1 5 11.9c-.5.5-.8 1.1-.9 1.6H8a2.5 2.5 0 0 0-.9-1.6A7 7 0 0 1 12 2z"/>
+  </symbol>
+
+  <symbol id="icon-report" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14,2 14,8 20,8"/>
+    <line x1="8" y1="13" x2="16" y2="13"/>
+    <line x1="8" y1="17" x2="13" y2="17"/>
+  </symbol>
+
+  <symbol id="icon-preview" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <line x1="7" y1="8" x2="17" y2="8"/>
+    <line x1="7" y1="12" x2="17" y2="12"/>
+    <line x1="7" y1="16" x2="13" y2="16"/>
+  </symbol>
+
+  <symbol id="icon-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="12" cy="12" r="5"/>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="icon-privacy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2"/>
+    <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.25C16.5 22.15 20 17.25 20 12V6z"/>
+    <polyline points="9,12 11,14 15,10"/>
+  </symbol>
+
+  <symbol id="icon-fhir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="6" r="3"/>
+    <circle cx="18" cy="18" r="3"/>
+    <line x1="9" y1="11" x2="15" y2="7"/>
+    <line x1="9" y1="13" x2="15" y2="17"/>
+  </symbol>
+
+  <!-- ── UI CONTROLS & ACTIONS ──────────────────── -->
+
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="7"/>
+    <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+  </symbol>
+
+  <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="17,8 12,3 7,8"/>
+    <line x1="12" y1="3" x2="12" y2="15"/>
+  </symbol>
+
+  <symbol id="icon-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    <line x1="12" y1="11" x2="12" y2="17"/>
+    <line x1="9" y1="14" x2="15" y2="14"/>
+  </symbol>
+
+  <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+    <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+    <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+  </symbol>
+
+  <symbol id="icon-connect" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20v-6M8 20v-4M16 20v-4"/>
+    <path d="M7 10V4M17 10V4"/>
+    <rect x="4" y="10" width="16" height="4" rx="1"/>
+  </symbol>
+
+  <symbol id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </symbol>
+
+  <symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"/>
+    <polygon points="22,2 15,22 11,13 2,9"/>
+  </symbol>
+
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3,6 5,6 21,6"/>
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    <path d="M10 11v6M14 11v6"/>
+    <path d="M9 6V4h6v2"/>
+  </symbol>
+
+  <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>
+  </symbol>
+
+  <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 4v6h-6"/>
+    <path d="M1 20v-6h6"/>
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+  </symbol>
+
+  <symbol id="icon-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="6" y="2" width="12" height="7"/>
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+    <rect x="6" y="14" width="12" height="8"/>
+  </symbol>
+
+  <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+
+  <symbol id="icon-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.6 9.4l-8-8a2 2 0 0 0-1.4-.6H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8 8a2 2 0 0 0 2.8 0l7.2-7.2a2 2 0 0 0 0-2.8z"/>
+    <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="icon-controls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="6" x2="20" y2="6"/>
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <line x1="4" y1="18" x2="20" y2="18"/>
+    <circle cx="9" cy="6" r="2"/>
+    <circle cx="15" cy="12" r="2"/>
+    <circle cx="9" cy="18" r="2"/>
+  </symbol>
+
+  <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+  </symbol>
+
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20,6 9,17 4,12"/>
+  </symbol>
+
+  <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </symbol>
+
+  <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 3c-2.5 2.5-4 5.5-4 9s1.5 6.5 4 9M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9"/>
+    <line x1="3" y1="9" x2="21" y2="9"/>
+    <line x1="3" y1="15" x2="21" y2="15"/>
+  </symbol>
+
+  <symbol id="icon-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2s-5 5-5 12h10c0-7-5-12-5-12z"/>
+    <path d="M7 14l-3 4h16l-3-4"/>
+    <line x1="12" y1="14" x2="12" y2="22"/>
+  </symbol>
+
+  <symbol id="icon-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="13" r="8"/>
+    <polyline points="12,9 12,13 15,16"/>
+    <path d="M9 2h6M12 2v3"/>
+  </symbol>
+
+  <symbol id="icon-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 21h8M12 17v4"/>
+    <path d="M5 3H2v5c0 2.76 1.79 5.13 4.37 5.82"/>
+    <path d="M19 3h3v5c0 2.76-1.79 5.13-4.37 5.82"/>
+    <path d="M5 3h14v9a7 7 0 0 1-14 0V3z"/>
+  </symbol>
+
+  <symbol id="icon-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+  </symbol>
+
+  <symbol id="icon-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18.5 2.5a2.5 2.5 0 0 1 0 3.5L11 13.5c-1 1-2 3.5-3.5 3.5S5 16.5 4 15c-.5-1 .5-2 1-3L9 8M9 8l1-1"/>
+    <path d="M6 17c-1 1-1 3 0 4s3 1 4 0"/>
+  </symbol>
+
+  <symbol id="icon-hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 2h14M5 22h14"/>
+    <path d="M5 2c0 7 7 7 7 10S5 15 5 22"/>
+    <path d="M19 2c0 7-7 7-7 10s7 5 7 10"/>
+  </symbol>
+
+  <symbol id="icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.4"/>
+  </symbol>
+
+  <symbol id="icon-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </symbol>
+
+  <symbol id="icon-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="12" y1="8" x2="12" y2="12"/>
+    <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2.4"/>
+  </symbol>
+
+  <symbol id="icon-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <polyline points="9,12 11,14 15,10"/>
+  </symbol>
+
+  <symbol id="icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="15" y1="9" x2="9" y2="15"/>
+    <line x1="9" y1="9" x2="15" y2="15"/>
+  </symbol>
+
+  <symbol id="icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <line x1="8" y1="12" x2="16" y2="12"/>
+  </symbol>
+
+  <symbol id="icon-secure" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2"/>
+    <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+    <circle cx="12" cy="16" r="1.2" fill="currentColor"/>
+    <line x1="14.8" y1="14" x2="16.5" y2="14" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="icon-hipaa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.25C16.5 22.15 20 17.25 20 12V6z"/>
+    <line x1="12" y1="8" x2="12" y2="16"/>
+    <line x1="8" y1="12" x2="16" y2="12"/>
+  </symbol>
+
+  <symbol id="icon-realtime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.5a9.5 9.5 0 0 1 14 0"/>
+    <path d="M2 9a14 14 0 0 1 20 0"/>
+    <path d="M8.5 16a5 5 0 0 1 7 0"/>
+    <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="8.5" cy="10" r="1.5" fill="currentColor"/>
+    <circle cx="15.5" cy="10" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
+    <path d="M8.5 15a3.5 3.5 0 0 0 7 0v-1H8.5z"/>
+  </symbol>
+
+  <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+  </symbol>
+
+  <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4.5"/>
+    <line x1="12" y1="2" x2="12" y2="5"/>
+    <line x1="12" y1="19" x2="12" y2="22"/>
+    <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
+    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+    <line x1="2" y1="12" x2="5" y2="12"/>
+    <line x1="19" y1="12" x2="22" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
+    <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+  </symbol>
+
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+
+  <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <line x1="3" y1="7" x2="21" y2="7"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="17" x2="21" y2="17"/>
+  </symbol>
+
+  <symbol id="icon-microphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="2" width="6" height="11" rx="3"/>
+    <path d="M5 10a7 7 0 0 0 14 0"/>
+    <line x1="12" y1="17" x2="12" y2="21"/>
+    <line x1="8" y1="21" x2="16" y2="21"/>
+  </symbol>
+
+  <symbol id="icon-language" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 3c-2.5 3-4 5.5-4 9s1.5 6 4 9M12 3c2.5 3 4 5.5 4 9s-1.5 6-4 9"/>
+    <line x1="3.5" y1="9" x2="20.5" y2="9"/>
+    <line x1="3.5" y1="15" x2="20.5" y2="15"/>
+  </symbol>
+
+</svg>
+<style>
+
+.hai-icon {
+  width: 18px; height: 18px;
+  stroke: currentColor; fill: none;
+  vertical-align: middle;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: filter .2s, opacity .2s, transform .18s;
+}
+.hai-icon:hover { filter: brightness(1.25); transform: scale(1.08); }
+.hai-icon-sm  { width: 14px; height: 14px; }
+.hai-icon-lg  { width: 22px; height: 22px; }
+.hai-icon-xl  { width: 32px; height: 32px; }
+.hai-icon.filled { fill: currentColor; stroke: none; }
+.hai-icon.spinning { animation: icon-spin 1s linear infinite; }
+@keyframes icon-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* ── Per-icon colour rules ────────────────────────────────── */
+
+/* CLINICAL / MEDICAL */
+svg:has(use[href="#icon-hospital"])    { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.40)); }
+svg:has(use[href="#icon-physician"])   { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.35)); }
+svg:has(use[href="#icon-patient"])     { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.35)); }
+svg:has(use[href="#icon-patients"])    { color: #34d399; }
+svg:has(use[href="#icon-imaging"])     { color: #c084fc; filter: drop-shadow(0 0 4px rgba(192,132,252,.35)); }
+svg:has(use[href="#icon-pill"])        { color: #fb923c; }
+svg:has(use[href="#icon-heart"])       { color: #f87171; filter: drop-shadow(0 0 5px rgba(248,113,113,.45)); }
+svg:has(use[href="#icon-lungs"])       { color: #38bdf8; }
+svg:has(use[href="#icon-bone"])        { color: #94a3b8; }
+svg:has(use[href="#icon-bandage"])     { color: #fb923c; }
+svg:has(use[href="#icon-survival"])    { color: #f472b6; filter: drop-shadow(0 0 4px rgba(244,114,182,.35)); }
+svg:has(use[href="#icon-icd"])         { color: #fb923c; filter: drop-shadow(0 0 4px rgba(251,146,60,.35)); }
+
+/* ANALYTICS & DATA */
+svg:has(use[href="#icon-analytics"])   { color: #38bdf8; filter: drop-shadow(0 0 5px rgba(56,189,248,.45)); }
+svg:has(use[href="#icon-trends-up"])   { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.40)); }
+svg:has(use[href="#icon-trends-down"]) { color: #f87171; filter: drop-shadow(0 0 4px rgba(248,113,113,.40)); }
+svg:has(use[href="#icon-xai"])         { color: #c084fc; filter: drop-shadow(0 0 6px rgba(192,132,252,.50)); }
+svg:has(use[href="#icon-ai-model"])    { color: #38bdf8; filter: drop-shadow(0 0 5px rgba(56,189,248,.45)); }
+svg:has(use[href="#icon-similarity"])  { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.35)); }
+svg:has(use[href="#icon-compare"])     { color: #fb923c; filter: drop-shadow(0 0 4px rgba(251,146,60,.40)); }
+svg:has(use[href="#icon-quality"])     { color: #fbbf24; filter: drop-shadow(0 0 4px rgba(251,191,36,.40)); }
+svg:has(use[href="#icon-insights"])    { color: #fbbf24; filter: drop-shadow(0 0 5px rgba(251,191,36,.50)); }
+svg:has(use[href="#icon-report"])      { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.35)); }
+svg:has(use[href="#icon-preview"])     { color: #94a3b8; }
+svg:has(use[href="#icon-target"])      { color: #f472b6; filter: drop-shadow(0 0 4px rgba(244,114,182,.40)); }
+svg:has(use[href="#icon-privacy"])     { color: #c084fc; filter: drop-shadow(0 0 4px rgba(192,132,252,.35)); }
+svg:has(use[href="#icon-shield"])      { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.40)); }
+svg:has(use[href="#icon-fhir"])        { color: #38bdf8; }
+
+/* UI ACTIONS */
+svg:has(use[href="#icon-search"])      { color: #64748b; }
+svg:has(use[href="#icon-upload"])      { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.40)); }
+svg:has(use[href="#icon-folder"])      { color: #fb923c; filter: drop-shadow(0 0 4px rgba(251,146,60,.35)); }
+svg:has(use[href="#icon-database"])    { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.35)); }
+svg:has(use[href="#icon-connect"])     { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.35)); }
+svg:has(use[href="#icon-chat"])        { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.40)); }
+svg:has(use[href="#icon-send"])        { color: #38bdf8; }
+svg:has(use[href="#icon-trash"])       { color: #f87171; }
+svg:has(use[href="#icon-edit"])        { color: #fb923c; }
+svg:has(use[href="#icon-refresh"])     { color: #38bdf8; }
+svg:has(use[href="#icon-print"])       { color: #94a3b8; }
+svg:has(use[href="#icon-eye"])         { color: #94a3b8; }
+svg:has(use[href="#icon-tag"])         { color: #f472b6; }
+svg:has(use[href="#icon-controls"])    { color: #64748b; }
+svg:has(use[href="#icon-star"])        { color: #fbbf24; filter: drop-shadow(0 0 4px rgba(251,191,36,.45)); }
+svg:has(use[href="#icon-globe"])       { color: #34d399; }
+svg:has(use[href="#icon-rocket"])      { color: #fb923c; filter: drop-shadow(0 0 5px rgba(251,146,60,.45)); }
+svg:has(use[href="#icon-timer"])       { color: #fbbf24; }
+svg:has(use[href="#icon-hourglass"])   { color: #94a3b8; }
+svg:has(use[href="#icon-trophy"])      { color: #fbbf24; filter: drop-shadow(0 0 5px rgba(251,191,36,.45)); }
+svg:has(use[href="#icon-sparkle"])     { color: #fbbf24; filter: drop-shadow(0 0 5px rgba(251,191,36,.50)); }
+svg:has(use[href="#icon-wave"])        { color: #fb923c; }
+svg:has(use[href="#icon-check"])       { color: #34d399; }
+svg:has(use[href="#icon-close"])       { color: #94a3b8; }
+svg:has(use[href="#icon-menu"])        { color: #94a3b8; }
+
+/* STATUS & ALERTS */
+svg:has(use[href="#icon-warning"])     { color: #fbbf24; filter: drop-shadow(0 0 5px rgba(251,191,36,.50)); }
+svg:has(use[href="#icon-bell"])        { color: #fbbf24; filter: drop-shadow(0 0 4px rgba(251,191,36,.45)); }
+svg:has(use[href="#icon-critical"])    { color: #f87171; filter: drop-shadow(0 0 4px rgba(248,113,113,.45)); }
+svg:has(use[href="#icon-success"])     { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.45)); }
+svg:has(use[href="#icon-error"])       { color: #f87171; filter: drop-shadow(0 0 4px rgba(248,113,113,.45)); }
+svg:has(use[href="#icon-stop"])        { color: #f87171; }
+svg:has(use[href="#icon-secure"])      { color: #c084fc; filter: drop-shadow(0 0 4px rgba(192,132,252,.40)); }
+svg:has(use[href="#icon-hipaa"])       { color: #34d399; filter: drop-shadow(0 0 4px rgba(52,211,153,.45)); }
+svg:has(use[href="#icon-realtime"])    { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.40)); }
+
+/* THEME & SETTINGS */
+svg:has(use[href="#icon-palette"])     { color: #f472b6; filter: drop-shadow(0 0 5px rgba(244,114,182,.45)); }
+svg:has(use[href="#icon-moon"])        { color: #c084fc; filter: drop-shadow(0 0 5px rgba(192,132,252,.45)); }
+svg:has(use[href="#icon-sun"])         { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,.55)); }
+svg:has(use[href="#icon-settings"])    { color: #64748b; }
+svg:has(use[href="#icon-microphone"])  { color: #38bdf8; }
+svg:has(use[href="#icon-language"])    { color: #34d399; }
+
+/* ── Context-specific overrides ──────────────────────────── */
+
+/* Logo icon — always white inside gradient box */
+.logo-icon svg.hai-icon            { color: #ffffff !important; filter: none !important; }
+.logo-icon svg.hai-icon:hover      { transform: none !important; }
+
+/* Login brand logo — white */
+.brand-logo svg.hai-icon           { color: #ffffff !important; filter: none !important; }
+
+/* Header status dot area — keep muted */
+.status-dot svg.hai-icon           { color: inherit; filter: none; }
+
+/* Active tab icon gets accent colour + glow */
+.mtab.active svg.hai-icon          { filter: drop-shadow(0 0 4px currentColor) brightness(1.2); }
+
+/* Buttons — icon inherits btn text colour */
+.btn svg.hai-icon                  { color: inherit; filter: none; }
+.btn-primary svg.hai-icon          { color: #ffffff; }
+.btn-danger svg.hai-icon           { color: var(--danger, #f87171); }
+
+/* Theme panel mode buttons */
+.mode-btn svg.hai-icon             { color: inherit; filter: none; }
+
+/* Input eye-toggle */
+.input-icon svg.hai-icon           { color: #94a3b8; }
+.input-icon svg.hai-icon:hover     { color: #38bdf8; }
+
+/* Sidebar close button */
+.sidebar-close-btn svg.hai-icon    { color: #94a3b8; }
+
+/* Mobile chat toggle */
+.chat-toggle-btn svg.hai-icon      { color: #ffffff; filter: drop-shadow(0 0 6px rgba(56,189,248,.6)); }
+
+/* Mobile hamburger */
+.hamburger-btn svg.hai-icon        { color: #94a3b8; }
+
+/* Panel titles — icon matches text */
+.panel-title svg.hai-icon          { opacity: .9; }
+
+/* Security bar in login */
+.security-bar svg.hai-icon         { width: 14px; height: 14px; }
+
+/* Tab source switcher buttons */
+.tab-btn svg.hai-icon              { width: 13px; height: 13px; color: inherit; filter: none; }
+
+/* Upload zone big icon */
+.upload-zone svg.hai-icon          { width: 28px; height: 28px; color: #38bdf8;
+                                      filter: drop-shadow(0 0 8px rgba(56,189,248,.50)); }
+
+/* Imaging type card icon */
+.img-type-icon svg.hai-icon        { width: 24px; height: 24px; }
+
+/* Alert / risk color-coded icons */
+.alert-critical svg.hai-icon       { color: #f87171; filter: drop-shadow(0 0 5px rgba(248,113,113,.55)); }
+.alert-warning  svg.hai-icon       { color: #fbbf24; filter: drop-shadow(0 0 5px rgba(251,191,36,.55)); }
+.alert-info     svg.hai-icon       { color: #38bdf8; filter: drop-shadow(0 0 4px rgba(56,189,248,.45)); }
+
+/* .sec-dot hidden — replaced by svg icons */
+.sec-dot { display: none; }
+
+/* ── Light mode adjustments ───────────────────────────────── */
+[data-theme="light"] svg:has(use[href="#icon-hospital"])   { color: #0284c7; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-analytics"])  { color: #0284c7; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-xai"])        { color: #7c3aed; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-warning"])    { color: #d97706; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-success"])    { color: #059669; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-error"])      { color: #dc2626; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-heart"])      { color: #dc2626; filter: none; }
+[data-theme="light"] svg:has(use[href="#icon-insights"])   { color: #d97706; filter: none; }
+/* ═════════════════════════════════════════════════════════════ */
+</style>
+
 
 <!-- Mobile sidebar overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <!-- Mobile chat overlay -->
 <div class="sidebar-overlay" id="chatOverlay" onclick="closeMobileChat()"></div>
 <!-- Mobile chat toggle button -->
-<button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleMobileChat()" title="AI Chat">💬</button>
+<button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleMobileChat()" title="AI Chat"><svg class="hai-icon"><use href="#icon-chat"/></svg></button>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-card">
@@ -894,21 +1483,21 @@ body { font-size: 1rem; }
 
 <header class="header">
   <div class="logo">
-    <div class="logo-icon">🏥</div>
+    <div class="logo-icon"><svg class="hai-icon"><use href="#icon-hospital"/></svg></div>
     <div><div class="logo-text">HealthAI</div><div class="logo-sub">Intelligent Healthcare Analytics</div></div>
   </div>
   <div class="header-right">
-    <span class="badge-free">❤ VIRENKUMAR MANIYA</span>
+    <span class="badge-free"><svg class="hai-icon"><use href="#icon-heart"/></svg> VIRENKUMAR MANIYA</span>
     <div class="status-dot"><div class="dot"></div><span>AI Ready</span></div>
 
     <!-- Theme Switcher -->
     <div class="theme-switcher">
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemePanel()" title="Themes">🎨</button>
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleThemePanel()" title="Themes"><svg class="hai-icon"><use href="#icon-palette"/></svg></button>
       <div class="theme-panel" id="themePanel">
         <div class="tp-title">Display Mode</div>
         <div class="mode-row">
-          <button class="mode-btn active" id="modeDark" onclick="setMode('dark')">🌙 Dark</button>
-          <button class="mode-btn" id="modeLight" onclick="setMode('light')">☀️ Light</button>
+          <button class="mode-btn active" id="modeDark" onclick="setMode('dark')"><svg class="hai-icon"><use href="#icon-moon"/></svg> Dark</button>
+          <button class="mode-btn" id="modeLight" onclick="setMode('light')"><svg class="hai-icon"><use href="#icon-sun"/></svg> Light</button>
         </div>
         <div class="tp-title" style="margin-top:4px">Accent Colour</div>
         <div class="palette-grid">
@@ -931,7 +1520,7 @@ body { font-size: 1rem; }
     </div>
 
     <!-- Mobile hamburger for sidebar -->
-    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu">☰</button>
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu"><svg class="hai-icon"><use href="#icon-menu"/></svg></button>
   </div>
 </header>
 
@@ -939,36 +1528,36 @@ body { font-size: 1rem; }
 
 <!-- ════ LEFT SIDEBAR ════ -->
 <aside class="sidebar-left" id="sidebarLeft">
-  <button class="sidebar-close-btn" onclick="closeSidebar()" title="Close sidebar">✕</button>
+  <button class="sidebar-close-btn" onclick="closeSidebar()" title="Close sidebar"><svg class="hai-icon"><use href="#icon-close"/></svg></button>
 
   <div class="panel">
-    <div class="panel-title">📂 Data Source</div>
+    <div class="panel-title"><svg class="hai-icon"><use href="#icon-folder"/></svg> Data Source</div>
     <div class="tab-group">
-      <button class="tab-btn active" onclick="switchSrcTab('excel')">📊 Excel/CSV</button>
-      <button class="tab-btn" onclick="switchSrcTab('sql')">🗄 SQL</button>
+      <button class="tab-btn active" onclick="switchSrcTab('excel')"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Excel/CSV</button>
+      <button class="tab-btn" onclick="switchSrcTab('sql')"><svg class="hai-icon"><use href="#icon-database"/></svg> SQL</button>
     </div>
     <div id="tab-excel">
       <div class="upload-zone" id="uploadZone">
         <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
-        <div style="font-size:24px;margin-bottom:6px">📋</div>
+        <div style="font-size:24px;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-preview"/></svg></div>
         <div style="font-size:11px;color:var(--text3);line-height:1.5"><strong style="color:var(--accent)">Click to upload</strong> or drag & drop<br>Excel (.xlsx, .xls) or CSV</div>
       </div>
     </div>
     <div id="tab-sql" style="display:none">
       <input class="input-field" id="sqlConn" placeholder="mssql+pyodbc://user:pass@server/db?driver=ODBC+Driver+17+for+SQL+Server" style="font-size:9px;height:50px">
       <textarea class="input-field" id="sqlQuery" rows="3" placeholder="SELECT * FROM patients"></textarea>
-      <button class="btn btn-primary" onclick="connectSQL()">🔌 Connect & Load</button>
+      <button class="btn btn-primary" onclick="connectSQL()"><svg class="hai-icon"><use href="#icon-connect"/></svg> Connect & Load</button>
     </div>
     <div id="dataset-info">
-      <div class="ds-stat">📄 File <strong id="ds-file">—</strong></div>
-      <div class="ds-stat">📊 Rows <strong id="ds-rows">—</strong></div>
-      <div class="ds-stat">🏷 Cols <strong id="ds-cols">—</strong></div>
-      <button class="btn btn-danger" style="margin-top:7px;width:100%;justify-content:center" onclick="clearSession()">🗑 Clear Session</button>
+      <div class="ds-stat"><svg class="hai-icon"><use href="#icon-report"/></svg> File <strong id="ds-file">—</strong></div>
+      <div class="ds-stat"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Rows <strong id="ds-rows">—</strong></div>
+      <div class="ds-stat"><svg class="hai-icon"><use href="#icon-tag"/></svg> Cols <strong id="ds-cols">—</strong></div>
+      <button class="btn btn-danger" style="margin-top:7px;width:100%;justify-content:center" onclick="clearSession()"><svg class="hai-icon"><use href="#icon-trash"/></svg> Clear Session</button>
     </div>
   </div>
 
   <div class="panel" id="column-panel">
-    <div class="panel-title">🎛 Column Selector</div>
+    <div class="panel-title"><svg class="hai-icon"><use href="#icon-controls"/></svg> Column Selector</div>
     <div class="sel-legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Click once = Feature</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Click twice = Target</div>
@@ -982,16 +1571,16 @@ body { font-size: 1rem; }
     <div class="panel-title">⚙️ Analysis Settings</div>
     <span class="cfg-label">Task Type</span>
     <select class="cfg-select" id="taskType" onchange="updateTaskUI()">
-      <option value="auto">🤖 Auto Detect</option>
-      <option value="regression">📈 Regression</option>
-      <option value="classification">🏷 Classification</option>
-      <option value="clustering">🔵 Clustering</option>
+      <option value="auto"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> Auto Detect</option>
+      <option value="regression"><svg class="hai-icon"><use href="#icon-trends-up"/></svg> Regression</option>
+      <option value="classification"><svg class="hai-icon"><use href="#icon-tag"/></svg> Classification</option>
+      <option value="clustering"><svg class="hai-icon"><use href="#icon-critical"/></svg> Clustering</option>
     </select>
     <span class="cfg-label">ML Model</span>
     <select class="cfg-select" id="modelType">
-      <option value="random_forest">🌲 Random Forest</option>
-      <option value="linear">📊 Linear / Logistic</option>
-      <option value="gradient_boost">🚀 Gradient Boost</option>
+      <option value="random_forest"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> Random Forest</option>
+      <option value="linear"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Linear / Logistic</option>
+      <option value="gradient_boost"><svg class="hai-icon"><use href="#icon-rocket"/></svg> Gradient Boost</option>
     </select>
     <div id="clusterCfg" style="display:none">
       <span class="cfg-label">Number of Clusters</span>
@@ -1009,29 +1598,29 @@ body { font-size: 1rem; }
     <button class="tab-arrow" id="tabArrowLeft" onclick="scrollTabs(-1)" title="Scroll left">‹</button>
     <div class="tabs-scroll" id="tabsScroll">
       <!-- GROUP 1: Core -->
-      <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics" data-group="core"><span class="mtab-icon">📊</span><span class="mtab-label">Analytics</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('preview')" id="mtab-preview" data-group="core"><span class="mtab-icon">📋</span><span class="mtab-label">Data Preview</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging" data-group="core"><span class="mtab-icon">🔬</span><span class="mtab-label">Medical Imaging</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics" data-group="core"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-analytics"/></svg></span><span class="mtab-label">Analytics</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('preview')" id="mtab-preview" data-group="core"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-preview"/></svg></span><span class="mtab-label">Data Preview</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging" data-group="core"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-imaging"/></svg></span><span class="mtab-label">Medical Imaging</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
       <div class="tab-group-sep" title="AI Analysis"></div>
       <!-- GROUP 2: AI Analysis -->
-      <button class="mtab" onclick="switchTab('xai')" id="mtab-xai" data-group="ai"><span class="mtab-icon">🧠</span><span class="mtab-label">Explainability</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('risk')" id="mtab-risk" data-group="ai"><span class="mtab-icon">⚠️</span><span class="mtab-label">Risk Engine</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('trends')" id="mtab-trends" data-group="ai"><span class="mtab-icon">📈</span><span class="mtab-label">Trends</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity" data-group="ai"><span class="mtab-icon">👥</span><span class="mtab-label">Similarity</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('insights')" id="mtab-insights" data-group="ai"><span class="mtab-icon">💡</span><span class="mtab-label">AI Insights</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('xai')" id="mtab-xai" data-group="ai"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-xai"/></svg></span><span class="mtab-label">Explainability</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('risk')" id="mtab-risk" data-group="ai"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-warning"/></svg></span><span class="mtab-label">Risk Engine</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('trends')" id="mtab-trends" data-group="ai"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-trends-up"/></svg></span><span class="mtab-label">Trends</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('similarity')" id="mtab-similarity" data-group="ai"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-similarity"/></svg></span><span class="mtab-label">Similarity</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('insights')" id="mtab-insights" data-group="ai"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-insights"/></svg></span><span class="mtab-label">AI Insights</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
       <div class="tab-group-sep" title="Clinical Tools"></div>
       <!-- GROUP 3: Clinical -->
-      <button class="mtab" onclick="switchTab('quality')" id="mtab-quality" data-group="clinical"><span class="mtab-icon">🧪</span><span class="mtab-label">Data Quality</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy" data-group="clinical"><span class="mtab-icon">🔒</span><span class="mtab-label">Privacy</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('patient')" id="mtab-patient" data-group="clinical"><span class="mtab-icon">🧑‍⚕️</span><span class="mtab-label">Patient View</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('survival')" id="mtab-survival" data-group="clinical"><span class="mtab-icon">📉</span><span class="mtab-label">Survival</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('coding')" id="mtab-coding" data-group="clinical"><span class="mtab-icon">💊</span><span class="mtab-label">ICD Coding</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('quality')" id="mtab-quality" data-group="clinical"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-quality"/></svg></span><span class="mtab-label">Data Quality</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('privacy')" id="mtab-privacy" data-group="clinical"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span><span class="mtab-label">Privacy</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('patient')" id="mtab-patient" data-group="clinical"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-patient"/></svg></span><span class="mtab-label">Patient View</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('survival')" id="mtab-survival" data-group="clinical"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-survival"/></svg></span><span class="mtab-label">Survival</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('coding')" id="mtab-coding" data-group="clinical"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-icd"/></svg></span><span class="mtab-label">ICD Coding</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
       <div class="tab-group-sep" title="Advanced"></div>
       <!-- GROUP 4: Advanced -->
-      <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget" data-group="advanced"><span class="mtab-icon">🎯</span><span class="mtab-label">Multi-Target</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts" data-group="advanced"><span class="mtab-icon">🔔</span><span class="mtab-label">Alert Rules</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('compare')" id="mtab-compare" data-group="advanced"><span class="mtab-icon">⚖️</span><span class="mtab-label">Compare</span><span class="tab-lock" style="display:none">🔒</span></button>
-      <button class="mtab" onclick="switchTab('report')" id="mtab-report" data-group="advanced"><span class="mtab-icon">📄</span><span class="mtab-label">Report</span><span class="tab-lock" style="display:none">🔒</span></button>
+      <button class="mtab" onclick="switchTab('multitarget')" id="mtab-multitarget" data-group="advanced"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-target"/></svg></span><span class="mtab-label">Multi-Target</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('alerts')" id="mtab-alerts" data-group="advanced"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-bell"/></svg></span><span class="mtab-label">Alert Rules</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('compare')" id="mtab-compare" data-group="advanced"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-compare"/></svg></span><span class="mtab-label">Compare</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
+      <button class="mtab" onclick="switchTab('report')" id="mtab-report" data-group="advanced"><span class="mtab-icon"><svg class="hai-icon"><use href="#icon-report"/></svg></span><span class="mtab-label">Report</span><span class="tab-lock" style="display:none"><svg class="hai-icon"><use href="#icon-privacy"/></svg></span></button>
     </div>
     <button class="tab-arrow" id="tabArrowRight" onclick="scrollTabs(1)" title="Scroll right">›</button>
   </div>
@@ -1043,26 +1632,26 @@ body { font-size: 1rem; }
       <div class="welcome-title">Healthcare AI Intelligence Platform</div>
       <div class="welcome-desc">Upload your healthcare dataset or connect to SQL Server. Select columns, run AI predictions, regression, clustering, explainability, risk detection, trend forecasting, patient similarity — and analyze medical images. Free for hospital &amp; healthcare charity.</div>
       <div class="feature-pills">
-        <div class="pill">🤖 LLM Chat</div>
-        <div class="pill">📈 Regression</div>
-        <div class="pill">🏷 Classification</div>
-        <div class="pill">🔵 Clustering</div>
-        <div class="pill">🎯 Prediction</div>
-        <div class="pill">🔬 Medical Imaging</div>
-        <div class="pill">🧠 Explainability</div>
-        <div class="pill">⚠️ Risk Engine</div>
-        <div class="pill">📈 Trends &amp; Forecast</div>
-        <div class="pill">👥 Patient Similarity</div>
-        <div class="pill">💡 Clinical Insights</div>
-        <div class="pill">🧪 Data Quality</div>
-        <div class="pill">📄 AI Reports</div>
-        <div class="pill">🔒 PHI Privacy</div>
-        <div class="pill">🧑‍⚕️ Patient Dashboard</div>
-        <div class="pill">📉 Survival Analysis</div>
-        <div class="pill">🎯 Multi-Target</div>
-        <div class="pill">🔔 Alert Rules</div>
-        <div class="pill">⚖️ Dataset Compare</div>
-        <div class="pill">💊 ICD Coding</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> LLM Chat</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-trends-up"/></svg> Regression</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-tag"/></svg> Classification</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-critical"/></svg> Clustering</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-target"/></svg> Prediction</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-imaging"/></svg> Medical Imaging</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-xai"/></svg> Explainability</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-warning"/></svg> Risk Engine</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-trends-up"/></svg> Trends &amp; Forecast</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-similarity"/></svg> Patient Similarity</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-insights"/></svg> Clinical Insights</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-quality"/></svg> Data Quality</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-report"/></svg> AI Reports</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-privacy"/></svg> PHI Privacy</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-patient"/></svg> Patient Dashboard</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-survival"/></svg> Survival Analysis</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-target"/></svg> Multi-Target</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-bell"/></svg> Alert Rules</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-compare"/></svg> Dataset Compare</div>
+        <div class="pill"><svg class="hai-icon"><use href="#icon-icd"/></svg> ICD Coding</div>
       </div>
     </div>
 
@@ -1083,11 +1672,11 @@ body { font-size: 1rem; }
         </div>
       </div>
       <div class="predict-form" id="pred-form">
-        <div class="predict-title">🎯 Predict for New Patient <span style="font-size:9px;color:var(--text3);font-weight:400;margin-left:auto">Auto-suggested from dataset</span></div>
+        <div class="predict-title"><svg class="hai-icon"><use href="#icon-target"/></svg> Predict for New Patient <span style="font-size:9px;color:var(--text3);font-weight:400;margin-left:auto">Auto-suggested from dataset</span></div>
         <div class="predict-inputs" id="pred-inputs"></div>
-        <button class="btn btn-primary btn-sm" onclick="runPrediction()" style="margin-bottom:0">⚡ Calculate Prediction</button>
+        <button class="btn btn-primary btn-sm" onclick="runPrediction()" style="margin-bottom:0"><svg class="hai-icon"><use href="#icon-realtime"/></svg> Calculate Prediction</button>
         <div class="pred-result" id="pred-result">
-          <div class="pred-result-hdr">🏥 Predicted Result</div>
+          <div class="pred-result-hdr"><svg class="hai-icon"><use href="#icon-hospital"/></svg> Predicted Result</div>
           <div class="pred-result-val" id="pred-val">—</div>
           <div class="conf-row" id="conf-row" style="display:none">
             <div class="conf-track"><div class="conf-fill" id="conf-fill" style="width:0%"></div></div>
@@ -1100,7 +1689,7 @@ body { font-size: 1rem; }
 
     <div id="cluster-result-card" class="result-card" style="display:none">
       <div class="result-header">
-        <div class="result-title">🔵 Clustering Analysis</div>
+        <div class="result-title"><svg class="hai-icon"><use href="#icon-critical"/></svg> Clustering Analysis</div>
         <span class="result-badge badge-clu">K-MEANS</span>
       </div>
       <div class="metrics-grid" id="cluster-metrics"></div>
@@ -1113,7 +1702,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-preview">
     <div class="result-card">
       <div class="result-header">
-        <div class="result-title">📋 Data Preview</div>
+        <div class="result-title"><svg class="hai-icon"><use href="#icon-preview"/></svg> Data Preview</div>
         <span style="font-size:11px;color:var(--text3)" id="prev-stats"></span>
       </div>
       <div class="preview-toolbar">
@@ -1151,22 +1740,22 @@ body { font-size: 1rem; }
 
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🔬 Medical Imaging AI Analysis</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-imaging"/></svg> Medical Imaging AI Analysis</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Upload X-Ray, CT Scan, Sonography, MRI or Dermatology images for AI-assisted findings detection.</div>
       <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Select Scan Type</div>
       <div class="img-type-grid">
-        <div class="img-type-card sel" onclick="selImgType('xray',this)"><div class="img-type-icon">🫁</div><div class="img-type-lbl">X-Ray</div><div class="img-type-sub">Chest · Bone · Spine</div></div>
-        <div class="img-type-card" onclick="selImgType('ct',this)"><div class="img-type-icon">🧠</div><div class="img-type-lbl">CT Scan</div><div class="img-type-sub">Brain · Abdomen</div></div>
-        <div class="img-type-card" onclick="selImgType('sono',this)"><div class="img-type-icon">🫀</div><div class="img-type-lbl">Sonography</div><div class="img-type-sub">Abdomen · Heart</div></div>
-        <div class="img-type-card" onclick="selImgType('mri',this)"><div class="img-type-icon">🦴</div><div class="img-type-lbl">MRI</div><div class="img-type-sub">Brain · Spine</div></div>
-        <div class="img-type-card" onclick="selImgType('retinal',this)"><div class="img-type-icon">👁</div><div class="img-type-lbl">Retinal</div><div class="img-type-sub">Fundus · OCT</div></div>
-        <div class="img-type-card" onclick="selImgType('derma',this)"><div class="img-type-icon">🩹</div><div class="img-type-lbl">Dermatology</div><div class="img-type-sub">Skin · Lesions</div></div>
+        <div class="img-type-card sel" onclick="selImgType('xray',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-lungs"/></svg></div><div class="img-type-lbl">X-Ray</div><div class="img-type-sub">Chest · Bone · Spine</div></div>
+        <div class="img-type-card" onclick="selImgType('ct',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-xai"/></svg></div><div class="img-type-lbl">CT Scan</div><div class="img-type-sub">Brain · Abdomen</div></div>
+        <div class="img-type-card" onclick="selImgType('sono',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-heart"/></svg></div><div class="img-type-lbl">Sonography</div><div class="img-type-sub">Abdomen · Heart</div></div>
+        <div class="img-type-card" onclick="selImgType('mri',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-bone"/></svg></div><div class="img-type-lbl">MRI</div><div class="img-type-sub">Brain · Spine</div></div>
+        <div class="img-type-card" onclick="selImgType('retinal',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-eye"/></svg></div><div class="img-type-lbl">Retinal</div><div class="img-type-sub">Fundus · OCT</div></div>
+        <div class="img-type-card" onclick="selImgType('derma',this)"><div class="img-type-icon"><svg class="hai-icon"><use href="#icon-bandage"/></svg></div><div class="img-type-lbl">Dermatology</div><div class="img-type-sub">Skin · Lesions</div></div>
       </div>
     </div>
 
     <div class="img-upload" id="imgUpload">
       <input type="file" id="imgFile" accept="image/*" onchange="loadImgFile(this.files[0])">
-      <div style="font-size:36px;margin-bottom:10px">📤</div>
+      <div style="font-size:36px;margin-bottom:10px"><svg class="hai-icon" style="width:36px;height:36px"><use href="#icon-upload"/></svg></div>
       <div style="font-size:12px;color:var(--text3);line-height:1.6"><strong style="color:var(--accent)">Click to upload</strong> or drag & drop<br>JPEG, PNG, WEBP · Max 10MB</div>
     </div>
 
@@ -1177,18 +1766,18 @@ body { font-size: 1rem; }
           <div class="img-overlay-lbl" id="imgLbl">X-RAY</div>
         </div>
         <div class="img-toolbar">
-          <button class="img-tbtn" onclick="changeImgType('xray')">🫁 X-Ray</button>
-          <button class="img-tbtn" onclick="changeImgType('ct')">🧠 CT</button>
-          <button class="img-tbtn" onclick="changeImgType('sono')">🫀 Sono</button>
-          <button class="img-tbtn" onclick="changeImgType('mri')">🦴 MRI</button>
-          <button class="img-tbtn" onclick="reAnalyze()" style="color:var(--accent2);border-color:rgba(52,211,153,.3)">🔄 Re-analyse</button>
-          <button class="img-tbtn" onclick="clearImage()" style="margin-left:auto;color:var(--danger);border-color:rgba(248,113,113,.3)">🗑 Clear Image</button>
+          <button class="img-tbtn" onclick="changeImgType('xray')"><svg class="hai-icon"><use href="#icon-lungs"/></svg> X-Ray</button>
+          <button class="img-tbtn" onclick="changeImgType('ct')"><svg class="hai-icon"><use href="#icon-xai"/></svg> CT</button>
+          <button class="img-tbtn" onclick="changeImgType('sono')"><svg class="hai-icon"><use href="#icon-heart"/></svg> Sono</button>
+          <button class="img-tbtn" onclick="changeImgType('mri')"><svg class="hai-icon"><use href="#icon-bone"/></svg> MRI</button>
+          <button class="img-tbtn" onclick="reAnalyze()" style="color:var(--accent2);border-color:rgba(52,211,153,.3)"><svg class="hai-icon"><use href="#icon-refresh"/></svg> Re-analyse</button>
+          <button class="img-tbtn" onclick="clearImage()" style="margin-left:auto;color:var(--danger);border-color:rgba(248,113,113,.3)"><svg class="hai-icon"><use href="#icon-trash"/></svg> Clear Image</button>
         </div>
       </div>
       <div class="img-findings-box">
-        <div class="img-findings-hdr">🤖 AI Findings <span id="imgBadge" style="margin-left:auto;font-size:9px;background:rgba(56,189,248,.15);color:var(--accent);padding:2px 7px;border-radius:7px;font-weight:600">X-RAY</span></div>
+        <div class="img-findings-hdr"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> AI Findings <span id="imgBadge" style="margin-left:auto;font-size:9px;background:rgba(56,189,248,.15);color:var(--accent);padding:2px 7px;border-radius:7px;font-weight:600">X-RAY</span></div>
         <div class="img-findings-body" id="imgBody">
-          <div style="text-align:center;padding:36px 16px;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔍</div><div style="font-size:12px">Upload a medical image to begin AI analysis</div></div>
+          <div style="text-align:center;padding:36px 16px;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px"><svg class="hai-icon" style="width:28px;height:28px"><use href="#icon-search"/></svg></div><div style="font-size:12px">Upload a medical image to begin AI analysis</div></div>
         </div>
         <div class="img-ask-area">
           <input type="text" id="imgQ" placeholder="Ask a specific question about this image..." onkeydown="if(event.key==='Enter')askImg()">
@@ -1203,7 +1792,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-xai">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🧠 Explainable AI — Why This Prediction?</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-xai"/></svg> Explainable AI — Why This Prediction?</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Understand exactly which features drive predictions. LIME-style per-feature contribution analysis with global importances.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-primary btn-sm" onclick="runXAI()">▶ Run Explainability</button>
@@ -1216,22 +1805,22 @@ body { font-size: 1rem; }
     <div id="xai-result" style="display:none">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🌍 Global Feature Importance</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px"><svg class="hai-icon"><use href="#icon-globe"/></svg> Global Feature Importance</div>
           <div id="xai-global-bars" class="feat-bars"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">⚡ Local Contributions (This Patient)</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px"><svg class="hai-icon"><use href="#icon-realtime"/></svg> Local Contributions (This Patient)</div>
           <div id="xai-prediction-box" style="margin-bottom:10px"></div>
           <div id="xai-local-bars"></div>
         </div>
       </div>
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">💬 Why This Prediction?</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px"><svg class="hai-icon"><use href="#icon-chat"/></svg> Why This Prediction?</div>
         <div id="xai-narrative" style="font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-line;padding:12px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)"></div>
       </div>
     </div>
     <div id="xai-empty" class="result-card" style="text-align:center;padding:32px;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:10px">🧠</div>
+      <div style="font-size:32px;margin-bottom:10px"><svg class="hai-icon" style="width:32px;height:32px"><use href="#icon-xai"/></svg></div>
       <div style="font-size:13px">Run an ML analysis first (Analytics tab), then come back here to explain the results.</div>
     </div>
   </div>
@@ -1240,7 +1829,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-risk">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--danger),var(--warn))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">⚠️ Clinical Risk &amp; Alert Engine</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-warning"/></svg> Clinical Risk &amp; Alert Engine</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Threshold alerts, anomaly detection (IsolationForest), sudden change detection, and composite patient risk scoring.</div>
       <button class="btn btn-primary btn-sm" onclick="runRisk()">▶ Run Risk Analysis</button>
     </div>
@@ -1249,28 +1838,28 @@ body { font-size: 1rem; }
       <div class="metrics-grid" id="risk-kpis" style="margin-bottom:14px"></div>
       <!-- Alerts -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🚨 Threshold Alerts</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-warning"/></svg> Threshold Alerts</div>
         <div id="risk-alerts"></div>
       </div>
       <!-- Anomalies + Top Risk side-by-side -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤖 Anomaly Detection</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> Anomaly Detection</div>
           <div id="risk-anomaly"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🔴 Top Risk Patients</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-stop"/></svg> Top Risk Patients</div>
           <div id="risk-top-patients"></div>
         </div>
       </div>
       <!-- Change Detection -->
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📉 Sudden Change Detection</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-survival"/></svg> Sudden Change Detection</div>
         <div id="risk-changes"></div>
       </div>
     </div>
     <div id="risk-empty" class="result-card" style="text-align:center;padding:32px;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:32px;margin-bottom:10px"><svg class="hai-icon" style="width:32px;height:32px"><use href="#icon-warning"/></svg></div>
       <div style="font-size:13px">Upload a dataset and select feature columns, then run Risk Analysis.</div>
     </div>
   </div>
@@ -1279,7 +1868,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-trends">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">📈 Trend &amp; Forecast Analysis</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-trends-up"/></svg> Trend &amp; Forecast Analysis</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Linear trend detection, moving averages, simple forecasting, and correlation matrix across selected features.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-primary btn-sm" onclick="runTrends()">▶ Run Trend Analysis</button>
@@ -1292,12 +1881,12 @@ body { font-size: 1rem; }
     <div id="trends-result" style="display:none">
       <div id="trends-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"></div>
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🔗 Feature Correlation Matrix</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-fhir"/></svg> Feature Correlation Matrix</div>
         <div id="trends-corr" style="overflow-x:auto"></div>
       </div>
     </div>
     <div id="trends-empty" class="result-card" style="text-align:center;padding:32px;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:10px">📈</div>
+      <div style="font-size:32px;margin-bottom:10px"><svg class="hai-icon" style="width:32px;height:32px"><use href="#icon-trends-up"/></svg></div>
       <div style="font-size:13px">Upload a dataset and select feature columns, then run Trend Analysis.</div>
     </div>
   </div>
@@ -1306,7 +1895,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-similarity">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),var(--accent4))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">👥 Patient Similarity Engine</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-similarity"/></svg> Patient Similarity Engine</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Find clinically similar patients using K-Nearest Neighbours. Cohort comparison vs full population.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-primary btn-sm" onclick="runSimilarity()">▶ Find Similar Patients</button>
@@ -1323,22 +1912,22 @@ body { font-size: 1rem; }
     <div id="sim-result" style="display:none">
       <!-- Query Patient -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🎯 Query Patient Profile</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-target"/></svg> Query Patient Profile</div>
         <div id="sim-query-patient"></div>
       </div>
       <!-- Similar Patients Table -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">👥 Most Similar Patients</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-similarity"/></svg> Most Similar Patients</div>
         <div id="sim-patients-table" style="overflow-x:auto"></div>
       </div>
       <!-- Cohort Comparison -->
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 Cohort vs Population Comparison</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Cohort vs Population Comparison</div>
         <div id="sim-cohort" class="feat-bars"></div>
       </div>
     </div>
     <div id="sim-empty" class="result-card" style="text-align:center;padding:32px;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:10px">👥</div>
+      <div style="font-size:32px;margin-bottom:10px"><svg class="hai-icon" style="width:32px;height:32px"><use href="#icon-similarity"/></svg></div>
       <div style="font-size:13px">Upload a dataset and select feature columns, then find similar patients.</div>
     </div>
   </div>
@@ -1346,15 +1935,15 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-insights">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">💡 Auto Clinical Insights</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-insights"/></svg> Auto Clinical Insights</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">AI-generated narrative summaries, chart interpretations, and clinical observations — powered by LLM + your ML results.</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" onclick="runInsights()">🤖 Generate Insights</button>
+        <button class="btn btn-primary btn-sm" onclick="runInsights()"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> Generate Insights</button>
         <span style="font-size:10px;color:var(--text3)">Run an ML analysis first, then generate narrative insights.</span>
       </div>
     </div>
     <div id="insights-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">💡</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-insights"/></svg></div>
       <div style="font-size:13px;margin-bottom:8px">No insights yet</div>
       <div style="font-size:11px">Go to the Analytics tab → run an analysis → come back here and click Generate Insights.</div>
     </div>
@@ -1362,7 +1951,7 @@ body { font-size: 1rem; }
       <!-- Summary + Confidence -->
       <div class="result-card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">📋 Executive Summary</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em"><svg class="hai-icon"><use href="#icon-preview"/></svg> Executive Summary</div>
           <div id="insights-conf-badge"></div>
         </div>
         <div class="insight-narrative" id="insights-summary"></div>
@@ -1370,21 +1959,21 @@ body { font-size: 1rem; }
       <!-- 3-column grid: observations / recommendations / risk flags -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🔬 Clinical Observations</div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-imaging"/></svg> Clinical Observations</div>
           <ul class="obs-list" id="insights-observations"></ul>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--accent3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">✅ Recommendations</div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-success"/></svg> Recommendations</div>
           <ul class="obs-list" id="insights-recommendations"></ul>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠️ Risk Flags</div>
+          <div style="font-size:10px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-warning"/></svg> Risk Flags</div>
           <ul class="obs-list" id="insights-risks"></ul>
         </div>
       </div>
       <!-- Chart interpretation -->
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 Chart Interpretation</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Chart Interpretation</div>
         <div class="insight-narrative" id="insights-chart" style="background:rgba(244,114,182,.04);border-color:rgba(244,114,182,.2);border-left-color:var(--accent3)"></div>
       </div>
     </div>
@@ -1394,12 +1983,12 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-quality">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--warn),var(--accent4))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🧪 Data Quality &amp; Bias Detection</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-quality"/></svg> Data Quality &amp; Bias Detection</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Missing data alerts, outlier detection, class imbalance warnings, duplicate rows — full research-grade quality report.</div>
-      <button class="btn btn-primary btn-sm" onclick="runQuality()">🔍 Run Quality Check</button>
+      <button class="btn btn-primary btn-sm" onclick="runQuality()"><svg class="hai-icon"><use href="#icon-search"/></svg> Run Quality Check</button>
     </div>
     <div id="quality-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">🧪</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-quality"/></svg></div>
       <div style="font-size:13px">Upload a dataset then run a quality check.</div>
     </div>
     <div id="quality-result" style="display:none">
@@ -1417,26 +2006,26 @@ body { font-size: 1rem; }
       <!-- Issues + Warnings + Passed side by side -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">❌ Issues</div>
+          <div style="font-size:10px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-error"/></svg> Issues</div>
           <div id="quality-issues"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠️ Warnings</div>
+          <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-warning"/></svg> Warnings</div>
           <div id="quality-warnings"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">✅ Passed</div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-success"/></svg> Passed</div>
           <div id="quality-passed"></div>
         </div>
       </div>
       <!-- Missing data table -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 Missing Data Report</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Missing Data Report</div>
         <div id="quality-missing" style="overflow-x:auto"></div>
       </div>
       <!-- Outliers table -->
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📉 Outlier Detection (3×IQR)</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-survival"/></svg> Outlier Detection (3×IQR)</div>
         <div id="quality-outliers" style="overflow-x:auto"></div>
       </div>
     </div>
@@ -1446,12 +2035,12 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-privacy">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),#a855f7)"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🔒 Privacy &amp; Compliance Layer</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-privacy"/></svg> Privacy &amp; Compliance Layer</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">PHI detection, anonymisation tools, and compliance scoring — makes your dataset healthcare-ready.</div>
-      <button class="btn btn-primary btn-sm" onclick="runPrivacy()">🔍 Scan for PHI</button>
+      <button class="btn btn-primary btn-sm" onclick="runPrivacy()"><svg class="hai-icon"><use href="#icon-search"/></svg> Scan for PHI</button>
     </div>
     <div id="privacy-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">🔒</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-privacy"/></svg></div>
       <div style="font-size:13px">Upload a dataset then scan for PHI (Personal Health Information).</div>
     </div>
     <div id="privacy-result" style="display:none">
@@ -1468,28 +2057,28 @@ body { font-size: 1rem; }
       </div>
       <!-- PHI columns detected -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🔍 Detected PHI Columns</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-search"/></svg> Detected PHI Columns</div>
         <div id="privacy-phi-list"></div>
       </div>
       <!-- Anonymisation tool -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🛡 Anonymisation Tool</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px"><svg class="hai-icon"><use href="#icon-shield"/></svg> Anonymisation Tool</div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Select a method then click Anonymise to clean the dataset. The session will be updated with anonymised data.</div>
         <div class="anon-method-grid" id="anon-method-grid">
-          <div class="anon-method-card sel" onclick="selAnonMethod('hash',this)"><div class="anon-method-icon">🔐</div><div class="anon-method-name">Hash (SHA-256)</div><div class="anon-method-desc">Replace with 12-char hash. Consistent — same value always hashes the same.</div></div>
+          <div class="anon-method-card sel" onclick="selAnonMethod('hash',this)"><div class="anon-method-icon"><svg class="hai-icon"><use href="#icon-secure"/></svg></div><div class="anon-method-name">Hash (SHA-256)</div><div class="anon-method-desc">Replace with 12-char hash. Consistent — same value always hashes the same.</div></div>
           <div class="anon-method-card" onclick="selAnonMethod('mask',this)"><div class="anon-method-icon">⬛</div><div class="anon-method-name">Mask</div><div class="anon-method-desc">Replace middle chars with ***. e.g. John → J**n</div></div>
-          <div class="anon-method-card" onclick="selAnonMethod('pseudonymise',this)"><div class="anon-method-icon">🏷</div><div class="anon-method-name">Pseudonymise</div><div class="anon-method-desc">Replace with PATIENT_00001 codes. Allows re-linkage with mapping.</div></div>
-          <div class="anon-method-card" onclick="selAnonMethod('drop',this)"><div class="anon-method-icon">🗑</div><div class="anon-method-name">Drop Column</div><div class="anon-method-desc">Remove column entirely. Most secure — no PHI remains.</div></div>
+          <div class="anon-method-card" onclick="selAnonMethod('pseudonymise',this)"><div class="anon-method-icon"><svg class="hai-icon"><use href="#icon-tag"/></svg></div><div class="anon-method-name">Pseudonymise</div><div class="anon-method-desc">Replace with PATIENT_00001 codes. Allows re-linkage with mapping.</div></div>
+          <div class="anon-method-card" onclick="selAnonMethod('drop',this)"><div class="anon-method-icon"><svg class="hai-icon"><use href="#icon-trash"/></svg></div><div class="anon-method-name">Drop Column</div><div class="anon-method-desc">Remove column entirely. Most secure — no PHI remains.</div></div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" onclick="runAnonymise()">🛡 Anonymise Selected PHI Columns</button>
+          <button class="btn btn-primary btn-sm" onclick="runAnonymise()"><svg class="hai-icon"><use href="#icon-shield"/></svg> Anonymise Selected PHI Columns</button>
           <span style="font-size:10px;color:var(--text3)" id="anon-col-count"></span>
         </div>
         <div id="anon-result" style="display:none;margin-top:12px;padding:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:var(--radius);font-size:12px;color:var(--accent2)"></div>
       </div>
       <!-- Recommendations -->
       <div class="result-card" style="margin-bottom:0">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Compliance Recommendations</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-preview"/></svg> Compliance Recommendations</div>
         <div id="privacy-recs"></div>
       </div>
     </div>
@@ -1499,26 +2088,26 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-report">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">📄 AI Clinical Report Generator</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-report"/></svg> AI Clinical Report Generator</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Generate a complete exportable clinical report — metrics, feature importance, AI narrative, quality assessment, recommendations. Opens in a new tab as print-ready HTML → Save as PDF.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-success btn-sm" onclick="runReport()">📄 Generate Report</button>
-        <button class="btn btn-sm" id="report-open-btn" style="display:none;background:rgba(56,189,248,.15);color:var(--accent);border:1px solid rgba(56,189,248,.3)" onclick="openReport()">🔗 Open in New Tab</button>
+        <button class="btn btn-success btn-sm" onclick="runReport()"><svg class="hai-icon"><use href="#icon-report"/></svg> Generate Report</button>
+        <button class="btn btn-sm" id="report-open-btn" style="display:none;background:rgba(56,189,248,.15);color:var(--accent);border:1px solid rgba(56,189,248,.3)" onclick="openReport()"><svg class="hai-icon"><use href="#icon-fhir"/></svg> Open in New Tab</button>
       </div>
     </div>
     <div id="report-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">📄</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-report"/></svg></div>
       <div style="font-size:13px;margin-bottom:8px">No report yet</div>
       <div style="font-size:11px">Run an ML analysis first, then generate your clinical report here.</div>
     </div>
     <div id="report-preview-wrap" style="display:none">
       <div class="report-preview">
         <div class="report-preview-bar">
-          <span>📄</span>
+          <span><svg class="hai-icon"><use href="#icon-report"/></svg></span>
           <span id="report-preview-title" style="color:var(--text2)">Clinical Report</span>
           <span style="margin-left:auto;display:flex;gap:6px">
-            <button onclick="openReport()" style="padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer">🔗 Open Full Report</button>
-            <button onclick="printReport()" style="padding:4px 12px;background:rgba(52,211,153,.2);color:var(--accent2);border:1px solid rgba(52,211,153,.3);border-radius:7px;font-size:10px;font-weight:600;cursor:pointer">🖨 Print / PDF</button>
+            <button onclick="openReport()" style="padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer"><svg class="hai-icon"><use href="#icon-fhir"/></svg> Open Full Report</button>
+            <button onclick="printReport()" style="padding:4px 12px;background:rgba(52,211,153,.2);color:var(--accent2);border:1px solid rgba(52,211,153,.3);border-radius:7px;font-size:10px;font-weight:600;cursor:pointer"><svg class="hai-icon"><use href="#icon-print"/></svg> Print / PDF</button>
           </span>
         </div>
         <iframe id="report-frame" class="report-preview-frame"></iframe>
@@ -1529,18 +2118,18 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-patient">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🧑‍⚕️ Patient Dashboard</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-patient"/></svg> Patient Dashboard</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Select any patient row — see all values, percentile ranks, composite risk score, predicted outcome, and most similar patients in one unified view.</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span style="font-size:10px;color:var(--text3)">Patient Row #</span>
         <input type="number" id="patientRowIdx" value="0" min="0" class="cfg-select" style="width:90px;margin-bottom:0">
-        <button class="btn btn-primary btn-sm" onclick="runPatientDashboard()">🧑‍⚕️ View Patient</button>
+        <button class="btn btn-primary btn-sm" onclick="runPatientDashboard()"><svg class="hai-icon"><use href="#icon-patient"/></svg> View Patient</button>
         <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="patientRowIdx.value=Math.max(0,+patientRowIdx.value-1);runPatientDashboard()">◀ Prev</button>
         <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="patientRowIdx.value=+patientRowIdx.value+1;runPatientDashboard()">Next ▶</button>
       </div>
     </div>
     <div id="patient-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">🧑‍⚕️</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-patient"/></svg></div>
       <div style="font-size:13px">Upload a dataset and select columns, then click View Patient.</div>
     </div>
     <div id="patient-result" style="display:none">
@@ -1564,17 +2153,17 @@ body { font-size: 1rem; }
       </div>
       <!-- All values grid -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">📊 All Column Values — Percentile vs Population</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px"><svg class="hai-icon"><use href="#icon-analytics"/></svg> All Column Values — Percentile vs Population</div>
         <div class="patient-value-grid" id="patient-values-grid"></div>
       </div>
       <!-- Population comparison + similar patients -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📈 vs Population Average</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-trends-up"/></svg> vs Population Average</div>
           <div id="patient-pop-bars" class="feat-bars"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">👥 Most Similar Patients</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-similarity"/></svg> Most Similar Patients</div>
           <div id="patient-similar-table"></div>
         </div>
       </div>
@@ -1585,7 +2174,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-survival">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),var(--accent))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">📉 Kaplan-Meier Survival Analysis</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-survival"/></svg> Kaplan-Meier Survival Analysis</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Standard clinical research tool. Estimate time-to-event survival curves, compare groups, find median survival. Requires a duration column (time) and event column (0/1).</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
@@ -1601,10 +2190,10 @@ body { font-size: 1rem; }
           <select id="survGroupCol" class="cfg-select" style="margin-bottom:0"><option value="">— No grouping —</option></select>
         </div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="runSurvival()">📉 Run Survival Analysis</button>
+      <button class="btn btn-primary btn-sm" onclick="runSurvival()"><svg class="hai-icon"><use href="#icon-survival"/></svg> Run Survival Analysis</button>
     </div>
     <div id="survival-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">📉</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-survival"/></svg></div>
       <div style="font-size:13px">Select duration and event columns, then run survival analysis.</div>
     </div>
     <div id="survival-result" style="display:none">
@@ -1612,18 +2201,18 @@ body { font-size: 1rem; }
       <div class="metrics-grid" id="survival-kpis" style="margin-bottom:14px"></div>
       <!-- Kaplan-Meier Chart -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📉 Kaplan-Meier Survival Curve</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-survival"/></svg> Kaplan-Meier Survival Curve</div>
         <div id="survival-legend" class="km-group-legend"></div>
         <div class="chart-wrap" style="height:240px"><canvas id="survivalChart"></canvas></div>
       </div>
       <!-- Median survival + interpretation -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⏱ Median Survival by Group</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-timer"/></svg> Median Survival by Group</div>
           <div id="survival-medians"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">💬 Clinical Interpretation</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-chat"/></svg> Clinical Interpretation</div>
           <div id="survival-interpretation" style="font-size:12px;color:var(--text2);line-height:1.8;padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)"></div>
         </div>
       </div>
@@ -1634,22 +2223,22 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-multitarget">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent4))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🎯 Multi-Target Prediction Comparator</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-target"/></svg> Multi-Target Prediction Comparator</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Run the same feature set against multiple outcome columns simultaneously. Compare model performance side-by-side — e.g. predict Diabetes AND Heart Disease AND Readmission together.</div>
       <div style="margin-bottom:12px">
         <label class="cfg-label">Select Target Columns to Compare (click multiple)</label>
         <div id="mt-target-selector" style="display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);min-height:44px"></div>
         <div style="font-size:10px;color:var(--text3);margin-top:5px">Selected: <span id="mt-target-count" style="color:var(--accent)">0</span> targets (need ≥2)</div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="runMultiTarget()">🎯 Compare All Targets</button>
+      <button class="btn btn-primary btn-sm" onclick="runMultiTarget()"><svg class="hai-icon"><use href="#icon-target"/></svg> Compare All Targets</button>
     </div>
     <div id="multitarget-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">🎯</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-target"/></svg></div>
       <div style="font-size:13px">Upload a dataset, select feature columns in the sidebar, then select ≥2 target columns above.</div>
     </div>
     <div id="multitarget-result" style="display:none">
       <div class="result-card" style="margin-bottom:14px;padding:14px 18px;background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.3)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🏆 Best Performing Target</div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em"><svg class="hai-icon"><use href="#icon-trophy"/></svg> Best Performing Target</div>
         <div id="mt-best" style="font-size:14px;font-weight:700;color:var(--accent2)"></div>
       </div>
       <div id="mt-results-list"></div>
@@ -1660,24 +2249,24 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-alerts">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--danger),var(--warn))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🔔 Clinical Alert Rules Builder</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-bell"/></svg> Clinical Alert Rules Builder</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Define custom threshold rules (e.g. Glucose > 140 → Critical). Auto-suggests rules based on your column names. Run on current dataset to see how many patients trigger each alert.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" onclick="loadSuggestedRules()">✨ Auto-Suggest Rules</button>
+        <button class="btn btn-primary btn-sm" onclick="loadSuggestedRules()"><svg class="hai-icon"><use href="#icon-sparkle"/></svg> Auto-Suggest Rules</button>
         <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)" onclick="addRuleRow()">＋ Add Rule</button>
         <button class="btn btn-sm" style="background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:var(--accent2)" onclick="runAlerts()">▶ Evaluate All Rules</button>
-        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="clearRules()">🗑 Clear</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="clearRules()"><svg class="hai-icon"><use href="#icon-trash"/></svg> Clear</button>
       </div>
     </div>
     <!-- Rule builder -->
     <div class="result-card" style="margin-bottom:14px">
-      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Alert Rules</div>
-      <div style="display:grid;grid-template-columns:1fr 130px 70px 100px 1fr 36px;gap:6px;margin-bottom:6px">
-        <span style="font-size:9px;color:var(--text3);padding:0 4px">Column</span>
-        <span style="font-size:9px;color:var(--text3);padding:0 4px">Operator</span>
-        <span style="font-size:9px;color:var(--text3);padding:0 4px">Value</span>
-        <span style="font-size:9px;color:var(--text3);padding:0 4px">Severity</span>
-        <span style="font-size:9px;color:var(--text3);padding:0 4px">Action / Name</span>
+      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-preview"/></svg> Alert Rules</div>
+      <div style="display:grid;grid-template-columns:1fr 110px 80px 110px 1fr 36px;gap:7px;margin-bottom:8px;padding:4px 14px">
+        <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Column</span>
+        <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Operator</span>
+        <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Value</span>
+        <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Severity</span>
+        <span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Action / Message</span>
         <span></span>
       </div>
       <div id="alert-rules-rows"></div>
@@ -1698,7 +2287,7 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-compare">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">⚖️ Dataset Comparator</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-compare"/></svg> Dataset Comparator</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Compare two datasets statistically — before/after treatment, control vs intervention, two time periods. Detects significant differences using Cohen's d effect size.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px">
         <div>
@@ -1709,7 +2298,7 @@ body { font-size: 1rem; }
           <label class="cfg-label">Dataset B — Upload second file to compare</label>
           <div class="upload-zone" style="padding:12px;margin-bottom:0" id="compareUploadZone">
             <input type="file" id="compareFileInput" accept=".xlsx,.xls,.csv" onchange="handleCompareUpload(this)">
-            <div style="font-size:20px;margin-bottom:4px">📤</div>
+            <div style="font-size:20px;margin-bottom:4px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-upload"/></svg></div>
             <div style="font-size:10px;color:var(--text3)"><strong style="color:var(--accent)">Upload</strong> second dataset</div>
           </div>
           <div id="compare-b-info" style="display:none;padding:8px 10px;background:var(--surface2);border-radius:var(--radius);font-size:11px;color:var(--accent3);border:1px solid rgba(244,114,182,.2);margin-top:6px"></div>
@@ -1718,21 +2307,21 @@ body { font-size: 1rem; }
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <input id="compareNameA" class="cfg-select" placeholder="Name A (e.g. Before Treatment)" style="width:200px;margin-bottom:0;font-size:11px" value="Dataset A">
         <input id="compareNameB" class="cfg-select" placeholder="Name B (e.g. After Treatment)" style="width:200px;margin-bottom:0;font-size:11px" value="Dataset B">
-        <button class="btn btn-primary btn-sm" onclick="runCompare()">⚖️ Compare Datasets</button>
+        <button class="btn btn-primary btn-sm" onclick="runCompare()"><svg class="hai-icon"><use href="#icon-compare"/></svg> Compare Datasets</button>
       </div>
     </div>
     <div id="compare-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">⚖️</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-compare"/></svg></div>
       <div style="font-size:13px">Load Dataset A (main upload), then upload Dataset B above.</div>
     </div>
     <div id="compare-result" style="display:none">
       <div class="result-card" style="margin-bottom:14px;padding:14px 18px;background:rgba(56,189,248,.04);border-color:rgba(56,189,248,.2)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">📋 Summary</div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em"><svg class="hai-icon"><use href="#icon-preview"/></svg> Summary</div>
         <div id="compare-summary" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
       </div>
       <div class="result-card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">📊 Column-by-Column Comparison</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Column-by-Column Comparison</div>
           <div style="margin-left:auto;display:flex;gap:10px;font-size:10px">
             <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:4px;background:var(--accent);border-radius:2px;display:inline-block"></span><span id="compare-name-a-lbl">A</span></span>
             <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:4px;background:var(--accent3);border-radius:2px;display:inline-block"></span><span id="compare-name-b-lbl">B</span></span>
@@ -1754,37 +2343,37 @@ body { font-size: 1rem; }
   <div class="tpanel" id="tpanel-coding">
     <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#a855f7,var(--accent3))"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">💊 Clinical Coding Assistant</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px"><svg class="hai-icon" style="width:24px;height:24px"><use href="#icon-icd"/></svg> Clinical Coding Assistant</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Automatically detects ICD-10 codes from your column names and data values. Flags potential drug interactions. Provides LLM-powered clinical coding recommendations.</div>
-      <button class="btn btn-primary btn-sm" onclick="runCoding()">💊 Analyse for ICD Codes</button>
+      <button class="btn btn-primary btn-sm" onclick="runCoding()"><svg class="hai-icon"><use href="#icon-icd"/></svg> Analyse for ICD Codes</button>
     </div>
     <div id="coding-empty" class="result-card" style="text-align:center;padding:40px;color:var(--text3)">
-      <div style="font-size:40px;margin-bottom:12px">💊</div>
+      <div style="font-size:40px;margin-bottom:12px"><svg class="hai-icon" style="width:40px;height:40px"><use href="#icon-icd"/></svg></div>
       <div style="font-size:13px">Upload a healthcare dataset to detect ICD-10 codes and drug interactions.</div>
     </div>
     <div id="coding-result" style="display:none">
       <!-- ICD-10 detections -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏥 Detected ICD-10 Codes</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px"><svg class="hai-icon"><use href="#icon-hospital"/></svg> Detected ICD-10 Codes</div>
         <div id="coding-icd-list"></div>
       </div>
       <!-- Drug interactions -->
       <div class="result-card" style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠️ Drug Interaction Flags</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-warning"/></svg> Drug Interaction Flags</div>
         <div id="coding-drug-list"></div>
       </div>
       <!-- LLM advice -->
       <div id="coding-llm-advice" style="display:none">
         <div class="result-card" style="margin-bottom:14px">
-          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🤖 AI Coding Recommendations</div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> AI Coding Recommendations</div>
           <div id="coding-recs"></div>
         </div>
         <div class="result-card" style="margin-bottom:14px">
-          <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📋 Documentation Gaps</div>
+          <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-preview"/></svg> Documentation Gaps</div>
           <div id="coding-gaps"></div>
         </div>
         <div class="result-card" style="margin-bottom:0">
-          <div style="font-size:10px;font-weight:600;color:var(--accent3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">💡 Suggested Additional Fields</div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"><svg class="hai-icon"><use href="#icon-insights"/></svg> Suggested Additional Fields</div>
           <div id="coding-suggestions"></div>
         </div>
       </div>
@@ -1796,13 +2385,13 @@ body { font-size: 1rem; }
 <!-- ════ RIGHT SIDEBAR (CHAT) ════ -->
 <aside class="sidebar-right" id="sidebarRight">
   <div class="section-head">
-    <span class="section-title">🤖 AI Health Assistant</span>
+    <span class="section-title"><svg class="hai-icon"><use href="#icon-ai-model"/></svg> AI Health Assistant</span>
     <span style="font-size:9px;color:var(--text3)">Groq LLaMA</span>
   </div>
   <div class="chat-msgs" id="chatMsgs">
     <div class="msg msg-ai">
       <div class="msg-bubble">
-        Hello! 👋 I'm your Healthcare AI Assistant.<br><br>
+        Hello! <svg class="hai-icon"><use href="#icon-wave"/></svg> I'm your Healthcare AI Assistant.<br><br>
         Upload a dataset and I can help you:<br>
         • Explain prediction results<br>
         • Analyze health patterns<br>
@@ -1814,10 +2403,10 @@ body { font-size: 1rem; }
   </div>
   <div class="chat-input-area">
     <div class="quick-btns">
-      <button class="q-btn" onclick="quickAsk('Explain my latest analysis results')">📊 Explain</button>
-      <button class="q-btn" onclick="quickAsk('What patterns do you see in this dataset?')">🔍 Patterns</button>
-      <button class="q-btn" onclick="quickAsk('Which features are most important?')">⭐ Key features</button>
-      <button class="q-btn" onclick="quickAsk('What are the health risks based on this data?')">⚠️ Risks</button>
+      <button class="q-btn" onclick="quickAsk('Explain my latest analysis results')"><svg class="hai-icon"><use href="#icon-analytics"/></svg> Explain</button>
+      <button class="q-btn" onclick="quickAsk('What patterns do you see in this dataset?')"><svg class="hai-icon"><use href="#icon-search"/></svg> Patterns</button>
+      <button class="q-btn" onclick="quickAsk('Which features are most important?')"><svg class="hai-icon"><use href="#icon-star"/></svg> Key features</button>
+      <button class="q-btn" onclick="quickAsk('What are the health risks based on this data?')"><svg class="hai-icon"><use href="#icon-warning"/></svg> Risks</button>
     </div>
     <div class="chat-row">
       <textarea id="chatInput" placeholder="Ask about your health data..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
@@ -1854,8 +2443,6 @@ function showLoad(t='Loading...',s='Please wait'){document.getElementById('loadi
 function hideLoad(){document.getElementById('loadingOverlay').classList.remove('active');}
 async function post(url,data){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify(data)});return r.json();}
 
-// ══ MAIN TABS — ENHANCED ══
-// Tab registry: defines order, display name, and optional init callback
 const TAB_REGISTRY = [
   {id:'analytics',   label:'📊 Analytics',      group:'core'},
   {id:'preview',     label:'📋 Data Preview',    group:'core'},
@@ -2813,11 +3400,6 @@ function printReport(){
   frame.contentWindow.print();
 }
 
-
-// ════════════════════════════════════════════════════════════
-// 6 NEW FEATURE JS
-// ════════════════════════════════════════════════════════════
-
 // ── Helper: populate survival column selects when data loads ──
 function populateSurvivalSelects(){
   const numeric = colInfo.filter(c=>c.col_type==='numeric');
@@ -2849,11 +3431,6 @@ function populateMultiTargetSelector(){
   });
 }
 
-// onData override merged into original above
-
-// ══════════════════════════════════════════
-// 1. PATIENT DASHBOARD
-// ══════════════════════════════════════════
 async function runPatientDashboard(){
   const rowIdx = parseInt(document.getElementById('patientRowIdx').value) || 0;
 
@@ -2976,9 +3553,6 @@ async function runPatientDashboard(){
   notif(`Patient #${rowIdx} profile loaded ✅`);
 }
 
-// ══════════════════════════════════════════
-// 2. SURVIVAL ANALYSIS
-// ══════════════════════════════════════════
 const KM_COLORS=['#38bdf8','#34d399','#f472b6','#fb923c','#a78bfa','#fbbf24'];
 async function runSurvival(){
   const dur=document.getElementById('survDurationCol').value;
@@ -3059,9 +3633,6 @@ async function runSurvival(){
   notif('Kaplan-Meier analysis complete!');
 }
 
-// ══════════════════════════════════════════
-// 3. MULTI-TARGET COMPARATOR
-// ══════════════════════════════════════════
 async function runMultiTarget(){
   const feats=[...selFeatures];
   const targets=[...mtSelectedTargets];
@@ -3108,27 +3679,51 @@ async function runMultiTarget(){
   notif(`Compared ${r.results.length} targets!`);
 }
 
-// ══════════════════════════════════════════
-// 4. ALERT RULES BUILDER
-// ══════════════════════════════════════════
 let alertRules=[];
 function addRuleRow(rule={}){
   const id='rule-'+Date.now()+Math.random().toString(36).slice(2,5);
-  const colOpts=colInfo.map(c=>`<option value="${c.name}" ${rule.column===c.name?'selected':''}>${c.name}</option>`).join('');
+
+  const knownCols = colInfo.map(c => c.name);
+  const extraCols = (rule.column && !knownCols.includes(rule.column)) ? [rule.column] : [];
+  const allCols   = [...knownCols, ...extraCols];
+  // If nothing at all, show the rule column or a placeholder
+  const colOpts = allCols.length
+    ? allCols.map(n=>`<option value="${n}" ${rule.column===n?'selected':''}>${n}</option>`).join('')
+    : `<option value="${rule.column||''}" selected>${rule.column||'— load dataset —'}</option>`;
+
   const ops=['>', '<', '>=', '<=', '==', '!='];
   const opOpts=ops.map(o=>`<option value="${o}" ${rule.operator===o?'selected':''}>${o}</option>`).join('');
   const sevs=['critical','warning','info'];
   const sevOpts=sevs.map(s=>`<option value="${s}" ${rule.severity===s?'selected':''}>${s}</option>`).join('');
+
+  // Severity colour badge
+  const sevColor = rule.severity==='critical'?'var(--danger)':rule.severity==='warning'?'var(--warn)':'var(--accent)';
+  const sevBg    = rule.severity==='critical'?'rgba(248,113,113,.12)':rule.severity==='warning'?'rgba(251,191,36,.12)':'rgba(56,189,248,.12)';
+
   const div=document.createElement('div');
-  div.id=id;div.className='rule-builder';
-  div.style.cssText='display:grid;grid-template-columns:1fr 110px 70px 100px 1fr 36px;gap:6px;align-items:center;padding:10px;margin-bottom:6px';
+  div.id=id; div.className='rule-builder';
+  div.style.cssText=`display:grid;grid-template-columns:1fr 110px 80px 110px 1fr 36px;gap:7px;align-items:center;
+    padding:11px 14px;margin-bottom:7px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--radius);border-left:3px solid ${sevColor};transition:border-color .2s`;
   div.innerHTML=`
-    <select class="cfg-select" style="margin-bottom:0" data-field="column">${colOpts}</select>
+    <select class="cfg-select" style="margin-bottom:0" data-field="column" title="Column to evaluate">${colOpts}</select>
     <select class="cfg-select" style="margin-bottom:0" data-field="operator">${opOpts}</select>
-    <input type="number" class="cfg-select" style="margin-bottom:0" data-field="value" value="${rule.value||''}">
-    <select class="cfg-select" style="margin-bottom:0" data-field="severity">${sevOpts}</select>
-    <input type="text" class="cfg-select" style="margin-bottom:0" data-field="action" value="${rule.action||rule.name||''}" placeholder="Alert action/name">
-    <button onclick="this.parentElement.remove()" style="width:32px;height:32px;border:none;background:rgba(248,113,113,.15);color:var(--danger);border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">×</button>`;
+    <input  type="number" class="cfg-select" style="margin-bottom:0;font-family:'DM Mono',monospace;color:var(--accent)"
+            data-field="value" value="${rule.value!==undefined?rule.value:''}" placeholder="Value">
+    <select class="cfg-select" style="margin-bottom:0;color:${sevColor};background:${sevBg}" data-field="severity"
+            onchange="(function(s){var c=s==='critical'?'var(--danger)':s==='warning'?'var(--warn)':'var(--accent)';
+              var bg=s==='critical'?'rgba(248,113,113,.12)':s==='warning'?'rgba(251,191,36,.12)':'rgba(56,189,248,.12)';
+              this.style.color=c;this.style.background=bg;
+              this.closest('.rule-builder').style.borderLeftColor=c;
+            }).call(this, this.value)">${sevOpts}</select>
+    <input  type="text" class="cfg-select" style="margin-bottom:0" data-field="action"
+            value="${(rule.action||rule.name||'').replace(/"/g,'&quot;')}" placeholder="Alert message / action">
+    <button onclick="this.closest('.rule-builder').remove()" title="Remove rule"
+            style="width:32px;height:32px;border:none;background:rgba(248,113,113,.12);color:var(--danger);
+                   border-radius:7px;cursor:pointer;font-size:16px;display:flex;align-items:center;
+                   justify-content:center;transition:background .15s;flex-shrink:0"
+            onmouseenter="this.style.background='rgba(248,113,113,.28)'"
+            onmouseleave="this.style.background='rgba(248,113,113,.12)'">×</button>`;
   document.getElementById('alert-rules-rows').appendChild(div);
 }
 function gatherRules(){
@@ -3144,12 +3739,24 @@ function gatherRules(){
 }
 async function loadSuggestedRules(){
   showLoad('Finding Suggested Rules...','Scanning column names for clinical patterns');
-  const r=await fetch('/api/suggest-alert-rules/').then(r=>r.json());
+  let r;
+  try {
+    r = await fetch('/api/suggest-alert-rules/').then(res=>res.json());
+  } catch(e) {
+    hideLoad();
+    notif('Could not reach suggest-alert-rules API','error');
+    return;
+  }
   hideLoad();
-  if(!r.success){notif(r.error||'Upload data first','error');return;}
+  if(!r.success){ notif(r.error||'Upload data first','error'); return; }
+
+  // API may return either r.rules (current) or r.suggestions (legacy)
+  const rules = r.rules || r.suggestions || [];
+  if(!rules.length){ notif('No rules suggested — try uploading a dataset first','warn'); return; }
+
   document.getElementById('alert-rules-rows').innerHTML='';
-  (r.suggestions||[]).slice(0,10).forEach(rule=>addRuleRow(rule));
-  notif(`${r.suggestions.length} rules auto-suggested!`);
+  rules.slice(0,15).forEach(rule => addRuleRow(rule));
+  notif(`${rules.length} rules auto-suggested!`);
 }
 function clearRules(){document.getElementById('alert-rules-rows').innerHTML='';}
 async function runAlerts(){
@@ -3195,21 +3802,12 @@ async function runAlerts(){
   notif(`${r.critical_alerts} critical · ${r.warning_alerts} warnings`);
 }
 
-// ══════════════════════════════════════════
-// 5. DATASET COMPARATOR
-// ══════════════════════════════════════════
 let compareBData=null;
 async function handleCompareUpload(input){
   const file=input.files[0];if(!file)return;
   showLoad('Reading Dataset B...','Parsing columns');
   const fd=new FormData();fd.append('file',file);
-  // We parse it client-side by loading into a temp fetch
-  // Actually we'll read it via a hidden upload then save rows
   const r=await fetch('/api/upload-temp/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd});
-  // If no temp endpoint, we'll read via preview from the main upload temporarily
-  // Simpler: re-upload as main, grab data_json, restore
-  // Better approach: upload to a temp key and get rows back
-  // For simplicity: read file as FormData, get preview back from standard upload
   const d2=await fetch('/api/upload/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd}).then(r=>r.json());
   hideLoad();
   if(!d2.success){notif(d2.error,'error');return;}
@@ -3251,9 +3849,6 @@ async function runCompare(){
   notif(`Found ${r.n_significant} significant differences`);
 }
 
-// ══════════════════════════════════════════
-// 6. ICD CLINICAL CODING
-// ══════════════════════════════════════════
 async function runCoding(){
   showLoad('Scanning for ICD-10 Codes...','Detecting clinical terminology and drug interactions');
   const r=await fetch('/api/clinical-coding/').then(r=>r.json());
@@ -3319,10 +3914,7 @@ async function runCoding(){
   notif(`Found ${res.icd10_suggestions?.length||0} ICD codes · ${res.drug_interaction_flags?.length||0} drug flags`);
 }
 
-// ══════════════════════════════════════════
-// ══ SESSION RESTORE ══
-(async()=>{
-  // Wire file input safely — inline onchange removed to prevent re-entrant firing
+(async()=>{  
   const fi = document.getElementById('fileInput');
   if(fi) fi.onchange = e => handleUpload(e.target);
 
@@ -3341,10 +3933,6 @@ async function runCoding(){
     fetchColStats();
   }
 })();
-
-// ════════════════════════════════════════════════════════
-// THEME SYSTEM
-// ════════════════════════════════════════════════════════
 
 let fontScale = 100;
 
@@ -3382,7 +3970,6 @@ function adjustFont(dir) {
   localStorage.setItem('hai-fontscale', fontScale);
 }
 
-// ════ MOBILE SIDEBAR ════
 function toggleSidebar() {
   const sl = document.getElementById('sidebarLeft');
   const ov = document.getElementById('sidebarOverlay');
@@ -3414,13 +4001,10 @@ function closeMobileChat() {
   ov.classList.remove('active');
 }
 
-// Close chat/sidebar on ESC
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeSidebar(); closeMobileChat(); }
 });
 
-// ════ TAB PRIORITY LOGIC ════
-// Priority tiers based on data state and typical workflow
 const TAB_PRIORITY = {
   'analytics':    { tier: 1, label: 'Analytics',    needsData: false },
   'preview':      { tier: 2, label: 'Data Preview', needsData: true  },
@@ -3465,10 +4049,8 @@ if (window.renderCols) {
   };
 }
 
-// Also update when analysis completes
 const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
 
-// ════ RESTORE PREFERENCES ════
 (function restorePrefs() {
   const savedMode = localStorage.getItem('hai-mode') || 'dark';
   const savedPalette = localStorage.getItem('hai-palette') || 'default';
@@ -3490,7 +4072,6 @@ const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
   updateTabPriority(false, false);
 })();
 
-// ════ RESPONSIVE: Auto-detect initial state ════
 function checkResponsive() {
   const w = window.innerWidth;
   const chatBtn = document.getElementById('chatToggleBtn');

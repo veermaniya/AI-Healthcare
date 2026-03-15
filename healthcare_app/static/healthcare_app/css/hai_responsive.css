@@ -1,14 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════
-   HealthAI — Responsive & Font Fix Patch
-   Drop-in CSS — add AFTER your existing <style> block in both
-   index.html and login.html
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ──────────────────────────────────────────────────────────────────
-   1. ROOT FONT SCALE — fluid, clamp-based, works on all screen sizes
-   ────────────────────────────────────────────────────────────────── */
 :root {
-  /* Base font scales smoothly from 15px (mobile) → 16px (tablet) → 17px (desktop) → 18px (4K) */
+  
   --font-base:    clamp(15px, 1.1vw + 10px, 18px);
   --font-xs:      clamp(11px, 0.75vw + 8px,  14px);
   --font-sm:      clamp(12px, 0.85vw + 9px,  15px);
@@ -17,34 +8,25 @@
   --font-xl:      clamp(20px, 1.8vw + 12px,  28px);
   --font-2xl:     clamp(26px, 2.5vw + 14px,  38px);
 
-  /* Sidebar/chat widths — responsive */
   --sidebar-w:    clamp(230px, 20vw, 300px);
   --chat-w:       clamp(260px, 22vw, 330px);
 
-  /* Spacing — scales with screen */
   --gap-xs:       clamp(4px, 0.4vw, 8px);
   --gap-sm:       clamp(8px, 0.7vw, 14px);
   --gap-md:       clamp(12px, 1vw, 20px);
   --gap-lg:       clamp(16px, 1.4vw, 28px);
 
-  /* Text colours — boosted contrast */
-  --text:   #eef2f7;   /* was #e2e8f0 — brighter */
-  --text2:  #b0bfd4;   /* was #94a3b8 — much more readable */
-  --text3:  #8898b0;   /* was #64748b — less grey */
+  --text:   #eef2f7;
+  --text2:  #b0bfd4;
+  --text3:  #8898b0;
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   2. GLOBAL FONT — bolder, bigger, more readable
-   ────────────────────────────────────────────────────────────────── */
 html { font-size: var(--font-base); }
 body { font-size: 1rem; font-weight: 450; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
 /* Every text element — bump weight and size */
 p, span, div, label, li, td, th, a { font-weight: 450; }
 
-/* ──────────────────────────────────────────────────────────────────
-   3. HEADER — taller, bigger text
-   ────────────────────────────────────────────────────────────────── */
 .header {
   height: clamp(56px, 5vh, 70px) !important;
   padding: 0 clamp(14px, 2vw, 28px) !important;
@@ -55,9 +37,6 @@ p, span, div, label, li, td, th, a { font-weight: 450; }
 .badge-free { font-size: clamp(10px, 0.65vw + 7px, 13px) !important; padding: 4px 12px !important; font-weight: 600 !important; }
 .status-dot { font-size: clamp(11px, 0.7vw + 8px, 14px) !important; font-weight: 500 !important; }
 
-/* ──────────────────────────────────────────────────────────────────
-   4. SIDEBAR — bigger panels, labels, inputs
-   ────────────────────────────────────────────────────────────────── */
 .panel       { padding: clamp(12px, 1.2vw, 18px) clamp(14px, 1.4vw, 20px) !important; }
 .panel-title {
   font-size:   clamp(12px, 0.85vw + 8px, 15px) !important;
@@ -105,9 +84,6 @@ p, span, div, label, li, td, th, a { font-weight: 450; }
 /* Upload zone */
 .upload-zone > div:last-child { font-size: clamp(11px, 0.75vw + 8px, 13px) !important; }
 
-/* ──────────────────────────────────────────────────────────────────
-   5. MAIN TABS — bigger, bolder, more readable
-   ────────────────────────────────────────────────────────────────── */
 .mtab {
   font-size:   clamp(11px, 0.75vw + 8px, 14px) !important;
   font-weight: 650 !important;
@@ -117,9 +93,6 @@ p, span, div, label, li, td, th, a { font-weight: 450; }
 }
 .tpanel { padding: clamp(14px, 1.2vw, 22px) clamp(16px, 1.4vw, 24px) !important; }
 
-/* ──────────────────────────────────────────────────────────────────
-   6. RESULT / CONTENT AREA — bigger result text
-   ────────────────────────────────────────────────────────────────── */
 .result-title {
   font-size:   clamp(15px, 1.1vw + 9px, 19px) !important;
   font-weight: 700 !important;
@@ -148,9 +121,6 @@ p, span, div, label, li, td, th, a { font-weight: 450; }
   line-height: 1.7 !important;
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   7. CHAT PANEL — bigger, easier to read
-   ────────────────────────────────────────────────────────────────── */
 .msg-bubble {
   font-size:   clamp(12px, 0.85vw + 9px, 15px) !important;
   font-weight: 450 !important;
@@ -163,9 +133,6 @@ p, span, div, label, li, td, th, a { font-weight: 450; }
   font-weight: 500 !important;
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   8. GENERAL TEXT ACROSS TABLES, CARDS, LABELS
-   ────────────────────────────────────────────────────────────────── */
 table { font-size: clamp(11px, 0.78vw + 8px, 14px) !important; }
 th    { font-size: clamp(10px, 0.68vw + 7px, 13px) !important; font-weight: 700 !important; color: var(--text2) !important; }
 td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 !important; }
@@ -183,10 +150,6 @@ td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 
   font-weight: 600 !important;
   padding: clamp(4px, 0.4vw, 7px) clamp(8px, 0.7vw, 12px) !important;
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   9. RESPONSIVE BREAKPOINTS — complete device coverage
-   ═══════════════════════════════════════════════════════════════════ */
 
 /* ─── ULTRA-WIDE / 4K (2560px+) ─── */
 @media (min-width: 2560px) {
@@ -371,11 +334,6 @@ td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 
   .mtab { padding: 0 6px !important; font-size: 10px !important; }
   .btn  { padding: 8px 10px !important; font-size: 12px !important; }
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   10. LOGIN PAGE — responsive
-   ═══════════════════════════════════════════════════════════════════ */
-
 /* Login title and subtitle */
 .login-title {
   font-size:   clamp(22px, 2.5vw + 10px, 34px) !important;
@@ -481,17 +439,11 @@ td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 
   .security-bar { gap: 12px !important; flex-wrap: wrap !important; justify-content: center !important; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   11. SCROLLBAR POLISH
-   ═══════════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(99,179,237,0.2); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(99,179,237,0.4); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   12. TOUCH TARGETS — minimum 44px on mobile for accessibility
-   ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .btn, .tab-btn, .role-btn, .sso-btn, .btn-login,
   .mode-btn, .font-ctrl-btn, .pal-dot,
@@ -503,9 +455,6 @@ td    { font-size: clamp(11px, 0.75vw + 8px, 14px) !important; font-weight: 450 
   .font-ctrl-btn { min-height: 36px !important; min-width: 36px !important; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   13. PRINT MEDIA — basic print support
-   ═══════════════════════════════════════════════════════════════════ */
 @media print {
   .sidebar-left, .sidebar-right, .header-right, .hamburger-btn,
   .chat-toggle-btn, .theme-switcher, #hai-lang-switcher { display: none !important; }

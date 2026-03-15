@@ -1,22 +1,7 @@
-"""
-Management command: create_default_users
-=========================================
-Creates pre-defined users in the database automatically.
-Safe to run multiple times — skips users that already exist.
-
-Usage:
-    python manage.py create_default_users
-
-Add/edit users in the USERS list below before deploying.
-"""
-
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 
-
-# ─────────────────────────────────────────────────
-#  ✏️  EDIT THIS LIST to add/change default users
-# ─────────────────────────────────────────────────
+#defualt  users list 
 USERS = [
     {
         "username":   "admin",
@@ -55,8 +40,6 @@ USERS = [
         "is_superuser": False,
     },
 ]
-# ─────────────────────────────────────────────────
-
 
 class Command(BaseCommand):
     help = "Create default users for the Healthcare AI platform (safe to re-run)"

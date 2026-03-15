@@ -1,9 +1,3 @@
-"""
-Healthcare AI ML Engine — Enhanced v2
-Features: Regression, Classification, Clustering, XAI (SHAP-style),
-          Clinical Risk Alerts, Time-Series Forecasting, Patient Similarity
-"""
-
 import pandas as pd
 import numpy as np
 import json
@@ -119,9 +113,8 @@ class HealthcareMLEngine:
                     for c, v in sorted(zip(cols, raw), key=lambda x: -x[1])]
         return []
 
-    # ─────────────────────────────────────────────
-    # STANDARD: Regression
-    # ─────────────────────────────────────────────
+    #Regression
+
     def run_regression(self, feature_cols, target_col, model_type='random_forest'):
         X, y, cols = self.preprocess(feature_cols, target_col)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -149,10 +142,6 @@ class HealthcareMLEngine:
             'predictions': [round(float(v), 3) for v in y_pred[:50].tolist()],
             'actuals': [round(float(v), 3) for v in y_test[:50].tolist()],
         }
-
-    # ─────────────────────────────────────────────
-    # STANDARD: Classification
-    # ─────────────────────────────────────────────
     def run_classification(self, feature_cols, target_col, model_type='random_forest'):
         X, y, cols = self.preprocess(feature_cols, target_col)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -183,9 +172,6 @@ class HealthcareMLEngine:
             'report': {str(k): v for k, v in report.items() if k not in ['accuracy']},
         }
 
-    # ─────────────────────────────────────────────
-    # STANDARD: Clustering
-    # ─────────────────────────────────────────────
     def run_clustering(self, feature_cols, n_clusters=3):
         X, _, cols = self.preprocess(feature_cols)
         X_scaled = self.scaler.fit_transform(X)
@@ -222,9 +208,6 @@ class HealthcareMLEngine:
             'feature_cols': cols,
         }
 
-    # ─────────────────────────────────────────────
-    # ① EXPLAINABLE AI
-    # ─────────────────────────────────────────────
     def run_explainability(self, feature_cols, target_col, model_type='random_forest',
                            sample_index=0, input_values=None):
         X, y, cols = self.preprocess(feature_cols, target_col)
@@ -324,12 +307,6 @@ class HealthcareMLEngine:
             'model': model_type,
         }
 
-    # ─────────────────────────────────────────────
-    # ② CLINICAL RISK & ALERT ENGINE
-    # ─────────────────────────────────────────────
-    # ─────────────────────────────────────────────
-    # ② CLINICAL RISK & ALERT ENGINE
-    # ─────────────────────────────────────────────
     def run_risk_engine(self, feature_cols, target_col=None, thresholds=None):
         if self.df is None:
             return {'error': 'No data loaded'}
@@ -465,9 +442,6 @@ class HealthcareMLEngine:
                 'high_threshold': auto_thresholds[col]['high'],
             } for col in numeric_cols},
         }
-    # ─────────────────────────────────────────────
-    # ③ TIME-SERIES / TREND ANALYSIS
-    # ─────────────────────────────────────────────
     def run_trend_analysis(self, feature_cols, time_col=None, target_col=None, forecast_steps=10):
         if self.df is None:
             return {'error': 'No data loaded'}
@@ -537,9 +511,6 @@ class HealthcareMLEngine:
             'total_rows': len(df_work),
         }
 
-    # ─────────────────────────────────────────────
-    # ④ PATIENT SIMILARITY
-    # ─────────────────────────────────────────────
     def find_similar_patients(self, feature_cols, query_values, n_similar=5):
         if self.df is None:
             return {'error': 'No data loaded'}
@@ -600,9 +571,6 @@ class HealthcareMLEngine:
             'cohort_comparison':  cohort_comparison,
         }
 
-    # ─────────────────────────────────────────────
-    # PREDICT NEW INPUT
-    # ─────────────────────────────────────────────
     def predict_new_input(self, feature_cols, target_col, input_values, model_type='random_forest'):
         X, y, cols = self.preprocess(feature_cols, target_col)
         task = self.auto_detect_task(target_col)
@@ -636,9 +604,6 @@ class HealthcareMLEngine:
         return result
 
 
-# ─────────────────────────────────────────────
-# Groq LLM Client
-# ─────────────────────────────────────────────
 class GroqLLMClient:
     MODELS = [
         'llama-3.3-70b-versatile',

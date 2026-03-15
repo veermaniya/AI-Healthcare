@@ -18,10 +18,6 @@ from ml_engine import (
 )
 from .models import DataSession, ChatMessage, AnalysisResult
 
-
-# ══════════════════════════════════════════════════════════════
-#  NUMPY JSON ENCODER — fixes "int64 not serializable" globally
-# ══════════════════════════════════════════════════════════════
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):  return int(obj)
@@ -529,28 +525,63 @@ def clinical_coding(request):
 def generate_report(request):
     if request.method != 'POST':
         return JR({'success': False, 'error': 'POST required'})
+ 
     sk = _sk(request)
     try:
-        df = _df(request)
+        # ── 1. Load dataframe & session info ──────────────────
+        df   = _df(request)
         db_s = DataSession.objects.filter(session_key=sk).first()
-        latest = AnalysisResult.objects.filter(
-            session__session_key=sk).order_by('-created_at').first()
-        ml_result = latest.get_result() if latest else {}
+ 
         session_info = {
             'file_name':    db_s.file_name if db_s else 'Unknown',
-            'rows':         db_s.row_count if db_s else 0,
+            'row_count':    db_s.row_count if db_s else 0,   # note: key is row_count
             'username':     request.user.username,
             'generated_at': __import__('datetime').datetime.now().strftime('%d %b %Y %H:%M'),
         }
-        eng = ReportGenerator()
+ 
+        # ── 2. Load latest ML result ───────────────────────────
+        latest    = AnalysisResult.objects.filter(
+                        session__session_key=sk
+                    ).order_by('-created_at').first()
+        ml_result = latest.get_result() if latest else {}
+ 
+        # ── 3. Build engine & col_info ─────────────────────────
         e = HealthcareMLEngine()
         if df is not None:
             e.load_dataframe(df)
         col_info = e.get_column_info() if df is not None else []
-        html = eng.generate_html_report(session_info, ml_result, col_info, df)
-        response = HttpResponse(html, content_type='text/html')
-        response['Content-Disposition'] = 'attachment; filename="HealthAI_Report.html"'
-        return response
+ 
+        # ── 4. Generate INSIGHTS dict (was: passing col_info list here → BUG) ──
+        llm = GroqLLMClient(api_key=settings.GROQ_API_KEY, model=settings.GROQ_MODEL)
+        insights_eng = ClinicalInsightsEngine()
+        insights = insights_eng.generate_narrative(
+            ml_result or {}, col_info, llm_client=llm
+        )
+ 
+        # ── 5. Generate QUALITY dict (was: passing raw df here → BUG) ───────
+        if df is not None:
+            quality_eng = DataQualityEngine()
+            quality = quality_eng.run_quality_check(df)
+        else:
+            # Sensible defaults when no data loaded
+            quality = {
+                'overall_score': 0,
+                'grade':         'N/A',
+                'issues':        ['No dataset loaded'],
+                'warnings':      [],
+            }
+ 
+        # ── 6. Generate HTML report ───────────────────────────
+        report_eng = ReportGenerator()
+        html = report_eng.generate_html_report(
+            session_info,
+            ml_result,
+            insights,
+            quality,
+        )
+ 
+        return JR({'success': True, 'html': html})
+ 
     except Exception as ex:
         return JR({'success': False, 'error': str(ex)})
 

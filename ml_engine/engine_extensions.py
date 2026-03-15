@@ -14,13 +14,6 @@ import re
 import hashlib
 from datetime import datetime
 
-
-# ═══════════════════════════════════════════════════════════════════
-# 1. CLINICAL INSIGHTS ENGINE
-#    Generates LLM-powered narrative summaries for any ML result,
-#    chart interpretation, and clinical observations.
-# ═══════════════════════════════════════════════════════════════════
-
 class ClinicalInsightsEngine:
 
     def generate_narrative(self, result: dict, col_info: list, llm_client=None) -> dict:
@@ -154,12 +147,6 @@ Be specific, clinically relevant, and use plain language a doctor can understand
         }
 
 
-# ═══════════════════════════════════════════════════════════════════
-# 2. DATA QUALITY ENGINE
-#    Missing data alerts, class imbalance, outlier detection,
-#    column bias warnings.
-# ═══════════════════════════════════════════════════════════════════
-
 class DataQualityEngine:
 
     def run_quality_check(self, df: pd.DataFrame) -> dict:
@@ -292,12 +279,6 @@ class DataQualityEngine:
             ),
         }
 
-
-# ═══════════════════════════════════════════════════════════════════
-# 3. REPORT GENERATOR
-#    Builds a complete HTML clinical report from session + results.
-#    The HTML can be printed-to-PDF from the browser.
-# ═══════════════════════════════════════════════════════════════════
 
 class ReportGenerator:
 
@@ -509,11 +490,6 @@ class ReportGenerator:
 </html>'''
 
 
-# ═══════════════════════════════════════════════════════════════════
-# 4. PRIVACY ENGINE
-#    PHI detection + masking, anonymisation, audit logging.
-# ═══════════════════════════════════════════════════════════════════
-
 class PrivacyEngine:
 
     # Common PHI field name patterns
@@ -653,5 +629,5 @@ class PrivacyEngine:
         recs.append('Use pseudonymisation for patient ID columns to allow re-linkage if needed.')
         recs.append('Never export raw PHI data — always anonymise before sharing with third parties.')
         if not phi_cols:
-            recs.append('✅ No PHI columns detected. Dataset appears safe for analysis.')
+            recs.append(' No PHI columns detected. Dataset appears safe for analysis.')
         return recs

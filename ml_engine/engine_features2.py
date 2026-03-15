@@ -16,13 +16,6 @@ from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
-
-# ═══════════════════════════════════════════════════════════════════
-# 1. PATIENT DASHBOARD ENGINE
-#    Select any patient row → unified card with all values,
-#    risk score, anomaly flag, predicted outcomes, similar patients
-# ═══════════════════════════════════════════════════════════════════
-
 class PatientDashboardEngine:
     def _clean(self, obj):
         """Recursively convert numpy types to native Python for JSON serialization."""
@@ -175,12 +168,6 @@ class PatientDashboardEngine:
         })
 
 
-# ═══════════════════════════════════════════════════════════════════
-# 2. MULTI-TARGET COMPARATOR
-#    Run the same features against multiple target columns at once.
-#    Returns side-by-side model performance + feature importance.
-# ═══════════════════════════════════════════════════════════════════
-
 class MultiTargetComparator:
 
     def compare_targets(self, df: pd.DataFrame, feature_cols: list,
@@ -277,13 +264,6 @@ class MultiTargetComparator:
             'best_performance': best['performance'] if best else None,
             'summary': f"Compared {len(results)} targets. Best: '{best['target']}' ({best['task']}, {list(best['metrics'].values())[0]:.3f})" if best else "No successful comparisons.",
         }
-
-
-# ═══════════════════════════════════════════════════════════════════
-# 3. SURVIVAL ANALYSIS ENGINE (Kaplan-Meier)
-#    Estimates survival/event-free probability over time.
-#    No lifelines required — pure numpy implementation.
-# ═══════════════════════════════════════════════════════════════════
 
 class SurvivalAnalysisEngine:
 
@@ -400,13 +380,6 @@ class SurvivalAnalysisEngine:
         event_rate = round(n_events / n_total * 100, 1)
         return (f"Survival analysis of '{event_col}' across {n_total} patients. "
                 f"Event rate: {event_rate}%. " + " | ".join(parts))
-
-
-# ═══════════════════════════════════════════════════════════════════
-# 4. ALERT RULES ENGINE
-#    Define, save, and evaluate custom clinical threshold rules.
-#    Rules are stored as JSON and can be re-run on new uploads.
-# ═══════════════════════════════════════════════════════════════════
 
 class AlertRulesEngine:
 
@@ -535,13 +508,6 @@ class AlertRulesEngine:
                         })
         return suggestions
 
-
-# ═══════════════════════════════════════════════════════════════════
-# 5. DATASET COMPARATOR
-#    Compare two datasets statistically — distributions, means,
-#    model performance gap (before/after, control/treatment).
-# ═══════════════════════════════════════════════════════════════════
-
 class DatasetComparator:
 
     def compare(self, df_a: pd.DataFrame, df_b: pd.DataFrame,
@@ -620,13 +586,6 @@ class DatasetComparator:
                 f"{', '.join(significant_diffs[:5]) or 'none'}."
             ),
         }
-
-
-# ═══════════════════════════════════════════════════════════════════
-# 6. CLINICAL CODING ASSISTANT
-#    LLM-powered: maps dataset column values to ICD-10 codes,
-#    flags potential drug interactions, suggests clinical coding.
-# ═══════════════════════════════════════════════════════════════════
 
 class ClinicalCodingAssistant:
 

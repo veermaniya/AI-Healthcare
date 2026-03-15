@@ -65,10 +65,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Groq API Key (Free - get from https://console.groq.com)
-# ═══════════════════════════════════════════════════════════
 # GROQ API KEY — PASTE YOUR KEY ON THE LINE BELOW
 # Get FREE key: https://console.groq.com → API Keys → Create
 # Key looks like: gsk_abc123...
-# ═══════════════════════════════════════════════════════════
 GROQ_API_KEY = ''   # ← REPLACE THIS
 GROQ_MODEL = 'llama-3.3-70b-versatile'
