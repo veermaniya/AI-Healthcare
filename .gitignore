@@ -1,0 +1,84 @@
+# ════════════════════════════════════════════════
+#  HealthAI — .gitignore
+# ════════════════════════════════════════════════
+
+# ── Python ────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# ── Virtual Environment ───────────────────────
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ── Django ────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# ── Sensitive / Secrets ───────────────────────
+.env
+.env.local
+.env.production
+secrets.py
+healthcare_ai/local_settings.py
+
+# ── Migrations (keep or ignore — your choice) ─
+# healthcare_app/migrations/*.py  ← uncomment to ignore migrations
+# !healthcare_app/migrations/__init__.py
+
+# ── Uploaded Data Files ───────────────────────
+uploads/
+*.csv
+*.xlsx
+*.xls
+*.json
+!package.json
+
+# ── OS Files ──────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── IDE / Editor ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# ── Testing ───────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+
+# ── Build / Distribution ──────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ── Static Files (collected) ──────────────────
+staticfiles/
+static_collected/

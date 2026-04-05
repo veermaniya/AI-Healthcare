@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+{% load static %}
+{% csrf_token %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthAI — Healthcare Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--surface3:#1f2d42;
+  --border:rgba(99,179,237,0.12);--accent:#38bdf8;--accent2:#34d399;
+  --accent3:#f472b6;--accent4:#fb923c;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --danger:#f87171;--warn:#fbbf24;
+  --radius:12px;--radius-lg:20px;--shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* HEADER */
+.header{flex-shrink:0;height:60px;background:rgba(10,15,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.logo-text{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:10px;color:var(--text3);letter-spacing:.05em}
+.header-right{display:flex;align-items:center;gap:14px}
+.badge-free{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:var(--accent2);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.status-dot{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* LAYOUT */
+.layout{flex:1;display:grid;grid-template-columns:290px 1fr 330px;overflow:hidden;position:relative;z-index:1}
+
+/* LEFT SIDEBAR */
+.sidebar-left{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.sidebar-left::-webkit-scrollbar{width:3px}
+.sidebar-left::-webkit-scrollbar-thumb{background:var(--border)}
+.panel{padding:14px 16px;border-bottom:1px solid var(--border)}
+.panel-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* source tabs */
+.tab-group{display:flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px;margin-bottom:10px}
+.tab-btn{flex:1;padding:6px 8px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab-btn.active{background:var(--surface3);color:var(--accent)}
+
+/* upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(56,189,248,.05)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* inputs */
+.input-field{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;font-family:'DM Mono',monospace;outline:none;margin-bottom:7px;resize:vertical;transition:border-color .2s}
+.input-field:focus{border-color:var(--accent)}
+.input-field::placeholder{color:var(--text3)}
+
+/* buttons */
+.btn{padding:8px 14px;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#fff;width:100%;justify-content:center}
+.btn-primary:hover{opacity:.9}
+.btn-success{background:linear-gradient(135deg,var(--accent2),#10b981);color:#fff;width:100%;justify-content:center}
+.btn-danger{background:rgba(248,113,113,.15);color:var(--danger);border:1px solid rgba(248,113,113,.3);font-size:11px;padding:5px 10px}
+.btn-sm{padding:7px 14px;font-size:11px;width:auto}
+
+/* dataset info */
+#dataset-info{display:none;padding:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:var(--radius);margin-top:8px}
+.ds-stat{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:3px}
+.ds-stat strong{color:var(--accent2)}
+
+/* column selector */
+#column-panel{display:none}
+.col-search{position:relative;margin-bottom:8px}
+.col-search input{width:100%;padding:7px 10px 7px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif}
+.col-search::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
+.col-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.col-list::-webkit-scrollbar{width:3px}
+.col-list::-webkit-scrollbar-thumb{background:var(--border)}
+.col-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;transition:background .15s;user-select:none}
+.col-item:hover{background:var(--surface2)}
+.col-item.feat{background:rgba(56,189,248,.1)}
+.col-item.tgt{background:rgba(244,114,182,.1)}
+.col-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;transition:all .15s}
+.col-item.feat .col-chk{background:var(--accent);border-color:var(--accent);color:#fff}
+.col-item.tgt .col-chk{background:var(--accent3);border-color:var(--accent3);color:#fff}
+.col-name{font-size:11px;font-family:'DM Mono',monospace;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.col-badge{font-size:8px;padding:1px 5px;border-radius:8px;font-weight:600}
+.badge-num{background:rgba(56,189,248,.15);color:var(--accent)}
+.badge-cat{background:rgba(251,146,60,.15);color:var(--accent4)}
+.sel-legend{display:flex;gap:8px;margin-bottom:8px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)}
+.legend-dot{width:7px;height:7px;border-radius:2px}
+.sel-summary{font-size:10px;color:var(--text3);margin-top:8px;line-height:1.5}
+.sel-summary span{color:var(--accent);font-weight:600}
+
+/* analysis config */
+#analysis-panel{display:none}
+.cfg-label{font-size:10px;color:var(--text3);margin-bottom:3px;display:block}
+.cfg-select{width:100%;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px}
+.cfg-select:focus{border-color:var(--accent)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+
+/* main tab bar */
+.main-tabs{flex-shrink:0;display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px}
+.mtab{height:44px;padding:0 16px;border:none;background:transparent;color:var(--text3);font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all .2s;flex-shrink:0;margin-bottom:-1px}
+.mtab:hover{color:var(--text2)}
+.mtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.new-badge{background:linear-gradient(135deg,var(--accent3),#e879f9);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:5px}
+
+/* tab panels - each scrolls independently */
+.tpanel{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 22px;min-height:0}
+.tpanel.active{display:block}
+.tpanel::-webkit-scrollbar{width:4px}
+.tpanel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* welcome card */
+.welcome-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.welcome-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3))}
+.welcome-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:10px;background:linear-gradient(135deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome-desc{font-size:13px;color:var(--text2);max-width:460px;margin:0 auto 18px;line-height:1.7}
+.feature-pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.pill{background:var(--surface2);border:1px solid var(--border);padding:5px 12px;border-radius:20px;font-size:11px;color:var(--text2);display:flex;align-items:center;gap:5px}
+
+/* result cards */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.result-title{font-size:14px;font-weight:600;color:var(--text)}
+.result-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:.05em}
+.badge-reg{background:rgba(56,189,248,.15);color:var(--accent)}
+.badge-cls{background:rgba(244,114,182,.15);color:var(--accent3)}
+.badge-clu{background:rgba(251,146,60,.15);color:var(--accent4)}
+
+/* metrics */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+.metric-card{background:var(--surface2);border-radius:var(--radius);padding:12px;text-align:center}
+.metric-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
+.metric-lbl{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* chart */
+.chart-wrap{position:relative;height:170px;margin-top:10px}
+
+/* feature bars */
+.feat-bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.feat-row{display:flex;align-items:center;gap:8px}
+.feat-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feat-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.feat-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .8s ease}
+.feat-pct{font-size:10px;color:var(--text3);width:34px;text-align:right}
+
+/* predict form */
+.predict-form{background:var(--surface2);border-radius:var(--radius);padding:14px;margin-top:14px}
+.predict-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.predict-inputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-bottom:12px}
+.pred-field{display:flex;flex-direction:column;gap:3px}
+.pred-label{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.04em}
+.ftype-badge{font-size:8px;padding:1px 5px;border-radius:7px;font-weight:600}
+.ftype-num{background:rgba(56,189,248,.15);color:var(--accent)}
+.ftype-cat{background:rgba(251,146,60,.15);color:var(--accent4)}
+.slider-wrap{display:flex;flex-direction:column;gap:3px}
+.slider-row{display:flex;align-items:center;gap:6px}
+.slider-input{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:var(--surface3);outline:none;cursor:pointer}
+.slider-input::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--surface)}
+.slider-val{width:54px;padding:4px 6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;text-align:center;outline:none}
+.slider-val:focus{border-color:var(--accent)}
+.slider-hints{display:flex;justify-content:space-between;font-size:8px;color:var(--text3);padding:0 2px}
+.cat-select{width:100%;padding:7px 8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.cat-select:focus{border-color:var(--accent4)}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.chip{padding:2px 7px;background:var(--surface3);border:1px solid var(--border);border-radius:9px;font-size:9px;color:var(--text3);cursor:pointer;transition:all .15s;font-family:'DM Mono',monospace}
+.chip:hover,.chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent)}
+.pred-result{padding:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:var(--radius);display:none;margin-top:10px;animation:slideIn .3s ease}
+.pred-result-hdr{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.pred-result-val{font-family:'DM Mono',monospace;font-size:24px;color:var(--accent2);font-weight:500}
+.conf-row{margin-top:7px;display:flex;align-items:center;gap:7px}
+.conf-track{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .8s ease}
+.conf-lbl{font-size:10px;color:var(--accent2);font-family:'DM Mono',monospace;width:34px;text-align:right}
+.pred-summary{margin-top:8px;padding:7px 9px;background:var(--surface2);border-radius:7px;font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;line-height:1.8}
+
+/* DATA PREVIEW TABLE */
+.preview-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.prev-search{position:relative;flex:1;min-width:160px}
+.prev-search input{width:100%;padding:7px 10px 7px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif}
+.prev-search input:focus{border-color:var(--accent)}
+.prev-search input::placeholder{color:var(--text3)}
+.prev-search::before{content:'🔍';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
+.coltog-btn{padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.coltog-btn:hover{border-color:var(--accent);color:var(--accent)}
+.coltog-drop{display:none;position:absolute;right:0;top:calc(100% + 5px);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px;z-index:200;min-width:165px;box-shadow:var(--shadow);max-height:200px;overflow-y:auto}
+.coltog-drop.open{display:block}
+.coltog-item{display:flex;align-items:center;gap:7px;padding:4px 3px;cursor:pointer;border-radius:5px;font-size:10px;color:var(--text2);font-family:'DM Mono',monospace}
+.coltog-item:hover{background:var(--surface3)}
+.coltog-item input[type=checkbox]{accent-color:var(--accent);width:12px;height:12px;cursor:pointer}
+.prev-table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+.prev-table{width:100%;border-collapse:collapse;font-size:11px}
+.prev-table th{background:var(--surface2);color:var(--text3);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;font-family:'DM Mono',monospace;cursor:pointer;position:sticky;top:0;z-index:1;user-select:none}
+.prev-table th:hover{color:var(--accent)}
+.prev-table th.sort-asc::after{content:' ↑';color:var(--accent)}
+.prev-table th.sort-desc::after{content:' ↓';color:var(--accent)}
+.prev-table td{padding:6px 10px;border-bottom:1px solid rgba(99,179,237,.05);color:var(--text2);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.prev-table tr:last-child td{border-bottom:none}
+.prev-table tr:hover td{background:rgba(56,189,248,.03)}
+.prev-table td.rn,.prev-table th.rn{color:var(--text3);font-family:'DM Mono',monospace;font-size:9px;width:36px;text-align:right;padding-right:12px}
+.pg-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface2);border-top:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);flex-wrap:wrap;gap:7px}
+.pg-info{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.pg-info strong{color:var(--accent)}
+.pg-btns{display:flex;align-items:center;gap:3px}
+.pg-btn{padding:4px 9px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:10px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;min-width:30px;text-align:center}
+.pg-btn:hover:not(:disabled){background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent)}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.pg-btn.active{background:var(--accent);border-color:var(--accent);color:#0a0f1a;font-weight:700}
+.pg-btn.ellip{background:transparent;border-color:transparent;cursor:default;color:var(--text3)}
+.pg-size{padding:4px 7px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:10px;outline:none;cursor:pointer}
+.pg-size:focus{border-color:var(--accent)}
+
+/* CHAT */
+.sidebar-right{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.section-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.section-title{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
+.chat-msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border)}
+.msg{max-width:90%;animation:slideIn .25s ease}
+.msg-user{align-self:flex-end}
+.msg-ai{align-self:flex-start}
+.msg-bubble{padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.6}
+.msg-user .msg-bubble{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#fff;border-bottom-right-radius:3px}
+.msg-ai .msg-bubble{background:var(--surface2);color:var(--text);border-bottom-left-radius:3px;border:1px solid var(--border)}
+.msg-ai .msg-bubble code{background:var(--surface3);padding:1px 4px;border-radius:3px;font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)}
+.msg-time{font-size:9px;color:var(--text3);margin-top:3px;padding:0 3px}
+.msg-user .msg-time{text-align:right}
+.chat-input-area{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.quick-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.q-btn{padding:3px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:10px;color:var(--text3);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.q-btn:hover{border-color:var(--accent);color:var(--accent)}
+.chat-row{display:flex;gap:7px;align-items:flex-end}
+.chat-row textarea{flex:1;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:none;max-height:90px;min-height:38px;line-height:1.5;transition:border-color .2s}
+.chat-row textarea:focus{border-color:var(--accent)}
+.chat-row textarea::placeholder{color:var(--text3)}
+.send-btn{width:38px;height:38px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#fff;font-size:15px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn:hover{transform:scale(1.05)}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* LOADING */
+.loading-dots{display:inline-flex;gap:4px;padding:4px 0}
+.loading-dots span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1.2s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+.notif{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--radius);font-size:12px;z-index:9999;transition:transform .3s;box-shadow:var(--shadow);display:flex;align-items:center;gap:7px}
+.notif.show{transform:translateX(-50%) translateY(0)}
+.notif.success{border-color:rgba(52,211,153,.4)}
+.notif.error{border-color:rgba(248,113,113,.4)}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,26,.7);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.loading-overlay.active{display:flex}
+.loading-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 36px;text-align:center;box-shadow:var(--shadow)}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text2)}
+.loading-sub{font-size:11px;color:var(--text3);margin-top:5px}
+
+/* MEDICAL IMAGING */
+.img-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:14px}
+.img-type-card{padding:12px 10px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;text-align:center;background:var(--surface2)}
+.img-type-card:hover{border-color:var(--accent);background:rgba(56,189,248,.06)}
+.img-type-card.sel{border-color:var(--accent);background:rgba(56,189,248,.12)}
+.img-type-icon{font-size:24px;margin-bottom:5px}
+.img-type-lbl{font-size:11px;font-weight:600;color:var(--text2)}
+.img-type-sub{font-size:9px;color:var(--text3);margin-top:2px}
+.img-upload{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);margin-bottom:14px}
+.img-upload:hover,.img-upload.over{border-color:var(--accent);background:rgba(56,189,248,.06)}
+.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-work{display:none;gap:14px}
+.img-work.on{display:grid;grid-template-columns:1fr 1fr}
+.img-preview-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative}
+.img-preview-box img{width:100%;max-height:300px;object-fit:contain;display:block;background:#000}
+.img-overlay-lbl{position:absolute;top:7px;left:7px;background:rgba(10,15,26,.8);border:1px solid var(--border);border-radius:7px;padding:3px 9px;font-size:10px;color:var(--accent);font-family:'DM Mono',monospace}
+.img-toolbar{padding:9px 12px;display:flex;gap:6px;border-top:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+.img-tbtn{padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text3);font-size:10px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.img-tbtn:hover{border-color:var(--accent);color:var(--accent)}
+.img-findings-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;max-height:460px}
+.img-findings-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:7px;background:var(--surface);flex-shrink:0;border-radius:var(--radius) var(--radius) 0 0}
+.img-findings-body{flex:1;padding:14px;overflow-y:auto;font-size:12px;color:var(--text2);line-height:1.7;min-height:0}
+.img-findings-body::-webkit-scrollbar{width:3px}
+.img-findings-body::-webkit-scrollbar-thumb{background:var(--border)}
+.finding{display:flex;gap:9px;padding:9px 11px;border-radius:var(--radius);margin-bottom:7px;border:1px solid transparent;animation:slideIn .3s ease}
+.finding.normal{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2)}
+.finding.warning{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2)}
+.finding.critical{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.2)}
+.finding.info{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.15)}
+.finding-icon{font-size:14px;flex-shrink:0}
+.finding-body{flex:1}
+.finding-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+.finding-desc{font-size:11px;color:var(--text2)}
+.conf-row2{display:flex;align-items:center;gap:7px;margin-top:5px}
+.conf-lbl2{color:var(--text3);width:65px;font-family:'DM Mono',monospace;font-size:9px}
+.conf-track2{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.conf-fill2{height:100%;border-radius:3px;transition:width 1s ease}
+.conf-pct2{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);width:30px;text-align:right}
+.img-ask-area{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0}
+.img-ask-area input{flex:1;padding:7px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif}
+.img-ask-area input:focus{border-color:var(--accent)}
+.img-ask-area input::placeholder{color:var(--text3)}
+.img-disclaimer{margin-top:10px;padding:9px 11px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius);font-size:10px;color:var(--text3);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Processing...</div>
+    <div class="loading-sub" id="loadingSubText">Please wait</div>
+  </div>
+</div>
+<div class="notif" id="notif"></div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <div><div class="logo-text">HealthAI</div><div class="logo-sub">Intelligent Healthcare Analytics</div></div>
+  </div>
+  <div class="header-right">
+    <span class="badge-free">❤ FREE CHARITY</span>
+    <div class="status-dot"><div class="dot"></div><span>AI Ready</span></div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- ════ LEFT SIDEBAR ════ -->
+<aside class="sidebar-left">
+
+  <div class="panel">
+    <div class="panel-title">📂 Data Source</div>
+    <div class="tab-group">
+      <button class="tab-btn active" onclick="switchSrcTab('excel')">📊 Excel/CSV</button>
+      <button class="tab-btn" onclick="switchSrcTab('sql')">🗄 SQL</button>
+    </div>
+    <div id="tab-excel">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleUpload(this)">
+        <div style="font-size:24px;margin-bottom:6px">📋</div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.5"><strong style="color:var(--accent)">Click to upload</strong> or drag & drop<br>Excel (.xlsx, .xls) or CSV</div>
+      </div>
+    </div>
+    <div id="tab-sql" style="display:none">
+      <input class="input-field" id="sqlConn" placeholder="mssql+pyodbc://user:pass@server/db?driver=ODBC+Driver+17+for+SQL+Server" style="font-size:9px;height:50px">
+      <textarea class="input-field" id="sqlQuery" rows="3" placeholder="SELECT * FROM patients"></textarea>
+      <button class="btn btn-primary" onclick="connectSQL()">🔌 Connect & Load</button>
+    </div>
+    <div id="dataset-info">
+      <div class="ds-stat">📄 File <strong id="ds-file">—</strong></div>
+      <div class="ds-stat">📊 Rows <strong id="ds-rows">—</strong></div>
+      <div class="ds-stat">🏷 Cols <strong id="ds-cols">—</strong></div>
+      <button class="btn btn-danger" style="margin-top:7px;width:100%;justify-content:center" onclick="clearSession()">🗑 Clear Session</button>
+    </div>
+  </div>
+
+  <div class="panel" id="column-panel">
+    <div class="panel-title">🎛 Column Selector</div>
+    <div class="sel-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Click once = Feature</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Click twice = Target</div>
+    </div>
+    <div class="col-search"><input type="text" placeholder="Search columns..." oninput="filterCols(this.value)"></div>
+    <div class="col-list" id="colList"></div>
+    <div class="sel-summary" id="selSummary">Select feature columns above</div>
+  </div>
+
+  <div class="panel" id="analysis-panel">
+    <div class="panel-title">⚙️ Analysis Settings</div>
+    <span class="cfg-label">Task Type</span>
+    <select class="cfg-select" id="taskType" onchange="updateTaskUI()">
+      <option value="auto">🤖 Auto Detect</option>
+      <option value="regression">📈 Regression</option>
+      <option value="classification">🏷 Classification</option>
+      <option value="clustering">🔵 Clustering</option>
+    </select>
+    <span class="cfg-label">ML Model</span>
+    <select class="cfg-select" id="modelType">
+      <option value="random_forest">🌲 Random Forest</option>
+      <option value="linear">📊 Linear / Logistic</option>
+      <option value="gradient_boost">🚀 Gradient Boost</option>
+    </select>
+    <div id="clusterCfg" style="display:none">
+      <span class="cfg-label">Number of Clusters</span>
+      <input class="cfg-select" id="nClusters" type="number" min="2" max="10" value="3">
+    </div>
+    <button class="btn btn-success" onclick="runAnalysis()">▶ Run Analysis</button>
+  </div>
+
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <div class="main-tabs">
+    <button class="mtab active" onclick="switchTab('analytics')" id="mtab-analytics">📊 Analytics</button>
+    <button class="mtab" onclick="switchTab('preview')" id="mtab-preview">📋 Data Preview</button>
+    <button class="mtab" onclick="switchTab('imaging')" id="mtab-imaging">🔬 Medical Imaging <span class="new-badge">NEW</span></button>
+  </div>
+
+  <!-- ANALYTICS TAB -->
+  <div class="tpanel active" id="tpanel-analytics">
+
+    <div class="welcome-card" id="welcomeCard">
+      <div class="welcome-title">Healthcare AI Intelligence Platform</div>
+      <div class="welcome-desc">Upload your healthcare dataset or connect to SQL Server. Select columns, run AI predictions, regression, clustering — and now analyze medical images. Free for healthcare charity.</div>
+      <div class="feature-pills">
+        <div class="pill">🤖 LLM Chat</div>
+        <div class="pill">📈 Regression</div>
+        <div class="pill">🏷 Classification</div>
+        <div class="pill">🔵 Clustering</div>
+        <div class="pill">🎯 Prediction</div>
+        <div class="pill">🔬 Medical Imaging</div>
+      </div>
+    </div>
+
+    <div id="ml-result-card" class="result-card" style="display:none">
+      <div class="result-header">
+        <div class="result-title" id="result-title">Analysis Results</div>
+        <span class="result-badge" id="result-badge">—</span>
+      </div>
+      <div class="metrics-grid" id="metrics-grid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Feature Importance</div>
+          <div class="feat-bars" id="feat-bars"></div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Actual vs Predicted</div>
+          <div class="chart-wrap"><canvas id="predChart"></canvas></div>
+        </div>
+      </div>
+      <div class="predict-form" id="pred-form">
+        <div class="predict-title">🎯 Predict for New Patient <span style="font-size:9px;color:var(--text3);font-weight:400;margin-left:auto">Auto-suggested from dataset</span></div>
+        <div class="predict-inputs" id="pred-inputs"></div>
+        <button class="btn btn-primary btn-sm" onclick="runPrediction()" style="margin-bottom:0">⚡ Calculate Prediction</button>
+        <div class="pred-result" id="pred-result">
+          <div class="pred-result-hdr">🏥 Predicted Result</div>
+          <div class="pred-result-val" id="pred-val">—</div>
+          <div class="conf-row" id="conf-row" style="display:none">
+            <div class="conf-track"><div class="conf-fill" id="conf-fill" style="width:0%"></div></div>
+            <div class="conf-lbl" id="conf-lbl">0%</div>
+          </div>
+          <div class="pred-summary" id="pred-summary"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cluster-result-card" class="result-card" style="display:none">
+      <div class="result-header">
+        <div class="result-title">🔵 Clustering Analysis</div>
+        <span class="result-badge badge-clu">K-MEANS</span>
+      </div>
+      <div class="metrics-grid" id="cluster-metrics"></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="clusterChart"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- DATA PREVIEW TAB -->
+  <div class="tpanel" id="tpanel-preview">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-title">📋 Data Preview</div>
+        <span style="font-size:11px;color:var(--text3)" id="prev-stats"></span>
+      </div>
+      <div class="preview-toolbar">
+        <div class="prev-search">
+          <input type="text" id="prevSearch" placeholder="Search across all columns..." oninput="onSearch(this.value)">
+        </div>
+        <div style="position:relative">
+          <button class="coltog-btn" onclick="toggleColDrop()">⚙ Columns</button>
+          <div class="coltog-drop" id="colTogDrop"></div>
+        </div>
+      </div>
+      <div class="prev-table-wrap">
+        <table class="prev-table">
+          <thead id="prevHead"></thead>
+          <tbody id="prevBody"></tbody>
+        </table>
+      </div>
+      <div class="pg-bar">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="pg-info" id="pg-info">—</span>
+          <select class="pg-size" onchange="changePageSize(this.value)">
+            <option value="10">10/page</option>
+            <option value="25">25/page</option>
+            <option value="50">50/page</option>
+            <option value="100">100/page</option>
+          </select>
+        </div>
+        <div class="pg-btns" id="pg-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDICAL IMAGING TAB -->
+  <div class="tpanel" id="tpanel-imaging">
+
+    <div class="result-card" style="position:relative;overflow:hidden;margin-bottom:14px">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2))"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">🔬 Medical Imaging AI Analysis</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Upload X-Ray, CT Scan, Sonography, MRI or Dermatology images for AI-assisted findings detection.</div>
+      <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Select Scan Type</div>
+      <div class="img-type-grid">
+        <div class="img-type-card sel" onclick="selImgType('xray',this)"><div class="img-type-icon">🫁</div><div class="img-type-lbl">X-Ray</div><div class="img-type-sub">Chest · Bone · Spine</div></div>
+        <div class="img-type-card" onclick="selImgType('ct',this)"><div class="img-type-icon">🧠</div><div class="img-type-lbl">CT Scan</div><div class="img-type-sub">Brain · Abdomen</div></div>
+        <div class="img-type-card" onclick="selImgType('sono',this)"><div class="img-type-icon">🫀</div><div class="img-type-lbl">Sonography</div><div class="img-type-sub">Abdomen · Heart</div></div>
+        <div class="img-type-card" onclick="selImgType('mri',this)"><div class="img-type-icon">🦴</div><div class="img-type-lbl">MRI</div><div class="img-type-sub">Brain · Spine</div></div>
+        <div class="img-type-card" onclick="selImgType('retinal',this)"><div class="img-type-icon">👁</div><div class="img-type-lbl">Retinal</div><div class="img-type-sub">Fundus · OCT</div></div>
+        <div class="img-type-card" onclick="selImgType('derma',this)"><div class="img-type-icon">🩹</div><div class="img-type-lbl">Dermatology</div><div class="img-type-sub">Skin · Lesions</div></div>
+      </div>
+    </div>
+
+    <div class="img-upload" id="imgUpload">
+      <input type="file" id="imgFile" accept="image/*" onchange="loadImgFile(this.files[0])">
+      <div style="font-size:36px;margin-bottom:10px">📤</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.6"><strong style="color:var(--accent)">Click to upload</strong> or drag & drop<br>JPEG, PNG, WEBP · Max 10MB</div>
+    </div>
+
+    <div class="img-work" id="imgWork">
+      <div>
+        <div class="img-preview-box">
+          <img id="imgPreview" src="" alt="Medical scan">
+          <div class="img-overlay-lbl" id="imgLbl">X-RAY</div>
+        </div>
+        <div class="img-toolbar">
+          <button class="img-tbtn" onclick="changeImgType('xray')">🫁 X-Ray</button>
+          <button class="img-tbtn" onclick="changeImgType('ct')">🧠 CT</button>
+          <button class="img-tbtn" onclick="changeImgType('sono')">🫀 Sono</button>
+          <button class="img-tbtn" onclick="changeImgType('mri')">🦴 MRI</button>
+          <button class="img-tbtn" onclick="reAnalyze()" style="margin-left:auto;color:var(--accent2);border-color:rgba(52,211,153,.3)">🔄 Re-analyse</button>
+        </div>
+      </div>
+      <div class="img-findings-box">
+        <div class="img-findings-hdr">🤖 AI Findings <span id="imgBadge" style="margin-left:auto;font-size:9px;background:rgba(56,189,248,.15);color:var(--accent);padding:2px 7px;border-radius:7px;font-weight:600">X-RAY</span></div>
+        <div class="img-findings-body" id="imgBody">
+          <div style="text-align:center;padding:36px 16px;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔍</div><div style="font-size:12px">Upload a medical image to begin AI analysis</div></div>
+        </div>
+        <div class="img-ask-area">
+          <input type="text" id="imgQ" placeholder="Ask a specific question about this image..." onkeydown="if(event.key==='Enter')askImg()">
+          <button class="btn btn-primary btn-sm" onclick="askImg()" style="white-space:nowrap">Ask AI</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- ════ RIGHT SIDEBAR (CHAT) ════ -->
+<aside class="sidebar-right">
+  <div class="section-head">
+    <span class="section-title">🤖 AI Health Assistant</span>
+    <span style="font-size:9px;color:var(--text3)">Groq LLaMA</span>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg msg-ai">
+      <div class="msg-bubble">
+        Hello! 👋 I'm your Healthcare AI Assistant.<br><br>
+        Upload a dataset and I can help you:<br>
+        • Explain prediction results<br>
+        • Analyze health patterns<br>
+        • Answer medical data questions<br><br>
+        <em style="color:var(--text3);font-size:10px">AI insights support but do not replace professional medical diagnosis.</em>
+      </div>
+      <div class="msg-time">HealthAI</div>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <div class="quick-btns">
+      <button class="q-btn" onclick="quickAsk('Explain my latest analysis results')">📊 Explain</button>
+      <button class="q-btn" onclick="quickAsk('What patterns do you see in this dataset?')">🔍 Patterns</button>
+      <button class="q-btn" onclick="quickAsk('Which features are most important?')">⭐ Key features</button>
+      <button class="q-btn" onclick="quickAsk('What are the health risks based on this data?')">⚠️ Risks</button>
+    </div>
+    <div class="chat-row">
+      <textarea id="chatInput" placeholder="Ask about your health data..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</aside>
+
+</div>
+
+<script>
+// ══ STATE ══
+let colInfo=[], selFeatures=new Set(), selTarget=null, lastResult=null, charts={}, colStats={};
+let imgFile=null, imgType='xray';
+let pvRows=[], pvFiltered=[], pvCols=[], pvVisible=[], pvPage=1, pvSize=10, pvSortCol=null, pvSortAsc=true, pvTotal=0;
+
+// ══ UTILS ══
+function cookie(n){
+  // Try cookie first
+  for(const c of document.cookie.split(';')){
+    const parts=c.trim().split('=');
+    if(parts[0]===n)return decodeURIComponent(parts.slice(1).join('='));
+  }
+  return null;
+}
+function getCSRF(){
+  // Try cookie, then meta tag, then hidden input
+  return cookie('csrftoken') || 
+    document.querySelector('meta[name=csrf-token]')?.content || 
+    document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+function notif(msg,type='success'){const e=document.getElementById('notif');e.textContent=(type==='success'?'✅ ':'❌ ')+msg;e.className=`notif ${type} show`;setTimeout(()=>e.classList.remove('show'),3500);}
+function showLoad(t='Loading...',s='Please wait'){document.getElementById('loadingText').textContent=t;document.getElementById('loadingSubText').textContent=s;document.getElementById('loadingOverlay').classList.add('active');}
+function hideLoad(){document.getElementById('loadingOverlay').classList.remove('active');}
+async function post(url,data){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify(data)});return r.json();}
+
+// ══ MAIN TABS ══
+function switchTab(tab){
+  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tpanel-'+tab).classList.add('active');
+  document.getElementById('mtab-'+tab).classList.add('active');
+}
+
+// ══ SOURCE TABS ══
+function switchSrcTab(tab){
+  document.getElementById('tab-excel').style.display=tab==='excel'?'block':'none';
+  document.getElementById('tab-sql').style.display=tab==='sql'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='excel')||(i===1&&tab==='sql')));
+}
+
+// ══ UPLOAD ══
+async function handleUpload(input){
+  const file=input.files[0];if(!file)return;
+  await handleUploadFile(file);
+  // reset input so same file can be re-uploaded
+  input.value='';
+}
+async function handleUploadFile(file){
+  showLoad('Reading dataset...','Parsing columns and data types');
+  const fd=new FormData();fd.append('file',file);
+  try{
+    const r=await fetch('/api/upload/',{method:'POST',headers:{'X-CSRFToken':getCSRF()},body:fd});
+    const d=await r.json();
+    if(d.success){onData(d);notif('Loaded '+d.rows+' rows × '+d.columns+' columns');}
+    else notif(d.error,'error');
+  }catch(e){notif('Upload failed: '+e.message,'error');}
+  hideLoad();
+}
+
+// ══ SQL ══
+async function connectSQL(){
+  const conn=document.getElementById('sqlConn').value.trim();
+  const query=document.getElementById('sqlQuery').value.trim();
+  if(!conn||!query){notif('Please fill connection string and query','error');return;}
+  showLoad('Connecting to database...','Executing query');
+  const d=await post('/api/connect-sql/',{connection_string:conn,query});
+  hideLoad();
+  if(d.success){onData(d);notif('Connected! '+d.rows+' rows loaded');}
+  else notif(d.error,'error');
+}
+
+// ══ ON DATA LOADED ══
+function onData(d){
+  colInfo=d.column_info;
+  document.getElementById('ds-file').textContent=d.file_name||'SQL Query';
+  document.getElementById('ds-rows').textContent=d.rows.toLocaleString();
+  document.getElementById('ds-cols').textContent=d.columns;
+  document.getElementById('dataset-info').style.display='block';
+  document.getElementById('welcomeCard').style.display='none';
+  document.getElementById('column-panel').style.display='block';
+  document.getElementById('analysis-panel').style.display='block';
+  renderCols(colInfo);
+  renderPreview(d.preview,d.rows,d.columns);
+  fetchColStats();
+  switchTab('analytics');
+}
+
+// ══ COLUMNS ══
+function renderCols(cols){
+  const list=document.getElementById('colList');list.innerHTML='';
+  cols.forEach(col=>{
+    const item=document.createElement('div');
+    item.className='col-item';item.dataset.col=col.name;
+    item.innerHTML=`<div class="col-chk" id="chk-${col.name}">—</div><span class="col-name" title="${col.name}">${col.name}</span><span class="col-badge ${col.col_type==='numeric'?'badge-num':'badge-cat'}">${col.col_type==='numeric'?'NUM':'CAT'}</span>`;
+    item.addEventListener('click',()=>toggleCol(col.name));
+    list.appendChild(item);
+  });
+  updateSelUI();
+}
+function toggleCol(name){
+  if(selTarget===name){selTarget=null;}
+  else if(selFeatures.has(name)){selFeatures.delete(name);selTarget=name;}
+  else{selFeatures.add(name);}
+  updateSelUI();
+}
+function updateSelUI(){
+  document.querySelectorAll('.col-item').forEach(item=>{
+    const c=item.dataset.col,chk=item.querySelector('.col-chk');
+    item.classList.remove('feat','tgt');
+    if(selFeatures.has(c)){item.classList.add('feat');chk.textContent='✓';}
+    else if(selTarget===c){item.classList.add('tgt');chk.textContent='★';}
+    else{chk.textContent='—';}
+  });
+  document.getElementById('selSummary').innerHTML=`Features: <span>${selFeatures.size}</span> selected &nbsp;|&nbsp; Target: <span>${selTarget||'none'}</span>`;
+}
+function filterCols(q){document.querySelectorAll('.col-item').forEach(item=>{item.style.display=item.dataset.col.toLowerCase().includes(q.toLowerCase())?'flex':'none';});}
+
+// ══ DATA PREVIEW ══
+function renderPreview(rows,total,cols){
+  if(!rows||!rows.length)return;
+  pvRows=rows;pvFiltered=rows;pvCols=Object.keys(rows[0]);pvVisible=[...pvCols];pvPage=1;pvTotal=total;pvSortCol=null;pvSortAsc=true;
+  document.getElementById('prev-stats').innerHTML=`<strong style="color:var(--accent)">${rows.length.toLocaleString()}</strong> loaded of <strong style="color:var(--accent2)">${total.toLocaleString()}</strong> total × <strong>${cols}</strong> cols`;
+  buildHead();buildColDrop();renderPage();
+}
+function buildHead(){
+  document.getElementById('prevHead').innerHTML='<tr><th class="rn">#</th>'+pvVisible.map(c=>{let cls='';if(pvSortCol===c)cls=pvSortAsc?'sort-asc':'sort-desc';return`<th class="${cls}" onclick="sortPv('${c}')">${c}</th>`;}).join('')+'</tr>';
+}
+function renderPage(){
+  const s=(pvPage-1)*pvSize,e=s+pvSize,pageRows=pvFiltered.slice(s,e);
+  document.getElementById('prevBody').innerHTML=pageRows.map((row,i)=>'<tr><td class="rn">'+(s+i+1)+'</td>'+pvVisible.map(c=>{const v=row[c]!=null?row[c]:'';const d=String(v).length>18?String(v).slice(0,18)+'…':v;return`<td title="${v}">${d}</td>`;}).join('')+'</tr>').join('');
+  updatePg();
+}
+function updatePg(){
+  const total=pvFiltered.length,pages=Math.max(1,Math.ceil(total/pvSize)),s=Math.min((pvPage-1)*pvSize+1,total),e=Math.min(pvPage*pvSize,total);
+  const tag=pvFiltered.length<pvRows.length?' <span style="color:var(--accent3)">(filtered)</span>':'';
+  document.getElementById('pg-info').innerHTML=`Showing <strong>${s}–${e}</strong> of <strong>${total.toLocaleString()}</strong>${tag}`;
+  const ctrl=document.getElementById('pg-btns');ctrl.innerHTML='';
+  const add=(lbl,pg,active,disabled,ellip)=>{const b=document.createElement('button');b.className='pg-btn'+(active?' active':'')+(ellip?' ellip':'');b.textContent=lbl;b.disabled=disabled||ellip;if(!disabled&&!ellip)b.onclick=()=>goPage(pg);ctrl.appendChild(b);};
+  add('← Prev',pvPage-1,false,pvPage<=1);
+  pgNums(pvPage,pages).forEach(p=>p==='...'?add('…',null,false,false,true):add(p,p,p===pvPage));
+  add('Next →',pvPage+1,false,pvPage>=pages);
+}
+function pgNums(cur,total){if(total<=7)return Array.from({length:total},(_,i)=>i+1);const p=[1];if(cur>3)p.push('...');for(let i=Math.max(2,cur-1);i<=Math.min(total-1,cur+1);i++)p.push(i);if(cur<total-2)p.push('...');p.push(total);return p;}
+function goPage(pg){pvPage=Math.max(1,Math.min(pg,Math.ceil(pvFiltered.length/pvSize)));buildHead();renderPage();}
+function changePageSize(s){pvSize=parseInt(s);pvPage=1;renderPage();}
+function onSearch(q){pvFiltered=q?pvRows.filter(row=>pvVisible.some(c=>String(row[c]??'').toLowerCase().includes(q.toLowerCase()))):pvRows;pvPage=1;buildHead();renderPage();}
+function sortPv(col){if(pvSortCol===col)pvSortAsc=!pvSortAsc;else{pvSortCol=col;pvSortAsc=true;}pvFiltered=[...pvFiltered].sort((a,b)=>{const va=a[col],vb=b[col];if(va==null)return 1;if(vb==null)return-1;const na=parseFloat(va),nb=parseFloat(vb);const cmp=!isNaN(na)&&!isNaN(nb)?na-nb:String(va).localeCompare(String(vb));return pvSortAsc?cmp:-cmp;});pvPage=1;buildHead();renderPage();}
+function buildColDrop(){const d=document.getElementById('colTogDrop');d.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Show/Hide</span><span style="font-size:9px;color:var(--accent);cursor:pointer" onclick="toggleAllCols(true)">All</span></div>`+pvCols.map(c=>`<label class="coltog-item"><input type="checkbox" checked id="coltog-${c}" onchange="toggleColVis('${c}',this.checked)">${c}</label>`).join('');}
+function toggleColDrop(){document.getElementById('colTogDrop').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.coltog-btn')&&!e.target.closest('.coltog-drop'))document.getElementById('colTogDrop')?.classList.remove('open');});
+function toggleColVis(col,checked){pvVisible=pvCols.filter(c=>{const el=document.getElementById(`coltog-${c}`);return el?el.checked:true;});pvPage=1;buildHead();renderPage();}
+function toggleAllCols(show){pvCols.forEach(c=>{const el=document.getElementById(`coltog-${c}`);if(el)el.checked=show;});pvVisible=show?[...pvCols]:[];buildHead();renderPage();}
+
+// ══ TASK UI ══
+function updateTaskUI(){document.getElementById('clusterCfg').style.display=document.getElementById('taskType').value==='clustering'?'block':'none';}
+
+// ══ RUN ANALYSIS ══
+async function runAnalysis(){
+  const features=[...selFeatures];
+  if(!features.length){notif('Select at least one feature column','error');return;}
+  const task=document.getElementById('taskType').value;
+  if(task!=='clustering'&&!selTarget){notif('Select a target column (click twice for Target ★)','error');return;}
+  showLoad('Running AI Analysis...','Training '+document.getElementById('modelType').value+' model');
+  const d=await post('/api/run-analysis/',{feature_columns:features,target_column:selTarget||'',task_type:task,model_type:document.getElementById('modelType').value,n_clusters:parseInt(document.getElementById('nClusters').value)});
+  hideLoad();
+  if(d.success){lastResult=d.result;renderResult(d.result);notif('Analysis complete! '+d.result.task+' model trained.');switchTab('analytics');setTimeout(()=>document.getElementById('ml-result-card').scrollIntoView({behavior:'smooth',block:'start'}),200);}
+  else notif(d.error,'error');
+}
+
+// ══ RENDER RESULTS ══
+function renderResult(r){
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+  document.getElementById('ml-result-card').style.display='none';
+  document.getElementById('cluster-result-card').style.display='none';
+  if(r.task==='clustering')renderClustering(r);else renderML(r);
+}
+function renderML(r){
+  document.getElementById('ml-result-card').style.display='block';
+  document.getElementById('result-title').textContent=(r.task==='regression'?'📈 Regression':'🏷 Classification')+' — Target: '+r.target;
+  const badge=document.getElementById('result-badge');badge.textContent=r.task.toUpperCase();badge.className='result-badge '+(r.task==='regression'?'badge-reg':'badge-cls');
+  const g=document.getElementById('metrics-grid');
+  if(r.task==='regression'){const m=r.metrics;g.innerHTML=`<div class="metric-card"><div class="metric-val">${m.r2_percent}%</div><div class="metric-lbl">R² Score</div></div><div class="metric-card"><div class="metric-val" style="color:var(--accent2)">${m.rmse}</div><div class="metric-lbl">RMSE</div></div><div class="metric-card"><div class="metric-val" style="color:var(--accent4)">${r.total_rows}</div><div class="metric-lbl">Rows</div></div><div class="metric-card"><div class="metric-val" style="color:var(--text2)">${r.features.length}</div><div class="metric-lbl">Features</div></div>`;}
+  else{const m=r.metrics;g.innerHTML=`<div class="metric-card"><div class="metric-val">${m.accuracy_percent}%</div><div class="metric-lbl">Accuracy</div></div><div class="metric-card"><div class="metric-val" style="color:var(--accent4)">${r.total_rows}</div><div class="metric-lbl">Rows</div></div><div class="metric-card"><div class="metric-val" style="color:var(--text2)">${r.features.length}</div><div class="metric-lbl">Features</div></div>`;}
+  const fb=document.getElementById('feat-bars');fb.innerHTML='';
+  if(r.feature_importance&&r.feature_importance.length){const top=r.feature_importance.slice(0,8),max=top[0].importance;top.forEach(f=>{const pct=Math.round(f.importance/max*100);fb.innerHTML+=`<div class="feat-row"><div class="feat-lbl" title="${f.feature}">${f.feature}</div><div class="feat-track"><div class="feat-fill" style="width:${pct}%"></div></div><div class="feat-pct">${(f.importance*100).toFixed(1)}%</div></div>`;});}
+  else fb.innerHTML='<div style="color:var(--text3);font-size:11px">Not available</div>';
+  if(r.sample_predictions&&r.sample_predictions.length){const ctx=document.getElementById('predChart').getContext('2d');charts.pred=new Chart(ctx,{type:'scatter',data:{datasets:[{label:'Actual vs Predicted',data:r.sample_predictions.map(p=>({x:p.actual,y:p.predicted})),backgroundColor:'rgba(56,189,248,.6)',borderColor:'rgba(56,189,248,.9)',pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}}},scales:{x:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(99,179,237,.06)'},title:{display:true,text:'Actual',color:'#64748b'}},y:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(99,179,237,.06)'},title:{display:true,text:'Predicted',color:'#64748b'}}}}});}
+  buildPredForm(r.features);
+}
+function renderClustering(r){
+  document.getElementById('cluster-result-card').style.display='block';
+  document.getElementById('cluster-metrics').innerHTML=`<div class="metric-card"><div class="metric-val">${r.n_clusters}</div><div class="metric-lbl">Clusters</div></div><div class="metric-card"><div class="metric-val" style="color:var(--accent2)">${r.metrics.silhouette_score}</div><div class="metric-lbl">Silhouette</div></div><div class="metric-card"><div class="metric-val" style="color:var(--accent4)">${r.total_rows}</div><div class="metric-lbl">Rows</div></div>`;
+  const ctx=document.getElementById('clusterChart').getContext('2d');
+  const dist=r.cluster_distribution,colors=['rgba(56,189,248,.7)','rgba(52,211,153,.7)','rgba(244,114,182,.7)','rgba(251,146,60,.7)','rgba(167,139,250,.7)'];
+  charts.cluster=new Chart(ctx,{type:'doughnut',data:{labels:dist.map(d=>d.cluster),datasets:[{data:dist.map(d=>d.count),backgroundColor:colors,borderColor:'#1a2235',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}}}});
+}
+
+// ══ COL STATS ══
+async function fetchColStats(){try{const r=await fetch('/api/column-stats/');const d=await r.json();if(d.success)colStats=d.stats;}catch(e){}}
+
+// ══ PREDICT FORM ══
+function buildPredForm(features){
+  const c=document.getElementById('pred-inputs');c.innerHTML='';
+  document.getElementById('pred-result').style.display='none';
+  features.forEach(col=>{
+    const s=colStats[col];const field=document.createElement('div');field.className='pred-field';
+    if(!s){field.innerHTML=`<label class="pred-label">${col} <span class="ftype-badge ftype-num">NUM</span></label><input type="number" id="pred-${col}" class="slider-val" style="width:100%" placeholder="Enter value">`;}
+    else if(s.type==='numeric'){field.innerHTML=`<label class="pred-label">${col} <span class="ftype-badge ftype-num">NUM</span></label><div class="slider-wrap"><div class="slider-row"><input type="range" class="slider-input" id="sli-${col}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.median}" oninput="syncSli('${col}',this.value)"><input type="number" class="slider-val" id="pred-${col}" value="${s.median}" oninput="syncVal('${col}',this.value)"></div><div class="slider-hints"><span>Min:${s.min}</span><span style="color:var(--accent)">Avg:${s.mean}</span><span>Max:${s.max}</span></div><div class="chips" id="chips-${col}"></div></div>`;}
+    else{const opts=s.unique_values.map(v=>`<option value="${v}" ${v==s.most_common?'selected':''}>${v}</option>`).join('');field.innerHTML=`<label class="pred-label">${col} <span class="ftype-badge ftype-cat">CAT</span></label><select class="cat-select" id="pred-${col}">${opts}</select><div class="chips" id="chips-${col}"></div>`;}
+    c.appendChild(field);
+    if(s&&s.type==='numeric'){const cc=document.getElementById(`chips-${col}`);[{l:'Low',v:s.min},{l:'Avg',v:s.mean},{l:'Med',v:s.median},{l:'High',v:s.max}].forEach(x=>{const ch=document.createElement('span');ch.className='chip';ch.textContent=x.l+':'+x.v;ch.onclick=()=>{syncSli(col,x.v);cc.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');};cc.appendChild(ch);});}
+    else if(s&&s.type==='categorical'){const cc=document.getElementById(`chips-${col}`);s.unique_values.slice(0,5).forEach(v=>{const ch=document.createElement('span');ch.className='chip'+(v==s.most_common?' active':'');ch.textContent=v;ch.onclick=()=>{const el=document.getElementById(`pred-${col}`);if(el)el.value=v;cc.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));ch.classList.add('active');};cc.appendChild(ch);});}
+  });
+}
+function syncSli(col,val){const s=document.getElementById('sli-'+col),i=document.getElementById('pred-'+col);if(s)s.value=val;if(i)i.value=val;}
+function syncVal(col,val){const s=document.getElementById('sli-'+col);if(s)s.value=val;}
+async function runPrediction(){
+  if(!lastResult||!lastResult.features)return;
+  const vals={};lastResult.features.forEach(f=>{const el=document.getElementById('pred-'+f);if(el)vals[f]=el.value;});
+  showLoad('Calculating prediction...','Running model on patient input');
+  const d=await post('/api/predict/',{feature_columns:lastResult.features,target_column:selTarget||'',input_values:vals});
+  hideLoad();
+  if(d.success){
+    const p=d.prediction;
+    document.getElementById('pred-val').textContent=p.prediction_label||parseFloat(p.prediction).toFixed(3);
+    const cr=document.getElementById('conf-row');
+    if(p.confidence){cr.style.display='flex';setTimeout(()=>{document.getElementById('conf-fill').style.width=p.confidence+'%';document.getElementById('conf-lbl').textContent=p.confidence+'%';},100);}
+    else cr.style.display='none';
+    document.getElementById('pred-summary').innerHTML=lastResult.features.map(f=>{const v=vals[f];const s=colStats[f];let h='';if(s&&s.type==='numeric'){const n=parseFloat(v);if(n<=s.min+(s.max-s.min)*.25)h='🟢 Low';else if(n>=s.max-(s.max-s.min)*.25)h='🔴 High';else h='🟡 Normal';}return f+': '+v+' '+h;}).join('<br>');
+    document.getElementById('pred-result').style.display='block';
+    document.getElementById('pred-result').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }else notif(d.error,'error');
+}
+
+// ══ CHAT ══
+function addMsg(role,text){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='msg msg-'+role;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=`<div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>')}</div><div class="msg-time">${role==='user'?'You':'HealthAI'} · ${t}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function addTyping(){const c=document.getElementById('chatMsgs');const d=document.createElement('div');d.className='msg msg-ai';d.id='typing';d.innerHTML='<div class="msg-bubble"><div class="loading-dots"><span></span><span></span><span></span></div></div>';c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function removeTyping(){document.getElementById('typing')?.remove();}
+async function sendChat(){
+  const input=document.getElementById('chatInput');const msg=input.value.trim();if(!msg)return;
+  input.value='';autoResize(input);addMsg('user',msg);
+  document.getElementById('sendBtn').disabled=true;addTyping();
+  const d=await post('/api/chat/',{message:msg,include_dataset:true});
+  removeTyping();document.getElementById('sendBtn').disabled=false;
+  if(d.success)addMsg('ai',d.message);
+  else addMsg('ai','⚠️ '+(d.error||'Could not reach LLM. Check GROQ_API_KEY in settings.py.'));
+}
+function quickAsk(msg){document.getElementById('chatInput').value=msg;sendChat();}
+function handleChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
+
+// ══ CLEAR ══
+async function clearSession(){
+  await post('/api/clear/',{});
+  colInfo=[];selFeatures.clear();selTarget=null;lastResult=null;
+  document.getElementById('dataset-info').style.display='none';
+  document.getElementById('column-panel').style.display='none';
+  document.getElementById('analysis-panel').style.display='none';
+  document.getElementById('ml-result-card').style.display='none';
+  document.getElementById('cluster-result-card').style.display='none';
+  document.getElementById('welcomeCard').style.display='block';
+  pvRows=[];pvFiltered=[];
+  document.getElementById('prevHead').innerHTML='';document.getElementById('prevBody').innerHTML='';
+  document.getElementById('pg-btns').innerHTML='';document.getElementById('pg-info').textContent='—';
+  switchTab('analytics');notif('Session cleared');
+}
+
+// ══ DRAG/DROP dataset ══
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleUploadFile(f);});
+
+// ══ MEDICAL IMAGING ══
+const IMG_LABELS={xray:'X-RAY',ct:'CT SCAN',sono:'SONOGRAPHY',mri:'MRI',retinal:'RETINAL',derma:'DERMATOLOGY'};
+const SCAN_NAMES={xray:'chest X-ray / bone X-ray',ct:'CT scan',sono:'sonography / ultrasound',mri:'MRI scan',retinal:'retinal fundus image',derma:'dermatology / skin image'};
+function selImgType(type,el){imgType=type;document.querySelectorAll('.img-type-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function changeImgType(type){imgType=type;const lbl=IMG_LABELS[type]||type.toUpperCase();document.getElementById('imgLbl').textContent=lbl;document.getElementById('imgBadge').textContent=lbl;if(imgFile)analyzeImg(imgFile,type);}
+function loadImgFile(file){
+  if(!file)return;imgFile=file;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('imgPreview').src=e.target.result;
+    document.getElementById('imgUpload').style.display='none';
+    document.getElementById('imgWork').classList.add('on');
+    const lbl=IMG_LABELS[imgType]||'SCAN';
+    document.getElementById('imgLbl').textContent=lbl;document.getElementById('imgBadge').textContent=lbl;
+    analyzeImg(file,imgType);
+  };reader.readAsDataURL(file);
+}
+function reAnalyze(){if(imgFile)analyzeImg(imgFile,imgType);}
+async function analyzeImg(file,scanType){
+  const body=document.getElementById('imgBody');
+  body.innerHTML=`<div style="text-align:center;padding:28px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div><div style="margin-top:10px;font-size:11px;color:var(--text3)">Analyzing ${scanType.toUpperCase()} image...</div></div>`;
+  const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
+  const prompt=`You are an expert radiologist analyzing a ${SCAN_NAMES[scanType]||scanType}. Analyze this image and respond ONLY with valid JSON in this exact format:
+{"quality":{"rating":"Good","note":"brief note"},"findings":[{"type":"normal","label":"Finding Name","description":"detailed description","confidence":85}],"recommendation":"clinical recommendation","summary":"2-3 sentence summary"}
+Types must be: normal, warning, critical, or info. Include 3-6 findings. Educational use only.`;
+  try{
+    const r=await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt,scan_type:scanType,mime_type:file.type})});
+    const d=await r.json();
+    if(d.success)renderFindings(d.result);
+    else body.innerHTML=`<div style="padding:14px"><div style="color:var(--danger);font-size:12px;margin-bottom:7px">⚠️ Analysis Error</div><div style="color:var(--text3);font-size:11px">${d.error}</div><div style="margin-top:10px;font-size:10px;color:var(--text3)">Ensure Groq API key is set and supports vision models.</div></div>`;
+  }catch(e){body.innerHTML=`<div style="padding:14px;color:var(--danger);font-size:12px">⚠️ Network error: ${e.message}</div>`;}
+}
+function renderFindings(result){
+  const body=document.getElementById('imgBody');
+  let p=null;try{const m=result.match(/\{[\s\S]*\}/);p=m?JSON.parse(m[0]):null;}catch(e){p=null;}
+  if(!p){body.innerHTML=`<div class="finding info"><div class="finding-icon">🤖</div><div class="finding-body"><div class="finding-lbl" style="color:var(--accent)">AI Analysis</div><div class="finding-desc">${result.replace(/\n/g,'<br>')}</div></div></div><div class="img-disclaimer">⚠️ Educational/assistive use only. Consult a medical professional.</div>`;return;}
+  const icons={normal:'✅',warning:'⚠️',critical:'🔴',info:'ℹ️'};
+  const tclr={normal:'var(--accent2)',warning:'var(--warn)',critical:'var(--danger)',info:'var(--accent)'};
+  const qclr={Good:'var(--accent2)',Fair:'var(--warn)',Poor:'var(--danger)'};
+  let h='';
+  if(p.quality)h+=`<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;padding:7px 10px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)"><span style="font-size:10px;color:var(--text3)">Image Quality:</span><span style="font-size:11px;font-weight:700;color:${qclr[p.quality.rating]||'var(--accent)'}">${p.quality.rating}</span><span style="font-size:10px;color:var(--text3);flex:1">${p.quality.note||''}</span></div>`;
+  if(p.summary)h+=`<div style="font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:12px;padding:9px 11px;background:rgba(56,189,248,.05);border-radius:var(--radius);border-left:3px solid var(--accent)">${p.summary}</div>`;
+  if(p.findings&&p.findings.length){h+=`<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">Key Findings</div>`;p.findings.forEach(f=>{const t=f.type||'info';h+=`<div class="finding ${t}"><div class="finding-icon">${icons[t]||'ℹ️'}</div><div class="finding-body"><div class="finding-lbl" style="color:${tclr[t]||'var(--accent)'}">${f.label||'Finding'}</div><div class="finding-desc">${f.description||''}</div>${f.confidence?`<div class="conf-row2"><div class="conf-lbl2">Confidence</div><div class="conf-track2"><div class="conf-fill2" style="width:${f.confidence}%;background:${f.confidence>80?'var(--accent2)':f.confidence>60?'var(--warn)':'var(--danger)'}"></div></div><div class="conf-pct2">${f.confidence}%</div></div>`:''}</div></div>`;});}
+  if(p.recommendation)h+=`<div style="margin-top:10px;padding:9px 12px;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:var(--radius)"><div style="font-size:9px;font-weight:700;color:var(--accent4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">📋 Recommendation</div><div style="font-size:11px;color:var(--text2);line-height:1.6">${p.recommendation}</div></div>`;
+  h+=`<div class="img-disclaimer">⚠️ AI analysis for educational/assistive purposes only. Does not constitute a medical diagnosis. Always consult a qualified healthcare professional.</div>`;
+  body.innerHTML=h;
+}
+async function askImg(){
+  const q=document.getElementById('imgQ')?.value?.trim();
+  if(!q||!imgFile){notif('Upload an image first','error');return;}
+  const body=document.getElementById('imgBody');
+  body.innerHTML=`<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="text-align:center;padding:18px"><div class="loading-dots" style="justify-content:center"><span></span><span></span><span></span></div></div>`;
+  const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(imgFile);});
+  try{
+    const r=await fetch('/api/analyze-image/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},body:JSON.stringify({image_base64:b64,prompt:`You are an expert radiologist. For this ${imgType} medical image, answer: ${q}\n\nBe specific and clinically relevant. Educational purposes only.`,scan_type:imgType,mime_type:imgFile.type})});
+    const d=await r.json();
+    if(d.success)body.innerHTML=`<div style="padding:9px 11px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius);margin-bottom:10px;font-size:11px;color:var(--accent)">🔍 "${q}"</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${d.result.replace(/\n/g,'<br>')}</div><div style="margin-top:10px"><button onclick="reAnalyze()" style="background:transparent;border:1px solid var(--border);border-radius:7px;padding:5px 10px;color:var(--text3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back to full analysis</button></div><div class="img-disclaimer">⚠️ AI response for educational purposes only.</div>`;
+    else{notif(d.error||'Analysis failed','error');reAnalyze();}
+  }catch(e){notif('Network error: '+e.message,'error');reAnalyze();}
+  document.getElementById('imgQ').value='';
+}
+// drag/drop imaging
+const iz=document.getElementById('imgUpload');
+iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('over');});
+iz.addEventListener('dragleave',()=>iz.classList.remove('over'));
+iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadImgFile(f);});
+
+// ══ SESSION RESTORE ══
+(async()=>{
+  const d=await fetch('/api/columns/').then(r=>r.json());
+  if(d.success&&d.columns.length>0){
+    colInfo=d.columns;
+    document.getElementById('ds-rows').textContent=d.rows.toLocaleString();
+    document.getElementById('ds-cols').textContent=d.columns.length;
+    document.getElementById('ds-file').textContent='Session restored';
+    document.getElementById('dataset-info').style.display='block';
+    document.getElementById('welcomeCard').style.display='none';
+    document.getElementById('column-panel').style.display='block';
+    document.getElementById('analysis-panel').style.display='block';
+    renderCols(colInfo);
+    if(d.preview)renderPreview(d.preview,d.rows,d.columns.length);
+    fetchColStats();
+  }
+})();
+</script>
+</body>
+</html>
